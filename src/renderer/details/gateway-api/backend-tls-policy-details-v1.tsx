@@ -23,7 +23,15 @@ function getTargetRefs(object: BackendTLSPolicy): Array<{ kind: string; name: st
 function getCaCertRefs(object: BackendTLSPolicy): Array<{ kind: string; name: string; namespace?: string }> {
   return typeof (object as any).getCaCertRefs === "function"
     ? (object as any).getCaCertRefs()
-    : ((object as any).spec?.caCertRefs ?? []);
+    : ((object as any).spec?.validation?.caCertificateRefs ?? []);
+}
+
+function getHostname(object: BackendTLSPolicy): string {
+  if (typeof (object as any).getHostname === "function") {
+    return (object as any).getHostname() ?? "-";
+  }
+
+  return (object as any).spec?.validation?.hostname ?? "-";
 }
 
 export const BackendTLSPolicyDetails = observer(
@@ -34,7 +42,7 @@ export const BackendTLSPolicyDetails = observer(
 
     return (
       <>
-        <DrawerItem name="Hostname">{object.spec.hostname ?? "-"}</DrawerItem>
+        <DrawerItem name="Hostname">{getHostname(object)}</DrawerItem>
         <DrawerItem name="Accepted">
           <BadgeBoolean value={isAccepted(object)} />
         </DrawerItem>

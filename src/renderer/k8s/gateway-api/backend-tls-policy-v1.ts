@@ -3,8 +3,10 @@ import { type GatewayCondition, type GatewayKubeObjectCRD, hasTrueCondition } fr
 
 export interface BackendTLSPolicySpec {
   targetRefs?: Array<{ kind: string; name: string; namespace?: string }>;
-  caCertRefs?: Array<{ kind: string; name: string; namespace?: string }>;
-  hostname?: string;
+  validation?: {
+    caCertificateRefs?: Array<{ kind: string; name: string; namespace?: string }>;
+    hostname?: string;
+  };
 }
 
 export interface BackendTLSPolicyStatus {
@@ -31,7 +33,11 @@ export class BackendTLSPolicy extends Renderer.K8sApi.LensExtensionKubeObject<
   }
 
   getCaCertRefs(): Array<{ kind: string; name: string; namespace?: string }> {
-    return this.spec.caCertRefs ?? [];
+    return this.spec.validation?.caCertificateRefs ?? [];
+  }
+
+  getHostname(): string | undefined {
+    return this.spec.validation?.hostname;
   }
 
   isAccepted(): boolean {
