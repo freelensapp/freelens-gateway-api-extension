@@ -8,30 +8,52 @@ const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle },
 } = Renderer;
 
+function isAccepted(object: BackendTLSPolicy): boolean {
+  return typeof (object as any).isAccepted === "function"
+    ? Boolean((object as any).isAccepted())
+    : ((object as any).status?.conditions ?? []).some(
+        (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
+      );
+}
+
+function getTargetRefs(object: BackendTLSPolicy): Array<{ kind: string; name: string; namespace?: string }> {
+  return typeof (object as any).getTargetRefs === "function"
+    ? (object as any).getTargetRefs()
+    : ((object as any).spec?.targetRefs ?? []);
+}
+
+function getCaCertRefs(object: BackendTLSPolicy): Array<{ kind: string; name: string; namespace?: string }> {
+  return typeof (object as any).getCaCertRefs === "function"
+    ? (object as any).getCaCertRefs()
+    : ((object as any).spec?.caCertRefs ?? []);
+}
+
 export const BackendTLSPolicyDetails = observer(
   (props: Renderer.Component.KubeObjectDetailsProps<BackendTLSPolicy>) => {
     const { object } = props;
+    const targetRefs = getTargetRefs(object);
+    const caCertRefs = getCaCertRefs(object);
 
     return (
       <>
         <DrawerItem name="Hostname">{object.spec.hostname ?? "-"}</DrawerItem>
         <DrawerItem name="Accepted">
-          <BadgeBoolean value={object.isAccepted()} />
+          <BadgeBoolean value={isAccepted(object)} />
         </DrawerItem>
         <DrawerTitle>Target Refs</DrawerTitle>
-        {object.getTargetRefs().map((targetRef, index) => (
+        {targetRefs.map((targetRef, index) => (
           <DrawerItem key={`target-${index}`} name={`${targetRef.kind} ${index + 1}`}>
             {targetRef.name}
           </DrawerItem>
         ))}
-        {object.getTargetRefs().length === 0 ? <DrawerItem name="Target Refs">-</DrawerItem> : null}
+        {targetRefs.length === 0 ? <DrawerItem name="Target Refs">-</DrawerItem> : null}
         <DrawerTitle>CA Cert Refs</DrawerTitle>
-        {object.getCaCertRefs().map((caCertRef, index) => (
+        {caCertRefs.map((caCertRef, index) => (
           <DrawerItem key={`ca-${index}`} name={`${caCertRef.kind} ${index + 1}`}>
             {caCertRef.name}
           </DrawerItem>
         ))}
-        {object.getCaCertRefs().length === 0 ? <DrawerItem name="CA Cert Refs">-</DrawerItem> : null}
+        {caCertRefs.length === 0 ? <DrawerItem name="CA Cert Refs">-</DrawerItem> : null}
       </>
     );
   },

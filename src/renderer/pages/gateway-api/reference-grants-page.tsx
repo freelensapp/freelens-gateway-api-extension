@@ -10,6 +10,18 @@ const {
   Component: { KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
+function getFromCount(item: ReferenceGrant): number {
+  return typeof (item as any).getFromCount === "function"
+    ? (item as any).getFromCount()
+    : ((item as any).spec?.from ?? []).length;
+}
+
+function getToCount(item: ReferenceGrant): number {
+  return typeof (item as any).getToCount === "function"
+    ? (item as any).getToCount()
+    : ((item as any).spec?.to ?? []).length;
+}
+
 export const ReferenceGrantsPage = observer((props: GatewayPageProps) =>
   withErrorPage(props, () => {
     const store = ReferenceGrant.getStore<ReferenceGrant>();
@@ -22,8 +34,8 @@ export const ReferenceGrantsPage = observer((props: GatewayPageProps) =>
         sortingCallbacks={{
           name: (item: ReferenceGrant) => item.getName(),
           namespace: (item: ReferenceGrant) => item.getNs() ?? "",
-          from: (item: ReferenceGrant) => item.getFromCount(),
-          to: (item: ReferenceGrant) => item.getToCount(),
+          from: (item: ReferenceGrant) => getFromCount(item),
+          to: (item: ReferenceGrant) => getToCount(item),
           age: (item: ReferenceGrant) => item.getCreationTimestamp(),
         }}
         searchFilters={[(item: ReferenceGrant) => item.getSearchFields()]}
@@ -38,8 +50,8 @@ export const ReferenceGrantsPage = observer((props: GatewayPageProps) =>
         renderTableContents={(item: ReferenceGrant) => [
           <WithTooltip>{item.getName()}</WithTooltip>,
           namespaceCell(item.getNs()),
-          <WithTooltip>{String(item.getFromCount())}</WithTooltip>,
-          <WithTooltip>{String(item.getToCount())}</WithTooltip>,
+          <WithTooltip>{String(getFromCount(item))}</WithTooltip>,
+          <WithTooltip>{String(getToCount(item))}</WithTooltip>,
           <KubeObjectAge object={item} key="age" />,
         ]}
       />

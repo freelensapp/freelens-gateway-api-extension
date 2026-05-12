@@ -10,6 +10,24 @@ const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
+function getControllerName(item: GatewayClass): string {
+  return typeof (item as any).getControllerName === "function"
+    ? (item as any).getControllerName()
+    : ((item as any).spec?.controllerName ?? "");
+}
+
+function isAccepted(item: GatewayClass): boolean {
+  return typeof (item as any).isAccepted === "function"
+    ? Boolean((item as any).isAccepted())
+    : ((item as any).status?.conditions ?? []).some(
+        (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
+      );
+}
+
+function isDefaultClass(item: GatewayClass): boolean {
+  return (item as any).metadata?.annotations?.["gateway.networking.k8s.io/is-default-class"] === "true";
+}
+
 export const GatewayClassesPage = observer((props: GatewayPageProps) =>
   withErrorPage(props, () => {
     const store = GatewayClass.getStore<GatewayClass>();
@@ -21,9 +39,9 @@ export const GatewayClassesPage = observer((props: GatewayPageProps) =>
         store={store}
         sortingCallbacks={{
           name: (item: GatewayClass) => item.getName(),
-          controller: (item: GatewayClass) => item.getControllerName(),
-          accepted: (item: GatewayClass) => String(item.isAccepted()),
-          default: (item: GatewayClass) => String(item.isDefault),
+          controller: (item: GatewayClass) => getControllerName(item),
+          accepted: (item: GatewayClass) => String(isAccepted(item)),
+          default: (item: GatewayClass) => String(isDefaultClass(item)),
           age: (item: GatewayClass) => item.getCreationTimestamp(),
         }}
         searchFilters={[(item: GatewayClass) => item.getSearchFields()]}
@@ -37,9 +55,9 @@ export const GatewayClassesPage = observer((props: GatewayPageProps) =>
         ]}
         renderTableContents={(item: GatewayClass) => [
           <WithTooltip>{item.getName()}</WithTooltip>,
-          <WithTooltip>{item.getControllerName()}</WithTooltip>,
-          <BadgeBoolean value={item.isAccepted()} />,
-          <BadgeBoolean value={item.isDefault} />,
+          <WithTooltip>{getControllerName(item)}</WithTooltip>,
+          <BadgeBoolean value={isAccepted(item)} />,
+          <BadgeBoolean value={isDefaultClass(item)} />,
           <KubeObjectAge object={item} key="age" />,
         ]}
       />

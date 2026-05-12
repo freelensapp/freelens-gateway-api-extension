@@ -10,6 +10,34 @@ const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
+function getClassName(item: Gateway): string {
+  return typeof (item as any).getClassName === "function"
+    ? (item as any).getClassName()
+    : ((item as any).spec?.gatewayClassName ?? "");
+}
+
+function getAddresses(item: Gateway): string[] {
+  return typeof (item as any).getAddresses === "function"
+    ? (item as any).getAddresses()
+    : ((item as any).status?.addresses ?? []).map((address: any) => address?.value).filter(Boolean);
+}
+
+function getListenersCount(item: Gateway): number {
+  if (typeof (item as any).getListeners === "function") {
+    return (item as any).getListeners().length;
+  }
+
+  return ((item as any).spec?.listeners ?? []).length;
+}
+
+function isReady(item: Gateway): boolean {
+  return typeof (item as any).isReady === "function"
+    ? Boolean((item as any).isReady())
+    : ((item as any).status?.conditions ?? []).some(
+        (condition: any) => condition?.type === "Ready" && condition?.status === "True",
+      );
+}
+
 export const GatewaysPage = observer((props: GatewayPageProps) =>
   withErrorPage(props, () => {
     const store = Gateway.getStore<Gateway>();
@@ -22,10 +50,10 @@ export const GatewaysPage = observer((props: GatewayPageProps) =>
         sortingCallbacks={{
           name: (item: Gateway) => item.getName(),
           namespace: (item: Gateway) => item.getNs() ?? "",
-          class: (item: Gateway) => item.getClassName(),
-          addresses: (item: Gateway) => item.getAddresses().join(","),
-          listeners: (item: Gateway) => item.getListeners().length,
-          ready: (item: Gateway) => String(item.isReady()),
+          class: (item: Gateway) => getClassName(item),
+          addresses: (item: Gateway) => getAddresses(item).join(","),
+          listeners: (item: Gateway) => getListenersCount(item),
+          ready: (item: Gateway) => String(isReady(item)),
           age: (item: Gateway) => item.getCreationTimestamp(),
         }}
         searchFilters={[(item: Gateway) => item.getSearchFields()]}
@@ -42,10 +70,10 @@ export const GatewaysPage = observer((props: GatewayPageProps) =>
         renderTableContents={(item: Gateway) => [
           <WithTooltip>{item.getName()}</WithTooltip>,
           namespaceCell(item.getNs()),
-          <WithTooltip>{item.getClassName()}</WithTooltip>,
-          <WithTooltip>{item.getAddresses().join(", ") || "-"}</WithTooltip>,
-          <WithTooltip>{String(item.getListeners().length)}</WithTooltip>,
-          <BadgeBoolean value={item.isReady()} />,
+          <WithTooltip>{getClassName(item)}</WithTooltip>,
+          <WithTooltip>{getAddresses(item).join(", ") || "-"}</WithTooltip>,
+          <WithTooltip>{String(getListenersCount(item))}</WithTooltip>,
+          <BadgeBoolean value={isReady(item)} />,
           <KubeObjectAge object={item} key="age" />,
         ]}
       />

@@ -9,6 +9,34 @@ const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
+function getParentRefs(item: any): any[] {
+  if (typeof item?.getParentRefs === "function") {
+    return item.getParentRefs();
+  }
+
+  const spec = item?.spec ?? {};
+
+  return [...(spec.commonParentRefs ?? []), ...(spec.parentRefs ?? [])];
+}
+
+function getBackendRefs(item: any): any[] {
+  if (typeof item?.getBackendRefs === "function") {
+    return item.getBackendRefs();
+  }
+
+  return (item?.spec?.rules ?? []).flatMap((rule: any) => rule?.backendRefs ?? []);
+}
+
+function isAccepted(item: any): boolean {
+  if (typeof item?.isAccepted === "function") {
+    return Boolean(item.isAccepted());
+  }
+
+  return (item?.status?.parents ?? []).some((parent: any) =>
+    (parent?.conditions ?? []).some((condition: any) => condition?.type === "Accepted" && condition?.status === "True"),
+  );
+}
+
 export function createStreamRoutePage<T extends Renderer.K8sApi.LensExtensionKubeObject<any, any, any>>(
   KubeObject: {
     crd: { plural: string; title: string };
@@ -29,9 +57,9 @@ export function createStreamRoutePage<T extends Renderer.K8sApi.LensExtensionKub
             name: (item: T) => item.getName(),
             namespace: (item: T) => item.getNs() ?? "",
             hostnames: (item: T) => getHostnames?.(item)?.join(",") ?? "",
-            parentRefs: (item: T) => formatParentRefs((item as any).getParentRefs()),
-            backends: (item: T) => formatBackendRefs((item as any).getBackendRefs()),
-            accepted: (item: T) => String((item as any).isAccepted()),
+            parentRefs: (item: T) => formatParentRefs(getParentRefs(item as any)),
+            backends: (item: T) => formatBackendRefs(getBackendRefs(item as any)),
+            accepted: (item: T) => String(isAccepted(item as any)),
             age: (item: T) => item.getCreationTimestamp(),
           }}
           searchFilters={[(item: T) => item.getSearchFields(), (item: T) => getHostnames?.(item) ?? []]}
@@ -49,9 +77,9 @@ export function createStreamRoutePage<T extends Renderer.K8sApi.LensExtensionKub
             <WithTooltip>{item.getName()}</WithTooltip>,
             namespaceCell(item.getNs()),
             ...(getHostnames ? [<WithTooltip>{getHostnames(item).join(", ") || "*"}</WithTooltip>] : []),
-            <WithTooltip>{formatParentRefs((item as any).getParentRefs())}</WithTooltip>,
-            <WithTooltip>{formatBackendRefs((item as any).getBackendRefs())}</WithTooltip>,
-            <BadgeBoolean value={(item as any).isAccepted()} />,
+            <WithTooltip>{formatParentRefs(getParentRefs(item as any))}</WithTooltip>,
+            <WithTooltip>{formatBackendRefs(getBackendRefs(item as any))}</WithTooltip>,
+            <BadgeBoolean value={isAccepted(item as any)} />,
             <KubeObjectAge object={item} key="age" />,
           ]}
         />
