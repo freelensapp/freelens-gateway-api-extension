@@ -28,10 +28,10 @@ interface VersionVariant<T extends AvailableVersionPageProps> {
  * @example
  * ```tsx
  * createAvailableVersionPage(
- *   "Examples",
+ *   "Gateways",
  *   [
- *     { kubeObjectClass: ExamplesV1alpha2, PageComponent: ExamplesV1alpha2, version: "v1alpha2" },
- *     { kubeObjectClass: ExamplesV1alpha1, PageComponent: ExamplesV1alpha1, version: "v1alpha1" },
+ *     { kubeObjectClass: GatewayV1, PageComponent: GatewaysPageV1, version: "v1" },
+ *     { kubeObjectClass: GatewayV1alpha2, PageComponent: GatewaysPageV1alpha2, version: "v1alpha2" },
  *   ]
  * );
  * ```
@@ -46,13 +46,13 @@ export function createAvailableVersionPage<T extends AvailableVersionPageProps>(
         const store = variant.kubeObjectClass.getStore();
         if (store) {
           Common.logger.debug(
-            `[@freelensapp/example-extension]: Rendering ${resourceName} page with API version ${variant.version}`,
+            `[@freelensapp/gateway-api-extension]: Rendering ${resourceName} page with API version ${variant.version}`,
           );
           return <variant.PageComponent {...props} />;
         }
       } catch (error) {
         Common.logger.debug(
-          `[@freelensapp/example-extension]: API version ${variant.version} not available for ${resourceName}: ${error}`,
+          `[@freelensapp/gateway-api-extension]: API version ${variant.version} not available for ${resourceName}: ${error}`,
         );
       }
     }
@@ -60,7 +60,7 @@ export function createAvailableVersionPage<T extends AvailableVersionPageProps>(
     // No version available - CRD not installed in cluster
     const triedVersions = variants.map((v) => v.version).join(", ");
     Common.logger.info(
-      `[@freelensapp/example-extension]: ${resourceName} CRD not found in cluster (tried versions: ${triedVersions})`,
+      `[@freelensapp/gateway-api-extension]: ${resourceName} CRD not found in cluster (tried versions: ${triedVersions})`,
     );
 
     return (
