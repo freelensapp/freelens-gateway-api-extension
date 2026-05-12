@@ -1,9 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
-import * as MobxReact from "mobx-react";
 import { TCPRoute } from "../../k8s/gateway-api";
+import { observer } from "../../observer";
 import { RouteDetails } from "./shared-route-details";
-
-const { observer } = MobxReact;
 
 function getParentRefs(object: TCPRoute): any[] {
   if (typeof (object as any).getParentRefs === "function") {

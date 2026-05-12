@@ -1,9 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
-import * as MobxReact from "mobx-react";
 import { withErrorPage } from "../../components/error-page";
+import { observer } from "../../observer";
 import { formatBackendRefs, formatParentRefs, type GatewayPageProps, namespaceCell } from "./shared";
-
-const { observer } = MobxReact;
 
 const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },

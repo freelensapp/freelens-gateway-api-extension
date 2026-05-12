@@ -1,8 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
-import * as MobxReact from "mobx-react";
 import { ReferenceGrant } from "../../k8s/gateway-api";
-
-const { observer } = MobxReact;
+import { observer } from "../../observer";
 
 const {
   Component: { DrawerItem, DrawerTitle },

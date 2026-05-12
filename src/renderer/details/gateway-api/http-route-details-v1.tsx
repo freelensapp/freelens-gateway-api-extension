@@ -1,9 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
-import * as MobxReact from "mobx-react";
 import { HTTPRoute } from "../../k8s/gateway-api";
+import { observer } from "../../observer";
 import { RouteDetails } from "./shared-route-details";
-
-const { observer } = MobxReact;
 
 function getHostnames(object: HTTPRoute): string[] {
   return typeof (object as any).getHostnames === "function"

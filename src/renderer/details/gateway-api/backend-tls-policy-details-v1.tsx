@@ -1,8 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
-import * as MobxReact from "mobx-react";
 import { BackendTLSPolicy } from "../../k8s/gateway-api";
-
-const { observer } = MobxReact;
+import { observer } from "../../observer";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle },
