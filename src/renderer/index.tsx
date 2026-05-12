@@ -5,126 +5,124 @@
 
 import { Renderer } from "@freelensapp/extensions";
 import { createAvailableVersionPage } from "./components/available-version";
-import {
-  BackendLBPolicyDetails,
-  BackendTLSPolicyDetails,
-  GatewayClassDetails,
-  GatewayDetails,
-  GRPCRouteDetails,
-  HTTPRouteDetails,
-  ReferenceGrantDetails,
-  TCPRouteDetails,
-  TLSRouteDetails,
-  UDPRouteDetails,
-} from "./details/gateway-api";
+import { BackendLBPolicyDetails as BackendLBPolicyDetails_v1alpha2 } from "./details/gateway-api/backend-lb-policy-details-v1alpha2";
+import { BackendTLSPolicyDetails as BackendTLSPolicyDetails_v1 } from "./details/gateway-api/backend-tls-policy-details-v1";
+import { GatewayClassDetails as GatewayClassDetails_v1 } from "./details/gateway-api/gateway-class-details-v1";
+import { GatewayDetails as GatewayDetails_v1 } from "./details/gateway-api/gateway-details-v1";
+import { GRPCRouteDetails as GRPCRouteDetails_v1 } from "./details/gateway-api/grpc-route-details-v1";
+import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./details/gateway-api/http-route-details-v1";
+import { ReferenceGrantDetails as ReferenceGrantDetails_v1beta1 } from "./details/gateway-api/reference-grant-details-v1beta1";
+import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./details/gateway-api/tcp-route-details-v1alpha2";
+import { TLSRouteDetails as TLSRouteDetails_v1alpha2 } from "./details/gateway-api/tls-route-details-v1alpha2";
+import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/gateway-api/udp-route-details-v1alpha2";
 import { GatewayApiIcon } from "./icons";
-import {
-  BackendLBPolicy,
-  BackendTLSPolicy,
-  Gateway,
-  GatewayClass,
-  GRPCRoute,
-  HTTPRoute,
-  ReferenceGrant,
-  TCPRoute,
-  TLSRoute,
-  UDPRoute,
-} from "./k8s/gateway-api";
-import {
-  BackendLBPoliciesPage,
-  BackendTLSPoliciesPage,
-  GatewayClassesPage,
-  GatewaysPage,
-  GRPCRoutesPage,
-  HTTPRoutesPage,
-  ReferenceGrantsPage,
-  TCPRoutesPage,
-  TLSRoutesPage,
-  UDPRoutesPage,
-} from "./pages/gateway-api";
+import { BackendLBPolicy as BackendLBPolicy_v1alpha2 } from "./k8s/gateway-api/backend-lb-policy-v1alpha2";
+import { BackendTLSPolicy as BackendTLSPolicy_v1 } from "./k8s/gateway-api/backend-tls-policy-v1";
+import { GatewayClass as GatewayClass_v1 } from "./k8s/gateway-api/gateway-class-v1";
+import { Gateway as Gateway_v1 } from "./k8s/gateway-api/gateway-v1";
+import { GRPCRoute as GRPCRoute_v1 } from "./k8s/gateway-api/grpc-route-v1";
+import { HTTPRoute as HTTPRoute_v1 } from "./k8s/gateway-api/http-route-v1";
+import { ReferenceGrant as ReferenceGrant_v1beta1 } from "./k8s/gateway-api/reference-grant-v1beta1";
+import { TCPRoute as TCPRoute_v1alpha2 } from "./k8s/gateway-api/tcp-route-v1alpha2";
+import { TLSRoute as TLSRoute_v1alpha2 } from "./k8s/gateway-api/tls-route-v1alpha2";
+import { UDPRoute as UDPRoute_v1alpha2 } from "./k8s/gateway-api/udp-route-v1alpha2";
+import { BackendLBPoliciesPage as BackendLBPoliciesPage_v1alpha2 } from "./pages/gateway-api/backend-lb-policies-page-v1alpha2";
+import { BackendTLSPoliciesPage as BackendTLSPoliciesPage_v1 } from "./pages/gateway-api/backend-tls-policies-page-v1";
+import { GatewayClassesPage as GatewayClassesPage_v1 } from "./pages/gateway-api/gateway-classes-page-v1";
+import { GatewaysPage as GatewaysPage_v1 } from "./pages/gateway-api/gateways-page-v1";
+import { GRPCRoutesPage as GRPCRoutesPage_v1 } from "./pages/gateway-api/grpc-routes-page-v1";
+import { HTTPRoutesPage as HTTPRoutesPage_v1 } from "./pages/gateway-api/http-routes-page-v1";
+import { ReferenceGrantsPage as ReferenceGrantsPage_v1beta1 } from "./pages/gateway-api/reference-grants-page-v1beta1";
+import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./pages/gateway-api/tcp-routes-page-v1alpha2";
+import { TLSRoutesPage as TLSRoutesPage_v1alpha2 } from "./pages/gateway-api/tls-routes-page-v1alpha2";
+import { UDPRoutesPage as UDPRoutesPage_v1alpha2 } from "./pages/gateway-api/udp-routes-page-v1alpha2";
 
 export default class GatewayApiRenderer extends Renderer.LensExtension {
   async onActivate() {}
 
   kubeObjectDetailItems = [
     {
-      kind: GatewayClass.kind,
-      apiVersions: GatewayClass.crd.apiVersions,
+      kind: GatewayClass_v1.kind,
+      apiVersions: GatewayClass_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GatewayClassDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GatewayClassDetails_v1 {...props} />,
       },
     },
     {
-      kind: Gateway.kind,
-      apiVersions: Gateway.crd.apiVersions,
+      kind: Gateway_v1.kind,
+      apiVersions: Gateway_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GatewayDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GatewayDetails_v1 {...props} />,
       },
     },
     {
-      kind: HTTPRoute.kind,
-      apiVersions: HTTPRoute.crd.apiVersions,
+      kind: HTTPRoute_v1.kind,
+      apiVersions: HTTPRoute_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <HTTPRouteDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <HTTPRouteDetails_v1 {...props} />,
       },
     },
     {
-      kind: GRPCRoute.kind,
-      apiVersions: GRPCRoute.crd.apiVersions,
+      kind: GRPCRoute_v1.kind,
+      apiVersions: GRPCRoute_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GRPCRouteDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GRPCRouteDetails_v1 {...props} />,
       },
     },
     {
-      kind: TCPRoute.kind,
-      apiVersions: TCPRoute.crd.apiVersions,
+      kind: TCPRoute_v1alpha2.kind,
+      apiVersions: TCPRoute_v1alpha2.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TCPRouteDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TCPRouteDetails_v1alpha2 {...props} />,
       },
     },
     {
-      kind: TLSRoute.kind,
-      apiVersions: TLSRoute.crd.apiVersions,
+      kind: TLSRoute_v1alpha2.kind,
+      apiVersions: TLSRoute_v1alpha2.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TLSRouteDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TLSRouteDetails_v1alpha2 {...props} />,
       },
     },
     {
-      kind: UDPRoute.kind,
-      apiVersions: UDPRoute.crd.apiVersions,
+      kind: UDPRoute_v1alpha2.kind,
+      apiVersions: UDPRoute_v1alpha2.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <UDPRouteDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <UDPRouteDetails_v1alpha2 {...props} />,
       },
     },
     {
-      kind: ReferenceGrant.kind,
-      apiVersions: ReferenceGrant.crd.apiVersions,
+      kind: ReferenceGrant_v1beta1.kind,
+      apiVersions: ReferenceGrant_v1beta1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <ReferenceGrantDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
+          <ReferenceGrantDetails_v1beta1 {...props} />
+        ),
       },
     },
     {
-      kind: BackendLBPolicy.kind,
-      apiVersions: BackendLBPolicy.crd.apiVersions,
+      kind: BackendLBPolicy_v1alpha2.kind,
+      apiVersions: BackendLBPolicy_v1alpha2.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <BackendLBPolicyDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
+          <BackendLBPolicyDetails_v1alpha2 {...props} />
+        ),
       },
     },
     {
-      kind: BackendTLSPolicy.kind,
-      apiVersions: BackendTLSPolicy.crd.apiVersions,
+      kind: BackendTLSPolicy_v1.kind,
+      apiVersions: BackendTLSPolicy_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <BackendTLSPolicyDetails {...props} />,
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <BackendTLSPolicyDetails_v1 {...props} />,
       },
     },
   ];
@@ -134,7 +132,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "gatewayclass",
       components: {
         Page: createAvailableVersionPage("Gateway Classes", [
-          { kubeObjectClass: GatewayClass, PageComponent: GatewayClassesPage, version: "v1" },
+          { kubeObjectClass: GatewayClass_v1, PageComponent: GatewayClassesPage_v1, version: "v1" },
         ]),
       },
     },
@@ -142,7 +140,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "gateway",
       components: {
         Page: createAvailableVersionPage("Gateways", [
-          { kubeObjectClass: Gateway, PageComponent: GatewaysPage, version: "v1" },
+          { kubeObjectClass: Gateway_v1, PageComponent: GatewaysPage_v1, version: "v1" },
         ]),
       },
     },
@@ -150,7 +148,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "httproute",
       components: {
         Page: createAvailableVersionPage("HTTP Routes", [
-          { kubeObjectClass: HTTPRoute, PageComponent: HTTPRoutesPage, version: "v1" },
+          { kubeObjectClass: HTTPRoute_v1, PageComponent: HTTPRoutesPage_v1, version: "v1" },
         ]),
       },
     },
@@ -158,7 +156,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "grpcroute",
       components: {
         Page: createAvailableVersionPage("gRPC Routes", [
-          { kubeObjectClass: GRPCRoute, PageComponent: GRPCRoutesPage, version: "v1" },
+          { kubeObjectClass: GRPCRoute_v1, PageComponent: GRPCRoutesPage_v1, version: "v1" },
         ]),
       },
     },
@@ -166,7 +164,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "tcproute",
       components: {
         Page: createAvailableVersionPage("TCP Routes", [
-          { kubeObjectClass: TCPRoute, PageComponent: TCPRoutesPage, version: "v1alpha2" },
+          { kubeObjectClass: TCPRoute_v1alpha2, PageComponent: TCPRoutesPage_v1alpha2, version: "v1alpha2" },
         ]),
       },
     },
@@ -174,7 +172,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "tlsroute",
       components: {
         Page: createAvailableVersionPage("TLS Routes", [
-          { kubeObjectClass: TLSRoute, PageComponent: TLSRoutesPage, version: "v1alpha2" },
+          { kubeObjectClass: TLSRoute_v1alpha2, PageComponent: TLSRoutesPage_v1alpha2, version: "v1alpha2" },
         ]),
       },
     },
@@ -182,7 +180,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "udproute",
       components: {
         Page: createAvailableVersionPage("UDP Routes", [
-          { kubeObjectClass: UDPRoute, PageComponent: UDPRoutesPage, version: "v1alpha2" },
+          { kubeObjectClass: UDPRoute_v1alpha2, PageComponent: UDPRoutesPage_v1alpha2, version: "v1alpha2" },
         ]),
       },
     },
@@ -190,7 +188,11 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "referencegrant",
       components: {
         Page: createAvailableVersionPage("Reference Grants", [
-          { kubeObjectClass: ReferenceGrant, PageComponent: ReferenceGrantsPage, version: "v1beta1" },
+          {
+            kubeObjectClass: ReferenceGrant_v1beta1,
+            PageComponent: ReferenceGrantsPage_v1beta1,
+            version: "v1beta1",
+          },
         ]),
       },
     },
@@ -198,7 +200,11 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "backendlbpolicy",
       components: {
         Page: createAvailableVersionPage("Backend LB Policies", [
-          { kubeObjectClass: BackendLBPolicy, PageComponent: BackendLBPoliciesPage, version: "v1alpha2" },
+          {
+            kubeObjectClass: BackendLBPolicy_v1alpha2,
+            PageComponent: BackendLBPoliciesPage_v1alpha2,
+            version: "v1alpha2",
+          },
         ]),
       },
     },
@@ -206,7 +212,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "backendtlspolicy",
       components: {
         Page: createAvailableVersionPage("Backend TLS Policies", [
-          { kubeObjectClass: BackendTLSPolicy, PageComponent: BackendTLSPoliciesPage, version: "v1" },
+          { kubeObjectClass: BackendTLSPolicy_v1, PageComponent: BackendTLSPoliciesPage_v1, version: "v1" },
         ]),
       },
     },
