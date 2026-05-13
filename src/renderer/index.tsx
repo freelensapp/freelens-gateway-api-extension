@@ -4,82 +4,213 @@
  */
 
 import { Renderer } from "@freelensapp/extensions";
-import { ExamplePreferencesStore } from "../common/store";
 import { createAvailableVersionPage } from "./components/available-version";
-import { ExampleDetails as ExampleDetailsV1alpha1 } from "./details/example-details-v1alpha1";
-import { ExampleDetails as ExampleDetailsV1alpha2 } from "./details/example-details-v1alpha2";
-import { ExampleIcon } from "./icons";
-import { Example as ExampleV1alpha1 } from "./k8s/example/example-v1alpha1";
-import { Example as ExampleV1alpha2 } from "./k8s/example/example-v1alpha2";
-import {
-  ExampleActiveToggleMenuItem as ExampleActiveToggleMenuItem_v1alpha1,
-  type ExampleActiveToggleMenuItemProps as ExampleActiveToggleMenuItemProps_v1alpha1,
-} from "./menus/example-active-toggle-menu-item-v1alpha1";
-import {
-  ExampleActiveToggleMenuItem as ExampleActiveToggleMenuItem_v1alpha2,
-  type ExampleActiveToggleMenuItemProps as ExampleActiveToggleMenuItemProps_v1alpha2,
-} from "./menus/example-active-toggle-menu-item-v1alpha2";
-import { ExamplesPage as ExamplesPageV1alpha1 } from "./pages/examples-page-v1alpha1";
-import { ExamplesPage as ExamplesPageV1alpha2 } from "./pages/examples-page-v1alpha2";
-import { ExamplePreferenceHint, ExamplePreferenceInput } from "./preferences/example-preference";
+import { BackendLBPolicyDetails as BackendLBPolicyDetails_v1alpha2 } from "./details/gateway-api/backend-lb-policy-details-v1alpha2";
+import { BackendTLSPolicyDetails as BackendTLSPolicyDetails_v1 } from "./details/gateway-api/backend-tls-policy-details-v1";
+import { GatewayClassDetails as GatewayClassDetails_v1 } from "./details/gateway-api/gateway-class-details-v1";
+import { GatewayDetails as GatewayDetails_v1 } from "./details/gateway-api/gateway-details-v1";
+import { GRPCRouteDetails as GRPCRouteDetails_v1 } from "./details/gateway-api/grpc-route-details-v1";
+import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./details/gateway-api/http-route-details-v1";
+import { ReferenceGrantDetails as ReferenceGrantDetails_v1 } from "./details/gateway-api/reference-grant-details-v1";
+import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./details/gateway-api/tcp-route-details-v1alpha2";
+import { TLSRouteDetails as TLSRouteDetails_v1 } from "./details/gateway-api/tls-route-details-v1";
+import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/gateway-api/udp-route-details-v1alpha2";
+import { GatewayApiIcon } from "./icons";
+import { BackendLBPolicy as BackendLBPolicy_v1alpha2 } from "./k8s/gateway-api/backend-lb-policy-v1alpha2";
+import { BackendTLSPolicy as BackendTLSPolicy_v1 } from "./k8s/gateway-api/backend-tls-policy-v1";
+import { GatewayClass as GatewayClass_v1 } from "./k8s/gateway-api/gateway-class-v1";
+import { Gateway as Gateway_v1 } from "./k8s/gateway-api/gateway-v1";
+import { GRPCRoute as GRPCRoute_v1 } from "./k8s/gateway-api/grpc-route-v1";
+import { HTTPRoute as HTTPRoute_v1 } from "./k8s/gateway-api/http-route-v1";
+import { ReferenceGrant as ReferenceGrant_v1 } from "./k8s/gateway-api/reference-grant-v1";
+import { TCPRoute as TCPRoute_v1alpha2 } from "./k8s/gateway-api/tcp-route-v1alpha2";
+import { TLSRoute as TLSRoute_v1 } from "./k8s/gateway-api/tls-route-v1";
+import { UDPRoute as UDPRoute_v1alpha2 } from "./k8s/gateway-api/udp-route-v1alpha2";
+import { BackendLBPoliciesPage as BackendLBPoliciesPage_v1alpha2 } from "./pages/gateway-api/backend-lb-policies-page-v1alpha2";
+import { BackendTLSPoliciesPage as BackendTLSPoliciesPage_v1 } from "./pages/gateway-api/backend-tls-policies-page-v1";
+import { GatewayClassesPage as GatewayClassesPage_v1 } from "./pages/gateway-api/gateway-classes-page-v1";
+import { GatewaysPage as GatewaysPage_v1 } from "./pages/gateway-api/gateways-page-v1";
+import { GRPCRoutesPage as GRPCRoutesPage_v1 } from "./pages/gateway-api/grpc-routes-page-v1";
+import { HTTPRoutesPage as HTTPRoutesPage_v1 } from "./pages/gateway-api/http-routes-page-v1";
+import { ReferenceGrantsPage as ReferenceGrantsPage_v1 } from "./pages/gateway-api/reference-grants-page-v1";
+import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./pages/gateway-api/tcp-routes-page-v1alpha2";
+import { TLSRoutesPage as TLSRoutesPage_v1 } from "./pages/gateway-api/tls-routes-page-v1";
+import { UDPRoutesPage as UDPRoutesPage_v1alpha2 } from "./pages/gateway-api/udp-routes-page-v1alpha2";
 
-export default class ExampleRenderer extends Renderer.LensExtension {
-  async onActivate() {
-    ExamplePreferencesStore.getInstanceOrCreate().loadExtension(this);
-  }
-
-  appPreferences = [
-    {
-      title: "Example Preferences",
-      components: {
-        Input: () => <ExamplePreferenceInput />,
-        Hint: () => <ExamplePreferenceHint />,
-      },
-    },
-  ];
+export default class GatewayApiRenderer extends Renderer.LensExtension {
+  async onActivate() {}
 
   kubeObjectDetailItems = [
     {
-      kind: ExampleV1alpha1.kind,
-      apiVersions: ExampleV1alpha1.crd.apiVersions,
+      kind: GatewayClass_v1.kind,
+      apiVersions: GatewayClass_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GatewayClassDetails_v1 {...props} />,
+      },
+    },
+    {
+      kind: Gateway_v1.kind,
+      apiVersions: Gateway_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GatewayDetails_v1 {...props} />,
+      },
+    },
+    {
+      kind: HTTPRoute_v1.kind,
+      apiVersions: HTTPRoute_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <HTTPRouteDetails_v1 {...props} />,
+      },
+    },
+    {
+      kind: GRPCRoute_v1.kind,
+      apiVersions: GRPCRoute_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GRPCRouteDetails_v1 {...props} />,
+      },
+    },
+    {
+      kind: TCPRoute_v1alpha2.kind,
+      apiVersions: TCPRoute_v1alpha2.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TCPRouteDetails_v1alpha2 {...props} />,
+      },
+    },
+    {
+      kind: TLSRoute_v1.kind,
+      apiVersions: TLSRoute_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TLSRouteDetails_v1 {...props} />,
+      },
+    },
+    {
+      kind: UDPRoute_v1alpha2.kind,
+      apiVersions: UDPRoute_v1alpha2.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <UDPRouteDetails_v1alpha2 {...props} />,
+      },
+    },
+    {
+      kind: ReferenceGrant_v1.kind,
+      apiVersions: ReferenceGrant_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <ReferenceGrantDetails_v1 {...props} />,
+      },
+    },
+    {
+      kind: BackendLBPolicy_v1alpha2.kind,
+      apiVersions: BackendLBPolicy_v1alpha2.crd.apiVersions,
       priority: 10,
       components: {
         Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
-          <ExampleDetailsV1alpha1 {...props} extension={this} />
+          <BackendLBPolicyDetails_v1alpha2 {...props} />
         ),
       },
     },
     {
-      kind: ExampleV1alpha2.kind,
-      apiVersions: ExampleV1alpha2.crd.apiVersions,
+      kind: BackendTLSPolicy_v1.kind,
+      apiVersions: BackendTLSPolicy_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
-          <ExampleDetailsV1alpha2 {...props} extension={this} />
-        ),
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <BackendTLSPolicyDetails_v1 {...props} />,
       },
     },
   ];
 
   clusterPages = [
     {
-      id: "example",
+      id: "gatewayclass",
       components: {
-        Page: () => <ExamplesPageV1alpha1 extension={this} />,
+        Page: createAvailableVersionPage("Gateway Classes", [
+          { kubeObjectClass: GatewayClass_v1, PageComponent: GatewayClassesPage_v1, version: "v1" },
+        ]),
       },
     },
     {
-      id: "example",
+      id: "gateway",
       components: {
-        Page: () => <ExamplesPageV1alpha2 extension={this} />,
+        Page: createAvailableVersionPage("Gateways", [
+          { kubeObjectClass: Gateway_v1, PageComponent: GatewaysPage_v1, version: "v1" },
+        ]),
       },
     },
     {
-      id: "example",
+      id: "httproute",
       components: {
-        Page: createAvailableVersionPage("Examples", [
-          { kubeObjectClass: ExampleV1alpha2, PageComponent: ExamplesPageV1alpha2, version: "v1alpha2" },
-          { kubeObjectClass: ExampleV1alpha1, PageComponent: ExamplesPageV1alpha1, version: "v1alpha1" },
+        Page: createAvailableVersionPage("HTTP Routes", [
+          { kubeObjectClass: HTTPRoute_v1, PageComponent: HTTPRoutesPage_v1, version: "v1" },
+        ]),
+      },
+    },
+    {
+      id: "grpcroute",
+      components: {
+        Page: createAvailableVersionPage("gRPC Routes", [
+          { kubeObjectClass: GRPCRoute_v1, PageComponent: GRPCRoutesPage_v1, version: "v1" },
+        ]),
+      },
+    },
+    {
+      id: "tcproute",
+      components: {
+        Page: createAvailableVersionPage("TCP Routes", [
+          { kubeObjectClass: TCPRoute_v1alpha2, PageComponent: TCPRoutesPage_v1alpha2, version: "v1alpha2" },
+        ]),
+      },
+    },
+    {
+      id: "tlsroute",
+      components: {
+        Page: createAvailableVersionPage("TLS Routes", [
+          { kubeObjectClass: TLSRoute_v1, PageComponent: TLSRoutesPage_v1, version: "v1" },
+        ]),
+      },
+    },
+    {
+      id: "udproute",
+      components: {
+        Page: createAvailableVersionPage("UDP Routes", [
+          { kubeObjectClass: UDPRoute_v1alpha2, PageComponent: UDPRoutesPage_v1alpha2, version: "v1alpha2" },
+        ]),
+      },
+    },
+    {
+      id: "referencegrant",
+      components: {
+        Page: createAvailableVersionPage("Reference Grants", [
+          {
+            kubeObjectClass: ReferenceGrant_v1,
+            PageComponent: ReferenceGrantsPage_v1,
+            version: "v1",
+          },
+        ]),
+      },
+    },
+    {
+      id: "backendlbpolicy",
+      components: {
+        Page: createAvailableVersionPage("Backend LB Policies", [
+          {
+            kubeObjectClass: BackendLBPolicy_v1alpha2,
+            PageComponent: BackendLBPoliciesPage_v1alpha2,
+            version: "v1alpha2",
+          },
+        ]),
+      },
+    },
+    {
+      id: "backendtlspolicy",
+      components: {
+        Page: createAvailableVersionPage("Backend TLS Policies", [
+          { kubeObjectClass: BackendTLSPolicy_v1, PageComponent: BackendTLSPoliciesPage_v1, version: "v1" },
         ]),
       },
     },
@@ -87,33 +218,76 @@ export default class ExampleRenderer extends Renderer.LensExtension {
 
   clusterPageMenus = [
     {
-      id: "example",
-      title: ExampleV1alpha1.crd.title,
-      target: { pageId: "example" },
+      id: "gateway-api",
+      title: "Gateway API",
+      target: { pageId: "gateway" },
       components: {
-        Icon: ExampleIcon,
-      },
-    },
-  ];
-
-  kubeObjectMenuItems = [
-    {
-      kind: ExampleV1alpha1.kind,
-      apiVersions: ExampleV1alpha1.crd.apiVersions,
-      components: {
-        MenuItem: (props: ExampleActiveToggleMenuItemProps_v1alpha1) => (
-          <ExampleActiveToggleMenuItem_v1alpha1 {...props} extension={this} />
-        ),
+        Icon: GatewayApiIcon,
       },
     },
     {
-      kind: ExampleV1alpha2.kind,
-      apiVersions: ExampleV1alpha2.crd.apiVersions,
-      components: {
-        MenuItem: (props: ExampleActiveToggleMenuItemProps_v1alpha2) => (
-          <ExampleActiveToggleMenuItem_v1alpha2 {...props} extension={this} />
-        ),
-      },
+      id: "gatewayclass",
+      parentId: "gateway-api",
+      title: "Gateway Classes",
+      target: { pageId: "gatewayclass" },
+      components: {},
+    },
+    { id: "gateway", parentId: "gateway-api", title: "Gateways", target: { pageId: "gateway" }, components: {} },
+    {
+      id: "httproute",
+      parentId: "gateway-api",
+      title: "HTTP Routes",
+      target: { pageId: "httproute" },
+      components: {},
+    },
+    {
+      id: "grpcroute",
+      parentId: "gateway-api",
+      title: "gRPC Routes",
+      target: { pageId: "grpcroute" },
+      components: {},
+    },
+    {
+      id: "tcproute",
+      parentId: "gateway-api",
+      title: "TCP Routes",
+      target: { pageId: "tcproute" },
+      components: {},
+    },
+    {
+      id: "tlsroute",
+      parentId: "gateway-api",
+      title: "TLS Routes",
+      target: { pageId: "tlsroute" },
+      components: {},
+    },
+    {
+      id: "udproute",
+      parentId: "gateway-api",
+      title: "UDP Routes",
+      target: { pageId: "udproute" },
+      components: {},
+    },
+    {
+      id: "referencegrant",
+      parentId: "gateway-api",
+      title: "Reference Grants",
+      target: { pageId: "referencegrant" },
+      components: {},
+    },
+    {
+      id: "backendlbpolicy",
+      parentId: "gateway-api",
+      title: "Backend LB Policies",
+      target: { pageId: "backendlbpolicy" },
+      components: {},
+    },
+    {
+      id: "backendtlspolicy",
+      parentId: "gateway-api",
+      title: "Backend TLS Policies",
+      target: { pageId: "backendtlspolicy" },
+      components: {},
     },
   ];
 }
