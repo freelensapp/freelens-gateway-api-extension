@@ -219,7 +219,7 @@ jobs:
 
       - name: Rebuild native packages for Electron
         working-directory: freelens
-        run: pnpm --color=always electron-rebuild -a x64
+        run: pnpm --color=always electron-rebuild -a arm64
         env:
           npm_package_config_node_gyp_tarball: ${{ env.ELECTRON_HEADERS_CACHE }}/node-v${{ env.electron_version }}-headers.tar.gz
 
@@ -238,7 +238,7 @@ jobs:
 
       - name: Build Electron app
         working-directory: freelens/freelens
-        run: node "$ELECTRON_BUILDER_PATH" --publish never --linux dir --x64
+        run: node "$ELECTRON_BUILDER_PATH" --publish never --linux dir --arm64
         env:
           DEBUG: electron-builder,electron-builder:*
           npm_config_user_agent: pnpm
@@ -253,8 +253,8 @@ jobs:
         id: integration-tests-linux
         working-directory: freelens
         run: |
-          sudo chown root:root freelens/dist/linux-unpacked/chrome-sandbox
-          sudo chmod 4755 freelens/dist/linux-unpacked/chrome-sandbox
+          sudo chown root:root freelens/dist/linux*-unpacked/chrome-sandbox
+          sudo chmod 4755 freelens/dist/linux*-unpacked/chrome-sandbox
           timeout 600 xvfb-run -a pnpm --color=always test:integration
         env:
           DEBUG: pw:browser
@@ -264,8 +264,8 @@ jobs:
         if: steps.integration-tests-linux.outcome == 'failure'
         working-directory: freelens
         run: |
-          sudo chown root:root freelens/dist/linux-unpacked/chrome-sandbox
-          sudo chmod 4755 freelens/dist/linux-unpacked/chrome-sandbox
+          sudo chown root:root freelens/dist/linux*-unpacked/chrome-sandbox
+          sudo chmod 4755 freelens/dist/linux*-unpacked/chrome-sandbox
           timeout 600 xvfb-run -a pnpm --color=always test:integration
         env:
           DEBUG: pw:browser
