@@ -2,6 +2,8 @@ import { Renderer } from "@freelensapp/extensions";
 import { withErrorPage } from "../../components/error-page";
 import { GatewayClass } from "../../k8s/gateway-api";
 import { observer } from "../../observer";
+import styles from "./gateway-classes.module.scss";
+import stylesInline from "./gateway-classes.module.scss?inline";
 import { type GatewayPageProps } from "./shared";
 
 const {
@@ -22,43 +24,39 @@ function isAccepted(item: GatewayClass): boolean {
       );
 }
 
-function isDefaultClass(item: GatewayClass): boolean {
-  return (item as any).metadata?.annotations?.["gateway.networking.k8s.io/is-default-class"] === "true";
-}
-
 export const GatewayClassesPage = observer((props: GatewayPageProps) =>
   withErrorPage(props, () => {
     const store = GatewayClass.getStore<GatewayClass>();
 
     return (
-      <KubeObjectListLayout<GatewayClass, any>
-        tableId={`${GatewayClass.crd.plural}Table`}
-        className="GatewayClassesPage"
-        store={store}
-        sortingCallbacks={{
-          name: (item: GatewayClass) => item.getName(),
-          controller: (item: GatewayClass) => getControllerName(item),
-          accepted: (item: GatewayClass) => String(isAccepted(item)),
-          default: (item: GatewayClass) => String(isDefaultClass(item)),
-          age: (item: GatewayClass) => item.getCreationTimestamp(),
-        }}
-        searchFilters={[(item: GatewayClass) => item.getSearchFields()]}
-        renderHeaderTitle={GatewayClass.crd.title}
-        renderTableHeader={[
-          { title: "Name", sortBy: "name" },
-          { title: "Controller", sortBy: "controller" },
-          { title: "Accepted", sortBy: "accepted" },
-          { title: "Default", sortBy: "default" },
-          { title: "Age", sortBy: "age" },
-        ]}
-        renderTableContents={(item: GatewayClass) => [
-          <WithTooltip>{item.getName()}</WithTooltip>,
-          <WithTooltip>{getControllerName(item)}</WithTooltip>,
-          <BadgeBoolean value={isAccepted(item)} />,
-          <BadgeBoolean value={isDefaultClass(item)} />,
-          <KubeObjectAge object={item} key="age" />,
-        ]}
-      />
+      <>
+        <style>{stylesInline}</style>
+        <KubeObjectListLayout<GatewayClass, any>
+          tableId={`${GatewayClass.crd.plural}Table`}
+          className={styles.page}
+          store={store}
+          sortingCallbacks={{
+            name: (item: GatewayClass) => item.getName(),
+            controller: (item: GatewayClass) => getControllerName(item),
+            accepted: (item: GatewayClass) => String(isAccepted(item)),
+            age: (item: GatewayClass) => item.getCreationTimestamp(),
+          }}
+          searchFilters={[(item: GatewayClass) => item.getSearchFields()]}
+          renderHeaderTitle={GatewayClass.crd.title}
+          renderTableHeader={[
+            { title: "Name", sortBy: "name", className: styles.name },
+            { title: "Controller", sortBy: "controller", className: styles.controller },
+            { title: "Accepted", sortBy: "accepted", className: styles.accepted },
+            { title: "Age", sortBy: "age", className: styles.age },
+          ]}
+          renderTableContents={(item: GatewayClass) => [
+            <WithTooltip>{item.getName()}</WithTooltip>,
+            <WithTooltip>{getControllerName(item)}</WithTooltip>,
+            <BadgeBoolean value={isAccepted(item)} />,
+            <KubeObjectAge object={item} key="age" />,
+          ]}
+        />
+      </>
     );
   }),
 );

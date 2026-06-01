@@ -1,8 +1,16 @@
 import { Renderer } from "@freelensapp/extensions";
 import { type GatewayCondition, type GatewayKubeObjectCRD, hasTrueCondition } from "./types";
 
+export interface ParametersReference {
+  group: string;
+  kind: string;
+  name: string;
+  namespace?: string;
+}
+
 export interface GatewayClassSpec {
   controllerName: string;
+  parametersRef?: ParametersReference;
   description?: string;
 }
 
@@ -31,10 +39,6 @@ export class GatewayClass extends Renderer.K8sApi.LensExtensionKubeObject<
 
   isAccepted(): boolean {
     return hasTrueCondition(this.status?.conditions, "Accepted");
-  }
-
-  get isDefault(): boolean {
-    return this.metadata.annotations?.["gateway.networking.k8s.io/is-default-class"] === "true";
   }
 }
 

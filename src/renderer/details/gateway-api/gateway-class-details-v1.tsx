@@ -3,7 +3,7 @@ import { GatewayClass } from "../../k8s/gateway-api";
 import { observer } from "../../observer";
 
 const {
-  Component: { BadgeBoolean, DrawerItem },
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject },
 } = Renderer;
 
 function getControllerName(object: GatewayClass): string {
@@ -20,10 +20,6 @@ function isAccepted(object: GatewayClass): boolean {
       );
 }
 
-function isDefaultClass(object: GatewayClass): boolean {
-  return (object as any).metadata?.annotations?.["gateway.networking.k8s.io/is-default-class"] === "true";
-}
-
 export const GatewayClassDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<GatewayClass>) => {
   const { object } = props;
 
@@ -33,10 +29,25 @@ export const GatewayClassDetails = observer((props: Renderer.Component.KubeObjec
       <DrawerItem name="Accepted">
         <BadgeBoolean value={isAccepted(object)} />
       </DrawerItem>
-      <DrawerItem name="Default Class">
-        <BadgeBoolean value={isDefaultClass(object)} />
-      </DrawerItem>
-      <DrawerItem name="Description">{object.spec.description ?? "-"}</DrawerItem>
+      {object.spec.parametersRef && (
+        <div>
+          <DrawerTitle>Parameters Reference</DrawerTitle>
+          {object.spec.parametersRef && (
+            <div>
+              <DrawerItem name="Group">{object.spec.parametersRef.group}</DrawerItem>
+              <DrawerItem name="Kind">{object.spec.parametersRef.kind}</DrawerItem>
+              <DrawerItem name="Name">
+                <LinkToObject objectRef={object.spec.parametersRef} object={object}>
+                  {object.spec.parametersRef.name}
+                </LinkToObject>
+              </DrawerItem>
+              <DrawerItem name="Namespace" hidden={!object.spec.parametersRef.namespace}>
+                {object.spec.parametersRef.namespace}
+              </DrawerItem>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 });
