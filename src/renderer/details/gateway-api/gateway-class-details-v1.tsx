@@ -48,6 +48,16 @@ export const GatewayClassDetails = observer((props: Renderer.Component.KubeObjec
           )}
         </div>
       )}
+      {object.status?.supportedFeatures && (
+        <div>
+          <DrawerTitle>Supported Features</DrawerTitle>
+          {object.status.supportedFeatures.map((feature, index) => (
+            <DrawerItem key={`feature-${index}`} name={`Feature ${index + 1}`}>
+              {feature.name}
+            </DrawerItem>
+          ))}
+        </div>
+      )}
     </>
   );
 });

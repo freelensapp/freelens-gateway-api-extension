@@ -14,8 +14,13 @@ export interface GatewayClassSpec {
   description?: string;
 }
 
+export interface SupportedFeature {
+  name: string;
+}
+
 export interface GatewayClassStatus {
   conditions?: GatewayCondition[];
+  supportedFeatures?: SupportedFeature[];
 }
 
 export class GatewayClass extends Renderer.K8sApi.LensExtensionKubeObject<
