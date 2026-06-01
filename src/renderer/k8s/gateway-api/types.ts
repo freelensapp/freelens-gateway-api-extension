@@ -29,3 +29,12 @@ export interface GatewayBackendRef {
   port?: number;
   weight?: number;
 }
+
+export type GatewayDefaultScope = "All" | "None";
+
+export interface SecretObjectReference {
+  group?: string;
+  kind?: string;
+  name: string;
+  namespace?: string;
+}

@@ -17,6 +17,9 @@ importers:
       '@freelensapp/extensions':
         specifier: ^1.9.0
         version: 1.9.0(@emotion/react@11.14.0(@types/react@17.0.91)(react@17.0.2))(@types/react@17.0.91)
+      '@freelensapp/kube-object':
+        specifier: ^1.9.0
+        version: 1.9.0
       '@types/node':
         specifier: ~24.12.4
         version: 24.12.4

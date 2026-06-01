@@ -1,21 +1,123 @@
 import { Renderer } from "@freelensapp/extensions";
-import { type GatewayCondition, type GatewayKubeObjectCRD, hasTrueCondition } from "./types";
+import {
+  type GatewayCondition,
+  type GatewayDefaultScope,
+  type GatewayKubeObjectCRD,
+  hasTrueCondition,
+  type SecretObjectReference,
+} from "./types";
 
-export type GatewayProtocol = "HTTP" | "HTTPS" | "TCP" | "TLS" | "UDP";
+import type { LabelSelector, ObjectReference } from "@freelensapp/kube-object";
 
-export interface GatewayListener {
+export type ProtocolType = "HTTP" | "HTTPS" | "TCP" | "TLS" | "UDP";
+
+export type FromNamespaces = "All" | "Selector" | "Same" | "None";
+
+export type TLSModeType = "Terminate" | "Passthrough";
+
+export interface ListenerTLSConfig {
+  mode?: TLSModeType;
+  certificateRefs?: SecretObjectReference[];
+  options?: Record<string, string>;
+}
+
+export interface RouteNamespaces {
+  from?: FromNamespaces;
+  selector?: LabelSelector;
+}
+
+export interface RouteGroupKind {
+  /**
+   * @default "gateway.networking.k8s.io"
+   */
+  group?: string;
+  kind: string;
+}
+
+export interface AllowedRoutes {
+  namespaces?: RouteNamespaces;
+  kinds?: RouteGroupKind[];
+}
+
+export interface Listener {
   name: string;
   hostname?: string;
   port: number;
-  protocol: GatewayProtocol;
-  tls?: {
-    mode?: "Terminate" | "Passthrough";
-  };
+  protocol: ProtocolType;
+  tls?: ListenerTLSConfig;
+  allowedRoutes?: AllowedRoutes;
+}
+
+export interface ListenerNamespaces {
+  from?: FromNamespaces;
+  selector?: LabelSelector;
+}
+
+export interface AllowedListeners {
+  namespaces?: ListenerNamespaces;
+}
+
+export interface GatewaySpecAddress {
+  /**
+   * @default "IPAddress"
+   */
+  type?: string;
+  value?: string;
+}
+
+export interface LocalParametersReference {
+  group: string;
+  kind: string;
+  name: string;
+}
+
+export interface GatewayInfrastructure {
+  labels?: Record<string, string>;
+  annotations?: Record<string, string>;
+  parametersRef?: LocalParametersReference;
+}
+
+export interface GatewayBackendTLS {
+  clientCertificateRef?: SecretObjectReference;
+}
+
+export type FrontendValidationModeType = "AllowValidOnly" | "AllowInsecureFallback";
+
+export interface FrontendTLSValidation {
+  caCertificateRefs?: ObjectReference[];
+  /**
+   * @default "AllowValidOnly"
+   */
+  mode?: FrontendValidationModeType;
+}
+
+export interface TLSConfig {
+  validation?: FrontendTLSValidation;
+}
+
+export interface TLSPortConfig {
+  port: number;
+  tls: TLSConfig;
+}
+
+export interface FrontendTLSConfig {
+  default: TLSConfig;
+  perPort?: TLSPortConfig[];
+}
+
+export interface GatewayTLSConfig {
+  backend?: GatewayBackendTLS;
+  frontend?: FrontendTLSConfig;
 }
 
 export interface GatewaySpec {
   gatewayClassName: string;
-  listeners?: GatewayListener[];
+  listeners?: Listener[];
+  addresses?: GatewaySpecAddress[];
+  infrastructure?: GatewayInfrastructure;
+  allowedListeners?: AllowedListeners;
+  tls?: GatewayTLSConfig;
+  defaultScope?: GatewayDefaultScope;
 }
 
 export interface GatewayStatus {
@@ -47,7 +149,7 @@ export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
     return (this.status?.addresses ?? []).map((address) => address.value);
   }
 
-  getListeners(): GatewayListener[] {
+  getListeners(): Listener[] {
     return this.spec.listeners ?? [];
   }
 
