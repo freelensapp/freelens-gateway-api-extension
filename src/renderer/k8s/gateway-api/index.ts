@@ -1,9 +1,4 @@
 import {
-  BackendLBPolicy as BackendLBPolicy_v1alpha2,
-  BackendLBPolicyApi as BackendLBPolicyApi_v1alpha2,
-  BackendLBPolicyStore as BackendLBPolicyStore_v1alpha2,
-} from "./backend-lb-policy-v1alpha2";
-import {
   BackendTLSPolicy as BackendTLSPolicy_v1,
   BackendTLSPolicyApi as BackendTLSPolicyApi_v1,
   BackendTLSPolicyStore as BackendTLSPolicyStore_v1,
@@ -47,12 +42,6 @@ import {
 
 export * from "./types";
 export {
-  BackendLBPolicy_v1alpha2,
-  BackendLBPolicy_v1alpha2 as BackendLBPolicy,
-  BackendLBPolicyApi_v1alpha2,
-  BackendLBPolicyApi_v1alpha2 as BackendLBPolicyApi,
-  BackendLBPolicyStore_v1alpha2,
-  BackendLBPolicyStore_v1alpha2 as BackendLBPolicyStore,
   BackendTLSPolicy_v1,
   BackendTLSPolicy_v1 as BackendTLSPolicy,
   BackendTLSPolicyApi_v1,
