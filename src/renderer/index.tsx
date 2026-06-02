@@ -220,7 +220,6 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
     {
       id: "gateway-api",
       title: "Gateway API",
-      target: { pageId: "gateway" },
       components: {
         Icon: GatewayApiIcon,
       },
@@ -232,7 +231,13 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       target: { pageId: "gatewayclass" },
       components: {},
     },
-    { id: "gateway", parentId: "gateway-api", title: "Gateways", target: { pageId: "gateway" }, components: {} },
+    {
+      id: "gateway",
+      parentId: "gateway-api",
+      title: "Gateways",
+      target: { pageId: "gateway" },
+      components: {},
+    },
     {
       id: "httproute",
       parentId: "gateway-api",
