@@ -5,7 +5,6 @@
 
 import { Renderer } from "@freelensapp/extensions";
 import { createAvailableVersionPage } from "./components/available-version";
-import { BackendLBPolicyDetails as BackendLBPolicyDetails_v1alpha2 } from "./details/gateway-api/backend-lb-policy-details-v1alpha2";
 import { BackendTLSPolicyDetails as BackendTLSPolicyDetails_v1 } from "./details/gateway-api/backend-tls-policy-details-v1";
 import { GatewayClassDetails as GatewayClassDetails_v1 } from "./details/gateway-api/gateway-class-details-v1";
 import { GatewayDetails as GatewayDetails_v1 } from "./details/gateway-api/gateway-details-v1";
@@ -16,7 +15,6 @@ import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./details/gateway-a
 import { TLSRouteDetails as TLSRouteDetails_v1 } from "./details/gateway-api/tls-route-details-v1";
 import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/gateway-api/udp-route-details-v1alpha2";
 import { GatewayApiIcon } from "./icons";
-import { BackendLBPolicy as BackendLBPolicy_v1alpha2 } from "./k8s/gateway-api/backend-lb-policy-v1alpha2";
 import { BackendTLSPolicy as BackendTLSPolicy_v1 } from "./k8s/gateway-api/backend-tls-policy-v1";
 import { GatewayClass as GatewayClass_v1 } from "./k8s/gateway-api/gateway-class-v1";
 import { Gateway as Gateway_v1 } from "./k8s/gateway-api/gateway-v1";
@@ -26,7 +24,6 @@ import { ReferenceGrant as ReferenceGrant_v1 } from "./k8s/gateway-api/reference
 import { TCPRoute as TCPRoute_v1alpha2 } from "./k8s/gateway-api/tcp-route-v1alpha2";
 import { TLSRoute as TLSRoute_v1 } from "./k8s/gateway-api/tls-route-v1";
 import { UDPRoute as UDPRoute_v1alpha2 } from "./k8s/gateway-api/udp-route-v1alpha2";
-import { BackendLBPoliciesPage as BackendLBPoliciesPage_v1alpha2 } from "./pages/gateway-api/backend-lb-policies-page-v1alpha2";
 import { BackendTLSPoliciesPage as BackendTLSPoliciesPage_v1 } from "./pages/gateway-api/backend-tls-policies-page-v1";
 import { GatewayClassesPage as GatewayClassesPage_v1 } from "./pages/gateway-api/gateway-classes-page-v1";
 import { GatewaysPage as GatewaysPage_v1 } from "./pages/gateway-api/gateways-page-v1";
@@ -103,16 +100,6 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       priority: 10,
       components: {
         Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <ReferenceGrantDetails_v1 {...props} />,
-      },
-    },
-    {
-      kind: BackendLBPolicy_v1alpha2.kind,
-      apiVersions: BackendLBPolicy_v1alpha2.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
-          <BackendLBPolicyDetails_v1alpha2 {...props} />
-        ),
       },
     },
     {
@@ -195,18 +182,6 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       },
     },
     {
-      id: "backendlbpolicy",
-      components: {
-        Page: createAvailableVersionPage("Backend LB Policies", [
-          {
-            kubeObjectClass: BackendLBPolicy_v1alpha2,
-            PageComponent: BackendLBPoliciesPage_v1alpha2,
-            version: "v1alpha2",
-          },
-        ]),
-      },
-    },
-    {
       id: "backendtlspolicy",
       components: {
         Page: createAvailableVersionPage("Backend TLS Policies", [
@@ -278,13 +253,6 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       parentId: "gateway-api",
       title: "Reference Grants",
       target: { pageId: "referencegrant" },
-      components: {},
-    },
-    {
-      id: "backendlbpolicy",
-      parentId: "gateway-api",
-      title: "Backend LB Policies",
-      target: { pageId: "backendlbpolicy" },
       components: {},
     },
     {
