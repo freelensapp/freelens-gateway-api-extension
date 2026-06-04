@@ -1,8 +1,31 @@
 import { Renderer } from "@freelensapp/extensions";
-import { BaseStreamRoute } from "./base-stream-route";
-import { type GatewayKubeObjectCRD } from "./types";
+import {
+  type BackendObjectReference,
+  type GatewayCondition,
+  type GatewayKubeObjectCRD,
+  type ParentReference,
+} from "./types";
 
-export class TCPRoute extends BaseStreamRoute {
+export interface TCPRouteSpec {
+  hostnames?: string[];
+  parentRefs?: ParentReference[];
+  rules?: Array<{
+    backendRefs?: BackendObjectReference[];
+    filters?: Array<{ type: string }>;
+  }>;
+}
+
+export interface TCPRouteStatus {
+  parents?: Array<{
+    conditions?: GatewayCondition[];
+  }>;
+}
+
+export class TCPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
+  Renderer.K8sApi.KubeObjectMetadata,
+  TCPRouteStatus,
+  TCPRouteSpec
+> {
   static readonly kind = "TCPRoute";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1alpha2/tcproutes";

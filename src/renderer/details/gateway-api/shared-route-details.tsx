@@ -5,7 +5,7 @@ const {
 } = Renderer;
 
 export interface RouteDetailsProps {
-  object: Renderer.K8sApi.LensExtensionKubeObject<any, any, any>;
+  object: any;
   hostnames?: string[];
   parentRefs: Array<{ kind: string; name: string; namespace?: string; sectionName?: string }>;
   backends: Array<{ kind?: string; name: string; namespace?: string; port?: number; weight?: number }>;

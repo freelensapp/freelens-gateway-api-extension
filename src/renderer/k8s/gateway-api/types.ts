@@ -14,26 +14,64 @@ export function hasTrueCondition(conditions: GatewayCondition[] | undefined, typ
   return conditions?.some((condition) => condition.type === type && condition.status === "True") ?? false;
 }
 
-export interface GatewayParentRef {
-  kind: string;
-  name: string;
-  namespace?: string;
-  sectionName?: string;
-}
-
-export interface GatewayBackendRef {
-  kind?: "Service";
-  name: string;
-  namespace?: string;
-  port?: number;
-  weight?: number;
-}
-
-export type GatewayDefaultScope = "All" | "None";
-
 export interface SecretObjectReference {
   group?: string;
   kind?: string;
   name: string;
   namespace?: string;
+}
+
+export type GatewayDefaultScope = "All" | "None";
+
+export type SessionPersistenceType = "Cookie" | "Header";
+
+export type CookieLifetimeType = "Session" | "Permanent";
+
+export interface CookieConfig {
+  /** default: `"Session"` */
+  lifetimeType?: CookieLifetimeType;
+}
+
+export interface SessionPersistence {
+  sessionName?: string;
+  absoluteTimeout?: string;
+  /** default: `"Cookie"` */
+  type?: SessionPersistenceType;
+  cookieConfig?: CookieConfig;
+}
+
+export interface ParentReference {
+  /** default: `"gateway.networking.k8s.io"` */
+  group?: string;
+  /** default: `"Gateway"` */
+  kind?: string;
+  namespace?: string;
+  name: string;
+  sectionName?: string;
+  port?: number;
+}
+
+export interface BackendObjectReference {
+  /** default: `""` */
+  group?: string;
+  /** default: `"Service"` */
+  kind?: string;
+  name: string;
+  namespace?: string;
+  port?: number;
+}
+
+export interface BackendRef extends BackendObjectReference {
+  /** default: `1` */
+  weight?: number;
+}
+
+export interface CommonRouteSpec {
+  parentRefs?: ParentReference[];
+  useDefaultGateways?: GatewayDefaultScope;
+}
+
+export interface Fraction {
+  numerator: number;
+  denominator?: number;
 }

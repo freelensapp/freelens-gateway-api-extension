@@ -1,8 +1,31 @@
 import { Renderer } from "@freelensapp/extensions";
-import { BaseStreamRoute } from "./base-stream-route";
-import { type GatewayKubeObjectCRD } from "./types";
+import {
+  type BackendObjectReference,
+  type GatewayCondition,
+  type GatewayKubeObjectCRD,
+  type ParentReference,
+} from "./types";
 
-export class UDPRoute extends BaseStreamRoute {
+export interface UDPRouteSpec {
+  hostnames?: string[];
+  parentRefs?: ParentReference[];
+  rules?: Array<{
+    backendRefs?: BackendObjectReference[];
+    filters?: Array<{ type: string }>;
+  }>;
+}
+
+export interface UDPRouteStatus {
+  parents?: Array<{
+    conditions?: GatewayCondition[];
+  }>;
+}
+
+export class UDPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
+  Renderer.K8sApi.KubeObjectMetadata,
+  UDPRouteStatus,
+  UDPRouteSpec
+> {
   static readonly kind = "UDPRoute";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1alpha2/udproutes";

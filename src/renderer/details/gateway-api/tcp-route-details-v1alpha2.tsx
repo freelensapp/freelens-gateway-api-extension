@@ -31,7 +31,7 @@ function isAccepted(object: TCPRoute): boolean {
       );
 }
 
-export const TCPRouteDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<TCPRoute>) => {
+export const TCPRouteDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<any>) => {
   const { object } = props;
 
   return (

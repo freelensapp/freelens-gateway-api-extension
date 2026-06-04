@@ -27,9 +27,7 @@ export interface RouteNamespaces {
 }
 
 export interface RouteGroupKind {
-  /**
-   * @default "gateway.networking.k8s.io"
-   */
+  /** default: `"gateway.networking.k8s.io"` */
   group?: string;
   kind: string;
 }
@@ -58,9 +56,7 @@ export interface AllowedListeners {
 }
 
 export interface GatewaySpecAddress {
-  /**
-   * @default "IPAddress"
-   */
+  /** default: `"IPAddress"` */
   type?: string;
   value?: string;
 }
@@ -85,9 +81,7 @@ export type FrontendValidationModeType = "AllowValidOnly" | "AllowInsecureFallba
 
 export interface FrontendTLSValidation {
   caCertificateRefs?: ObjectReference[];
-  /**
-   * @default "AllowValidOnly"
-   */
+  /** default: `"AllowValidOnly"` */
   mode?: FrontendValidationModeType;
 }
 
@@ -121,9 +115,7 @@ export interface GatewaySpec {
 }
 
 export interface GatewayStatusAddress {
-  /**
-   * @default "IPAddress"
-   */
+  /** default: `"IPAddress"` */
   type?: string;
   value: string;
 }
