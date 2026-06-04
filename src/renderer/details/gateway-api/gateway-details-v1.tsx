@@ -7,7 +7,7 @@ import stylesInline from "./common.module.scss?inline";
 import type { GatewaySpecAddress, ListenerStatus } from "../../k8s/gateway-api/gateway-v1";
 
 const {
-  Component: { BadgeBoolean, DrawerItem, DrawerItemLabels, DrawerTitle, Icon, LinkToObject },
+  Component: { BadgeBoolean, DrawerItem, DrawerItemLabels, DrawerTitle, Icon, LinkToObject, LinkToSecret },
 } = Renderer;
 
 function isReady(object: Gateway): boolean {
@@ -96,9 +96,7 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
           </>
         )}
 
-        <DrawerItem name="Default Scope" hidden={!object.spec.defaultScope}>
-          {object.spec.defaultScope}
-        </DrawerItem>
+        <DrawerItem name="Default Scope">{object.spec.defaultScope ?? "None"}</DrawerItem>
 
         {infrastructure && (
           <>
@@ -128,24 +126,36 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
         {object.spec?.tls && (
           <>
             <DrawerTitle>TLS</DrawerTitle>
-            <DrawerItem name="Backend Client Cert Ref" hidden={!object.spec.tls.backend?.clientCertificateRef}>
-              {object.spec.tls.backend?.clientCertificateRef
-                ? `${object.spec.tls.backend.clientCertificateRef.kind ?? "Secret"}/${object.spec.tls.backend.clientCertificateRef.name}`
-                : "-"}
+            <DrawerItem name="Backend Client Cert" hidden={!object.spec.tls.backend?.clientCertificateRef}>
+              <LinkToSecret
+                name={object.spec.tls.backend?.clientCertificateRef?.name}
+                namespace={object.spec.tls.backend?.clientCertificateRef?.namespace ?? object.getNs()}
+              />
             </DrawerItem>
             <DrawerItem name="Frontend Validation Mode">{frontendValidation?.mode ?? "-"}</DrawerItem>
-            <DrawerItem name="Frontend CA Cert Refs">
+            <DrawerItem name="Frontend CA Certs">
               {frontendValidation?.caCertificateRefs?.length
                 ? frontendValidation.caCertificateRefs
-                    .map((reference) => `${reference.kind ?? "Secret"}/${reference.name}`)
+                    .map((reference) => (
+                      <DrawerItem name="" key={`${reference.kind}:${reference.name}:${reference.namespace}`}>
+                        <LinkToObject objectRef={reference} object={object} />
+                      </DrawerItem>
+                    ))
                     .join(", ")
                 : "-"}
             </DrawerItem>
-            {frontendPerPort.map((entry, index) => (
-              <DrawerItem key={`frontend-port-${index}`} name={`Frontend Port ${entry.port}`}>
-                {entry.tls.validation?.mode ?? "-"}
-              </DrawerItem>
-            ))}
+            <DrawerItem name="Frontend Per Port TLS" hidden={frontendPerPort.length === 0}>
+              {frontendPerPort.map((entry) => (
+                <DrawerItem name={entry.port} key={`frontend-port-${entry.port}`}>
+                  {entry.tls?.validation?.mode ?? "-"}:{" "}
+                  {entry.tls?.validation?.caCertificateRefs?.map((reference) => (
+                    <>
+                      <LinkToObject objectRef={reference} object={object} />{" "}
+                    </>
+                  ))}
+                </DrawerItem>
+              ))}
+            </DrawerItem>
           </>
         )}
 
@@ -158,20 +168,20 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
                   <Icon small material="list" /> <span>{listener.name}</span>
                 </div>
                 <DrawerItem name="Listener">{`${listener.protocol}:${listener.port} ${listener.hostname ?? "*"}`}</DrawerItem>
-                <DrawerItem name="TLS Mode" hidden={!listener.tls?.mode}>
-                  {listener.tls?.mode}
+                <DrawerItem name="TLS Mode" hidden={!listener.tls}>
+                  {listener.tls?.mode ?? "Terminate"}
                 </DrawerItem>
-                <DrawerItem name="TLS Cert Refs" hidden={!listener.tls?.certificateRefs?.length}>
-                  {listener.tls?.certificateRefs
-                    ?.map((certificateRef) => `${certificateRef.kind ?? "Secret"}/${certificateRef.name}`)
-                    .join(", ")}
+                <DrawerItem name="TLS Certs" hidden={!listener.tls?.certificateRefs?.length}>
+                  {listener.tls?.certificateRefs?.map((certificateRef) => (
+                    <LinkToSecret name={certificateRef.name} namespace={certificateRef.namespace ?? object.getNs()} />
+                  ))}
                 </DrawerItem>
                 <DrawerItemLabels
                   name="TLS Options"
                   labels={listener.tls?.options ?? {}}
                   hidden={!listener.tls?.options}
                 />
-                <DrawerItem name="Allowed Routes Namespaces From" hidden={!listener.allowedRoutes?.namespaces?.from}>
+                <DrawerItem name="Allowed Routes Namespaces From">
                   {listener.allowedRoutes?.namespaces?.from ?? "-"}
                 </DrawerItem>
                 <DrawerItem name="Allowed Routes Selector" hidden={!listener.allowedRoutes?.namespaces?.selector}>
@@ -190,8 +200,8 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
           {object.status?.attachedListenerSets ?? "-"}
         </DrawerItem>
         {listenerStatuses &&
-          listenerStatuses.map((listenerStatus, index) => (
-            <div key={`listener-status-${listenerStatus.name}-${index}`}>
+          listenerStatuses.map((listenerStatus) => (
+            <div key={`listener-status-${listenerStatus.name}`}>
               <DrawerItem name={`Listener ${listenerStatus.name} Attached Routes`}>
                 {listenerStatus.attachedRoutes}
               </DrawerItem>

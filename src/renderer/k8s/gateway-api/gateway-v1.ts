@@ -16,6 +16,7 @@ export type FromNamespaces = "All" | "Selector" | "Same" | "None";
 export type TLSModeType = "Terminate" | "Passthrough";
 
 export interface ListenerTLSConfig {
+  /** default: `"Terminate"` */
   mode?: TLSModeType;
   certificateRefs?: SecretObjectReference[];
   options?: Record<string, string>;
@@ -111,6 +112,7 @@ export interface GatewaySpec {
   infrastructure?: GatewayInfrastructure;
   allowedListeners?: AllowedListeners;
   tls?: GatewayTLSConfig;
+  /** default: `"None"` */
   defaultScope?: GatewayDefaultScope;
 }
 
