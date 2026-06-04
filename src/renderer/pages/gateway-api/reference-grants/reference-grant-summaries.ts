@@ -12,8 +12,8 @@ function formatReferenceGrantFromEntry(entry: { kind: string; namespace?: string
   return `${entry.namespace ?? ""}/${entry.kind}`;
 }
 
-function formatReferenceGrantFromSummary(spec: ReferenceGrantSummarySpec): string {
-  const from = spec.from ?? [];
+function formatReferenceGrantFromSummary(spec: ReferenceGrantSummarySpec | undefined): string {
+  const from = spec?.from ?? [];
 
   if (from.length === 0) {
     return "-";
@@ -26,8 +26,8 @@ function formatReferenceGrantToEntry(entry: { kind: string; name?: string }): st
   return entry.name ? `${entry.kind}/${entry.name}` : entry.kind;
 }
 
-function formatReferenceGrantToSummary(spec: ReferenceGrantSummarySpec): string {
-  const to = spec.to ?? [];
+function formatReferenceGrantToSummary(spec: ReferenceGrantSummarySpec | undefined): string {
+  const to = spec?.to ?? [];
 
   if (to.length === 0) {
     return "-";
@@ -36,7 +36,7 @@ function formatReferenceGrantToSummary(spec: ReferenceGrantSummarySpec): string 
   return to.map(formatReferenceGrantToEntry).join(", ");
 }
 
-export function getReferenceGrantRowSummaries(spec: ReferenceGrantSummarySpec): ReferenceGrantRowSummaries {
+export function getReferenceGrantRowSummaries(spec: ReferenceGrantSummarySpec | undefined): ReferenceGrantRowSummaries {
   return {
     from: formatReferenceGrantFromSummary(spec),
     to: formatReferenceGrantToSummary(spec),

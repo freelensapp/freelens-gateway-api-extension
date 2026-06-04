@@ -11,18 +11,6 @@ const {
   Component: { KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
-function getFromCount(item: ReferenceGrant): number {
-  return typeof (item as any).getFromCount === "function"
-    ? (item as any).getFromCount()
-    : ((item as any).spec?.from ?? []).length;
-}
-
-function getToCount(item: ReferenceGrant): number {
-  return typeof (item as any).getToCount === "function"
-    ? (item as any).getToCount()
-    : ((item as any).spec?.to ?? []).length;
-}
-
 export const ReferenceGrantsPage = observer((props: GatewayPageProps) =>
   withErrorPage(props, () => {
     const store = ReferenceGrant.getStore<ReferenceGrant>();
@@ -37,8 +25,8 @@ export const ReferenceGrantsPage = observer((props: GatewayPageProps) =>
           sortingCallbacks={{
             name: (item: ReferenceGrant) => item.getName(),
             namespace: (item: ReferenceGrant) => item.getNs() ?? "",
-            from: (item: ReferenceGrant) => getFromCount(item),
-            to: (item: ReferenceGrant) => getToCount(item),
+            from: (item: ReferenceGrant) => getReferenceGrantRowSummaries(item.spec).from,
+            to: (item: ReferenceGrant) => getReferenceGrantRowSummaries(item.spec).to,
             age: (item: ReferenceGrant) => item.getCreationTimestamp(),
           }}
           searchFilters={[(item: ReferenceGrant) => item.getSearchFields()]}
@@ -51,7 +39,7 @@ export const ReferenceGrantsPage = observer((props: GatewayPageProps) =>
             { title: "Age", sortBy: "age", className: styles.age },
           ]}
           renderTableContents={(item: ReferenceGrant) => {
-            const summaries = getReferenceGrantRowSummaries(item.spec ?? {});
+            const summaries = getReferenceGrantRowSummaries(item.spec);
 
             return [
               <WithTooltip>{item.getName()}</WithTooltip>,
