@@ -25,6 +25,11 @@ import {
   ReferenceGrantStore as ReferenceGrantStore_v1,
 } from "./reference-grant-v1";
 import {
+  ReferenceGrant as ReferenceGrant_v1beta1,
+  ReferenceGrantApi as ReferenceGrantApi_v1beta1,
+  ReferenceGrantStore as ReferenceGrantStore_v1beta1,
+} from "./reference-grant-v1beta1";
+import {
   TCPRoute as TCPRoute_v1alpha2,
   TCPRouteApi as TCPRouteApi_v1alpha2,
   TCPRouteStore as TCPRouteStore_v1alpha2,
@@ -74,10 +79,13 @@ export {
   HTTPRouteStore_v1 as HTTPRouteStore,
   ReferenceGrant_v1,
   ReferenceGrant_v1 as ReferenceGrant,
+  ReferenceGrant_v1beta1,
   ReferenceGrantApi_v1,
   ReferenceGrantApi_v1 as ReferenceGrantApi,
+  ReferenceGrantApi_v1beta1,
   ReferenceGrantStore_v1,
   ReferenceGrantStore_v1 as ReferenceGrantStore,
+  ReferenceGrantStore_v1beta1,
   TCPRoute_v1alpha2,
   TCPRoute_v1alpha2 as TCPRoute,
   TCPRouteApi_v1alpha2,
