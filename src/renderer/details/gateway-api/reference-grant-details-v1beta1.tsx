@@ -1,5 +1,5 @@
 import { Renderer } from "@freelensapp/extensions";
-import { ReferenceGrant } from "../../k8s/gateway-api";
+import { ReferenceGrant } from "../../k8s/gateway-api/reference-grant-v1beta1";
 import { observer } from "../../observer";
 
 const {
