@@ -1,8 +1,9 @@
 import { Renderer } from "@freelensapp/extensions";
-import { withErrorPage } from "../../components/error-page";
-import { ReferenceGrant } from "../../k8s/gateway-api/reference-grant-v1beta1";
-import { observer } from "../../observer";
-import { type GatewayPageProps, namespaceCell } from "./shared";
+import { withErrorPage } from "../../../components/error-page";
+import { ReferenceGrant } from "../../../k8s/gateway-api";
+import { observer } from "../../../observer";
+import { type GatewayPageProps, namespaceCell } from "../shared";
+import { getReferenceGrantRowSummaries } from "./reference-grant-summaries";
 
 const {
   Component: { KubeObjectAge, KubeObjectListLayout, WithTooltip },
@@ -45,13 +46,17 @@ export const ReferenceGrantsPage = observer((props: GatewayPageProps) =>
           { title: "To", sortBy: "to" },
           { title: "Age", sortBy: "age" },
         ]}
-        renderTableContents={(item: ReferenceGrant) => [
-          <WithTooltip>{item.getName()}</WithTooltip>,
-          namespaceCell(item.getNs()),
-          <WithTooltip>{String(getFromCount(item))}</WithTooltip>,
-          <WithTooltip>{String(getToCount(item))}</WithTooltip>,
-          <KubeObjectAge object={item} key="age" />,
-        ]}
+        renderTableContents={(item: ReferenceGrant) => {
+          const summaries = getReferenceGrantRowSummaries(item.spec ?? {});
+
+          return [
+            <WithTooltip>{item.getName()}</WithTooltip>,
+            namespaceCell(item.getNs()),
+            <WithTooltip>{summaries.from}</WithTooltip>,
+            <WithTooltip>{summaries.to}</WithTooltip>,
+            <KubeObjectAge object={item} key="age" />,
+          ];
+        }}
       />
     );
   }),
