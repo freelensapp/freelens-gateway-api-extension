@@ -2,8 +2,8 @@ import { Renderer } from "@freelensapp/extensions";
 import { withErrorPage } from "../../components/error-page";
 import { GatewayClass } from "../../k8s/gateway-api";
 import { observer } from "../../observer";
-import styles from "./gateway-classes.module.scss";
-import stylesInline from "./gateway-classes.module.scss?inline";
+import styles from "./gateway-classes-page-v1.module.scss";
+import stylesInline from "./gateway-classes-page-v1.module.scss?inline";
 import { type GatewayPageProps } from "./shared";
 
 const {
