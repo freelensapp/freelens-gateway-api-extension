@@ -7,7 +7,7 @@ import {
   type SecretObjectReference,
 } from "./types";
 
-import type { LabelSelector, ObjectReference } from "@freelensapp/kube-object";
+import type { Condition, LabelSelector, ObjectReference } from "@freelensapp/kube-object";
 
 export type ProtocolType = "HTTP" | "HTTPS" | "TCP" | "TLS" | "UDP";
 
@@ -120,9 +120,26 @@ export interface GatewaySpec {
   defaultScope?: GatewayDefaultScope;
 }
 
+export interface GatewayStatusAddress {
+  /**
+   * @default "IPAddress"
+   */
+  type?: string;
+  value: string;
+}
+
+export interface ListenerStatus {
+  name: string;
+  supportedKinds?: RouteGroupKind[];
+  attachedRoutes: number;
+  conditions?: Condition[];
+}
+
 export interface GatewayStatus {
+  addresses?: GatewayStatusAddress[];
   conditions?: GatewayCondition[];
-  addresses?: Array<{ type: string; value: string }>;
+  listeners?: ListenerStatus[];
+  attachedListenerSets?: number;
 }
 
 export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
@@ -137,7 +154,7 @@ export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
     apiVersions: ["gateway.networking.k8s.io/v1"],
     plural: "gateways",
     singular: "gateway",
-    shortNames: ["gw"],
+    shortNames: ["gtw"],
     title: "Gateways",
   };
 

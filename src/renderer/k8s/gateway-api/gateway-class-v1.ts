@@ -35,6 +35,7 @@ export class GatewayClass extends Renderer.K8sApi.LensExtensionKubeObject<
     apiVersions: ["gateway.networking.k8s.io/v1"],
     plural: "gatewayclasses",
     singular: "gatewayclass",
+    shortNames: ["gc"],
     title: "Gateway Classes",
   };
 

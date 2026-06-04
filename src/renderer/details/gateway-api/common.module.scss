@@ -1,0 +1,13 @@
+@use "../../vars";
+
+.details {
+  .title {
+    margin-top: vars.$margin * 2;
+    margin-bottom: vars.$margin;
+
+    span {
+      margin-left: vars.$gap;
+      font-weight: bold;
+    }
+  }
+}
