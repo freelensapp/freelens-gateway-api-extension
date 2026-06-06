@@ -11,11 +11,9 @@ const {
 } = Renderer;
 
 function isReady(object: Gateway): boolean {
-  return typeof (object as any).isReady === "function"
-    ? Boolean((object as any).isReady())
-    : ((object as any).status?.conditions ?? []).some(
-        (condition: any) => condition?.type === "Ready" && condition?.status === "True",
-      );
+  return (object.status?.conditions ?? []).some(
+    (condition) => condition?.type === "Ready" && condition?.status === "True",
+  );
 }
 
 function formatAddress(address: GatewaySpecAddress): string {

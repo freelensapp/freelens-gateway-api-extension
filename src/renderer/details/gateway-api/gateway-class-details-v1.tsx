@@ -7,17 +7,13 @@ const {
 } = Renderer;
 
 function getControllerName(object: GatewayClass): string {
-  return typeof (object as any).getControllerName === "function"
-    ? (object as any).getControllerName()
-    : ((object as any).spec?.controllerName ?? "-");
+  return object.spec?.controllerName ?? "-";
 }
 
 function isAccepted(object: GatewayClass): boolean {
-  return typeof (object as any).isAccepted === "function"
-    ? Boolean((object as any).isAccepted())
-    : ((object as any).status?.conditions ?? []).some(
-        (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
-      );
+  return (object.status?.conditions ?? []).some(
+    (condition) => condition?.type === "Accepted" && condition?.status === "True",
+  );
 }
 
 export const GatewayClassDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<GatewayClass>) => {

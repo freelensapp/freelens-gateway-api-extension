@@ -4,37 +4,21 @@ import { observer } from "../../observer";
 import { RouteDetails } from "./shared-route-details";
 
 function getHostnames(object: HTTPRoute): string[] {
-  return typeof (object as any).getHostnames === "function"
-    ? (object as any).getHostnames()
-    : ((object as any).spec?.hostnames ?? []);
+  return object.spec?.hostnames ?? [];
 }
 
 function getParentRefs(object: HTTPRoute): any[] {
-  if (typeof (object as any).getParentRefs === "function") {
-    return (object as any).getParentRefs();
-  }
-
-  const spec = (object as any).spec ?? {};
-
-  return [...(spec.commonParentRefs ?? []), ...(spec.parentRefs ?? [])];
+  return object.spec?.parentRefs ?? [];
 }
 
 function getBackends(object: HTTPRoute): any[] {
-  if (typeof (object as any).getBackendRefs === "function") {
-    return (object as any).getBackendRefs();
-  }
-
-  return ((object as any).spec?.rules ?? []).flatMap((rule: any) => rule?.backendRefs ?? []);
+  return (object.spec?.rules ?? []).flatMap((rule) => rule?.backendRefs ?? []);
 }
 
 function isAccepted(object: HTTPRoute): boolean {
-  return typeof (object as any).isAccepted === "function"
-    ? Boolean((object as any).isAccepted())
-    : (((object as any).status?.parents ?? []) as any[]).some((parent: any) =>
-        (parent?.conditions ?? []).some(
-          (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
-        ),
-      );
+  return (object.status?.parents ?? []).some((parent) =>
+    (parent?.conditions ?? []).some((condition) => condition?.type === "Accepted" && condition?.status === "True"),
+  );
 }
 
 export const HTTPRouteDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<HTTPRoute>) => {
