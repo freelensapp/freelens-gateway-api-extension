@@ -75,3 +75,13 @@ export interface Fraction {
   numerator: number;
   denominator?: number;
 }
+
+export interface RouteParentStatus {
+  parentRef: ParentReference;
+  controllerName: string;
+  conditions?: GatewayCondition[];
+}
+
+export interface RouteStatus {
+  parents: RouteParentStatus[];
+}

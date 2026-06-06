@@ -3,10 +3,10 @@ import {
   type BackendObjectReference,
   type CommonRouteSpec,
   type Fraction,
-  type GatewayCondition,
   type GatewayKubeObjectCRD,
   hasTrueCondition,
   ParentReference,
+  type RouteStatus,
   type SessionPersistence,
 } from "./types";
 
@@ -192,11 +192,7 @@ export interface HTTPRouteSpec extends CommonRouteSpec {
   rules?: HTTPRouteRule[];
 }
 
-export interface HTTPRouteStatus {
-  parents?: Array<{
-    conditions?: GatewayCondition[];
-  }>;
-}
+export interface HTTPRouteStatus extends RouteStatus {}
 
 export class HTTPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   Renderer.K8sApi.KubeObjectMetadata,
