@@ -1,6 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
 import {
   type BackendObjectReference,
+  type BackendRef,
   type CommonRouteSpec,
   type Fraction,
   type GatewayKubeObjectCRD,
@@ -75,7 +76,7 @@ export interface HTTPQueryParamMatch {
 
 export interface HTTPRouteMatch {
   /** default: `"/"` */
-  path?: string;
+  path?: HTTPPathMatch;
   headers?: HTTPHeaderMatch[];
   queryParams?: HTTPQueryParamMatch[];
   method?: HTTPMethod;
@@ -132,7 +133,7 @@ export interface HTTPCORSFilter {
   maxAge?: number;
 }
 
-export interface HTTPBackendRef {
+export interface HTTPBackendRef extends BackendRef {
   filters?: HTTPRouteFilter[];
 }
 

@@ -1,19 +1,13 @@
 import { Renderer } from "@freelensapp/extensions";
+import crypto from "crypto";
 import { HTTPRoute } from "../../k8s/gateway-api";
 import { observer } from "../../observer";
-import { RouteDetails } from "./shared-route-details";
+import styles from "./common.module.scss";
+import stylesInline from "./common.module.scss?inline";
 
-function getHostnames(object: HTTPRoute): string[] {
-  return object.spec?.hostnames ?? [];
-}
-
-function getParentRefs(object: HTTPRoute): any[] {
-  return object.spec?.parentRefs ?? [];
-}
-
-function getBackends(object: HTTPRoute): any[] {
-  return (object.spec?.rules ?? []).flatMap((rule) => rule?.backendRefs ?? []);
-}
+const {
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Icon, Table, TableCell, TableHead, TableRow },
+} = Renderer;
 
 function isAccepted(object: HTTPRoute): boolean {
   return (object.status?.parents ?? []).some((parent) =>
@@ -21,16 +15,153 @@ function isAccepted(object: HTTPRoute): boolean {
   );
 }
 
+function routeRef(namespace: string | undefined, kind: string, name: string) {
+  return {
+    apiVersion: "gateway.networking.k8s.io/v1",
+    kind,
+    name,
+    namespace,
+  };
+}
+
 export const HTTPRouteDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<HTTPRoute>) => {
   const { object } = props;
+  const objectNs = object.getNs();
+
+  const hostnames = object.spec?.hostnames ?? [];
+  const parentRefs = object.spec?.parentRefs ?? [];
+  const rules = object.spec?.rules ?? [];
+  const accepted = isAccepted(object);
 
   return (
-    <RouteDetails
-      object={object}
-      hostnames={getHostnames(object)}
-      parentRefs={getParentRefs(object)}
-      backends={getBackends(object)}
-      accepted={isAccepted(object)}
-    />
+    <>
+      <style>{stylesInline}</style>
+      <div className={styles.details}>
+        {hostnames.length > 0 && <DrawerItem name="Hostnames">{hostnames.join(", ") || "*"}</DrawerItem>}
+        <DrawerItem name="Accepted">
+          <BadgeBoolean value={accepted} />
+        </DrawerItem>
+
+        <DrawerTitle>Parent References</DrawerTitle>
+        {parentRefs.map((parentRef) => {
+          const namespace = parentRef.namespace || objectNs;
+          const kind = parentRef.kind ?? "Gateway";
+          const key = crypto.createHash("sha256").update(JSON.stringify(parentRefs)).digest("hex").substring(0, 16);
+
+          return (
+            <DrawerItem key={key}>
+              <LinkToObject object={object} objectRef={routeRef(namespace, kind, parentRef.name)} />
+            </DrawerItem>
+          );
+        })}
+        {parentRefs.length === 0 ? <DrawerItem name="Parent References">-</DrawerItem> : null}
+
+        {rules.length > 0 && (
+          <>
+            <DrawerTitle>Rules</DrawerTitle>
+            {rules.map((rule, index) => {
+              const key = crypto.createHash("sha256").update(JSON.stringify(rule)).digest("hex").substring(0, 16);
+              return (
+                <div key={key}>
+                  <div className={styles.title}>
+                    <Icon small material="list" />
+                    <span>Rule {index + 1}</span>
+                    {rule.name && <span style={{ color: "var(--textColorSecondary)" }}>({rule.name})</span>}
+                  </div>
+
+                  {rule.matches && rule.matches.length > 0 && (
+                    <DrawerItem name="Matches">
+                      {rule.matches.map((match) => {
+                        const key = crypto
+                          .createHash("sha256")
+                          .update(JSON.stringify(match))
+                          .digest("hex")
+                          .substring(0, 16);
+
+                        return (
+                          <>
+                            <DrawerItem name="Type" key={key}>
+                              {match.path?.type ?? "PathPrefix"}
+                            </DrawerItem>
+                            <DrawerItem name="Path" key={key}>
+                              {match.path?.value ?? "/"}
+                            </DrawerItem>
+                            <DrawerItem name="Method" key={key} hidden={!match.method}>
+                              {match.method}
+                            </DrawerItem>
+                            <DrawerItem name="Headers" key={key} hidden={!match.headers}>
+                              {match.headers &&
+                                match.headers?.length > 0 &&
+                                match.headers.map((h) => `${h.name}=${h.value} (${h.type ?? "Exact"})`).join(", ")}
+                            </DrawerItem>
+                            <DrawerItem name="Query Params" key={key} hidden={!match.queryParams}>
+                              {match.queryParams &&
+                                match.queryParams?.length > 0 &&
+                                match.queryParams.map((q) => `${q.name}=${q.value} (${q.type ?? "Exact"})`).join(", ")}
+                            </DrawerItem>
+                          </>
+                        );
+                      })}
+                    </DrawerItem>
+                  )}
+
+                  {rule.filters && rule.filters.length > 0 && (
+                    <DrawerItem name="Filters">
+                      {rule.filters.map((filter) => {
+                        const key = crypto
+                          .createHash("sha256")
+                          .update(JSON.stringify(filter))
+                          .digest("hex")
+                          .substring(0, 16);
+                        return <div key={key}>{filter.type}</div>;
+                      })}
+                    </DrawerItem>
+                  )}
+
+                  {rule.backendRefs && rule.backendRefs.length > 0 && (
+                    <DrawerItem name="Backend References">
+                      <Table selectable tableId="backendRefs" scrollable={false} sortSyncWithUrl={false}>
+                        <TableHead flat sticky={false}>
+                          <TableCell>Reference</TableCell>
+                          <TableCell>Port</TableCell>
+                          <TableCell>Weight</TableCell>
+                        </TableHead>
+                        {rule.backendRefs.map((backend) => {
+                          const kind = backend.kind ?? "Service";
+                          const namespace = backend.namespace || objectNs;
+                          const key = crypto
+                            .createHash("sha256")
+                            .update(JSON.stringify(backend))
+                            .digest("hex")
+                            .substring(0, 16);
+
+                          return (
+                            <TableRow key={key} nowrap>
+                              <TableCell>
+                                <LinkToObject
+                                  object={object}
+                                  objectRef={{
+                                    apiVersion: "v1",
+                                    kind,
+                                    name: backend.name,
+                                    namespace,
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell>{backend.port ?? "-"}</TableCell>
+                              <TableCell>{backend.weight ?? "-"}</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </Table>
+                    </DrawerItem>
+                  )}
+                </div>
+              );
+            })}
+          </>
+        )}
+      </div>
+    </>
   );
 });
