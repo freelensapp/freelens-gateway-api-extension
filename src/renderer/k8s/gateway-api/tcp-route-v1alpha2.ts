@@ -1,25 +1,16 @@
 import { Renderer } from "@freelensapp/extensions";
-import {
-  type BackendObjectReference,
-  type GatewayCondition,
-  type GatewayKubeObjectCRD,
-  type ParentReference,
-} from "./types";
+import { type BackendRef, type CommonRouteSpec, type GatewayKubeObjectCRD, type RouteStatus } from "./types";
 
-export interface TCPRouteSpec {
-  hostnames?: string[];
-  parentRefs?: ParentReference[];
-  rules?: Array<{
-    backendRefs?: BackendObjectReference[];
-    filters?: Array<{ type: string }>;
-  }>;
+export interface TCPRouteRule {
+  name?: string;
+  backendRefs?: BackendRef[];
 }
 
-export interface TCPRouteStatus {
-  parents?: Array<{
-    conditions?: GatewayCondition[];
-  }>;
+export interface TCPRouteSpec extends CommonRouteSpec {
+  rules: TCPRouteRule[];
 }
+
+export interface TCPRouteStatus extends RouteStatus {}
 
 export class TCPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   Renderer.K8sApi.KubeObjectMetadata,
@@ -33,7 +24,6 @@ export class TCPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
     apiVersions: ["gateway.networking.k8s.io/v1alpha2"],
     plural: "tcproutes",
     singular: "tcproute",
-    shortNames: ["tcpr"],
     title: "TCP Routes",
   };
 }
