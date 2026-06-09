@@ -6,12 +6,11 @@ import {
   type Fraction,
   type GatewayKubeObjectCRD,
   hasTrueCondition,
+  type LocalObjectReference,
   ParentReference,
   type RouteStatus,
   type SessionPersistence,
 } from "./types";
-
-import type { LocalObjectReference } from "@freelensapp/kube-object";
 
 export type PathMatchType = "Exact" | "PathPrefix" | "RegularExpression";
 

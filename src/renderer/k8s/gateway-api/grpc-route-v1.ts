@@ -1,26 +1,61 @@
 import { Renderer } from "@freelensapp/extensions";
 import {
   type BackendObjectReference,
-  type GatewayCondition,
+  type BackendRef,
+  type CommonRouteSpec,
   type GatewayKubeObjectCRD,
   hasTrueCondition,
+  type LocalObjectReference,
   type ParentReference,
+  RouteStatus,
+  type SessionPersistence,
 } from "./types";
 
-export interface GRPCRouteSpec {
-  hostnames?: string[];
-  parentRefs?: ParentReference[];
-  rules?: Array<{
-    backendRefs?: BackendObjectReference[];
-    filters?: Array<{ type: string }>;
-  }>;
+import type { HTTPHeaderFilter, HTTPRequestMirrorFilter } from "./http-route-v1";
+
+export type GRPCMethodMatchType = "Exact" | "RegularExpression";
+
+export type GRPCRouteFilterType = "RequestHeaderModifier" | "ResponseHeaderModifier" | "RequestMirror" | "ExtensionRef";
+
+export interface GRPCMethodMatch {
+  type?: GRPCMethodMatchType;
+  service?: string;
+  method?: string;
 }
 
-export interface GRPCRouteStatus {
-  parents?: Array<{
-    conditions?: GatewayCondition[];
-  }>;
+export interface GRPCHeaderMatch {}
+
+export interface GRPCRouteMatch {
+  method?: GRPCMethodMatch;
+  headers?: GRPCHeaderMatch[];
 }
+
+export interface GRPCRouteFilter {
+  type: GRPCRouteFilterType;
+  requestHeaderModifier?: HTTPHeaderFilter;
+  responseHeaderModifier?: HTTPHeaderFilter;
+  requestMirror?: HTTPRequestMirrorFilter;
+  extensionRef?: LocalObjectReference;
+}
+
+export interface GRPCBackendRef extends BackendRef {
+  filters?: GRPCRouteFilter[];
+}
+
+export interface GRPCRouteRule {
+  name?: string;
+  matches?: GRPCRouteMatch[];
+  filters?: GRPCRouteFilter[];
+  backendRefs?: GRPCBackendRef[];
+  sessionPersistence?: SessionPersistence;
+}
+
+export interface GRPCRouteSpec extends CommonRouteSpec {
+  hostnames?: string[];
+  rules?: GRPCRouteRule[];
+}
+
+export interface GRPCRouteStatus extends RouteStatus {}
 
 export class GRPCRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   Renderer.K8sApi.KubeObjectMetadata,
@@ -34,7 +69,6 @@ export class GRPCRoute extends Renderer.K8sApi.LensExtensionKubeObject<
     apiVersions: ["gateway.networking.k8s.io/v1"],
     plural: "grpcroutes",
     singular: "grpcroute",
-    shortNames: ["grpcr"],
     title: "gRPC Routes",
   };
 

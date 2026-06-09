@@ -14,6 +14,12 @@ export function hasTrueCondition(conditions: GatewayCondition[] | undefined, typ
   return conditions?.some((condition) => condition.type === type && condition.status === "True") ?? false;
 }
 
+export interface LocalObjectReference {
+  group: string;
+  kind: string;
+  name: string;
+}
+
 export interface SecretObjectReference {
   group?: string;
   kind?: string;
