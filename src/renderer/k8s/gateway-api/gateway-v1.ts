@@ -3,7 +3,6 @@ import {
   type GatewayCondition,
   type GatewayDefaultScope,
   type GatewayKubeObjectCRD,
-  hasTrueCondition,
   type SecretObjectReference,
 } from "./types";
 
@@ -151,22 +150,6 @@ export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
     shortNames: ["gtw"],
     title: "Gateways",
   };
-
-  getClassName(): string {
-    return this.spec.gatewayClassName;
-  }
-
-  getAddresses(): string[] {
-    return (this.status?.addresses ?? []).map((address) => address.value);
-  }
-
-  getListeners(): Listener[] {
-    return this.spec.listeners ?? [];
-  }
-
-  isReady(): boolean {
-    return hasTrueCondition(this.status?.conditions, "Ready");
-  }
 }
 
 export class GatewayApi extends Renderer.K8sApi.KubeApi<Gateway> {}

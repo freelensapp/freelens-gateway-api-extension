@@ -1,5 +1,5 @@
 import { Renderer } from "@freelensapp/extensions";
-import { type GatewayCondition, type GatewayKubeObjectCRD, hasTrueCondition } from "./types";
+import { type GatewayCondition, type GatewayKubeObjectCRD } from "./types";
 
 export interface BackendTLSPolicySpec {
   targetRefs?: Array<{ kind: string; name: string; namespace?: string }>;
@@ -27,22 +27,6 @@ export class BackendTLSPolicy extends Renderer.K8sApi.LensExtensionKubeObject<
     singular: "backendtlspolicy",
     title: "Backend TLS Policies",
   };
-
-  getTargetRefs(): Array<{ kind: string; name: string; namespace?: string }> {
-    return this.spec.targetRefs ?? [];
-  }
-
-  getCaCertRefs(): Array<{ kind: string; name: string; namespace?: string }> {
-    return this.spec.validation?.caCertificateRefs ?? [];
-  }
-
-  getHostname(): string | undefined {
-    return this.spec.validation?.hostname;
-  }
-
-  isAccepted(): boolean {
-    return hasTrueCondition(this.status?.conditions, "Accepted");
-  }
 }
 
 export class BackendTLSPolicyApi extends Renderer.K8sApi.KubeApi<BackendTLSPolicy> {}

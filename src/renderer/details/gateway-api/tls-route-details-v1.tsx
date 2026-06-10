@@ -4,37 +4,26 @@ import { observer } from "../../observer";
 import { RouteDetails } from "./shared-route-details";
 
 function getHostnames(object: TLSRoute): string[] {
-  return typeof (object as any).getHostnames === "function"
-    ? (object as any).getHostnames()
-    : ((object as any).spec?.hostnames ?? []);
+  return object.spec?.hostnames ?? [];
 }
 
 function getParentRefs(object: TLSRoute): any[] {
-  if (typeof (object as any).getParentRefs === "function") {
-    return (object as any).getParentRefs();
-  }
-
-  const spec = (object as any).spec ?? {};
-
-  return [...(spec.commonParentRefs ?? []), ...(spec.parentRefs ?? [])];
+  return (object.spec?.parentRefs ?? []).map((ref) => ({
+    ...ref,
+    kind: ref.kind ?? "Gateway",
+  }));
 }
 
-function getBackends(object: TLSRoute): any[] {
-  if (typeof (object as any).getBackendRefs === "function") {
-    return (object as any).getBackendRefs();
-  }
-
-  return ((object as any).spec?.rules ?? []).flatMap((rule: any) => rule?.backendRefs ?? []);
+function getBackendRefs(object: TLSRoute): any[] {
+  return (object.spec?.rules ?? []).flatMap((rule) => rule.backendRefs ?? []);
 }
 
 function isAccepted(object: TLSRoute): boolean {
-  return typeof (object as any).isAccepted === "function"
-    ? Boolean((object as any).isAccepted())
-    : (((object as any).status?.parents ?? []) as any[]).some((parent: any) =>
-        (parent?.conditions ?? []).some(
-          (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
-        ),
-      );
+  return (
+    object.status?.parents?.some((parent) =>
+      parent.conditions?.some((condition) => condition.type === "Accepted" && condition.status === "True"),
+    ) ?? false
+  );
 }
 
 export const TLSRouteDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<TLSRoute>) => {
@@ -45,7 +34,7 @@ export const TLSRouteDetails = observer((props: Renderer.Component.KubeObjectDet
       object={object}
       hostnames={getHostnames(object)}
       parentRefs={getParentRefs(object)}
-      backends={getBackends(object)}
+      backends={getBackendRefs(object)}
       accepted={isAccepted(object)}
     />
   );

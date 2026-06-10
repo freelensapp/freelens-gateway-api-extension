@@ -1,25 +1,17 @@
 import { Renderer } from "@freelensapp/extensions";
-import {
-  type BackendObjectReference,
-  type GatewayCondition,
-  type GatewayKubeObjectCRD,
-  type ParentReference,
-} from "./types";
+import { type BackendRef, type CommonRouteSpec, type GatewayKubeObjectCRD, type RouteStatus } from "./types";
 
-export interface TLSRouteSpec {
+export interface TLSRouteRule {
+  name?: string;
+  backendRefs?: BackendRef[];
+}
+
+export interface TLSRouteSpec extends CommonRouteSpec {
   hostnames?: string[];
-  parentRefs?: ParentReference[];
-  rules?: Array<{
-    backendRefs?: BackendObjectReference[];
-    filters?: Array<{ type: string }>;
-  }>;
+  rules?: TLSRouteRule[];
 }
 
-export interface TLSRouteStatus {
-  parents?: Array<{
-    conditions?: GatewayCondition[];
-  }>;
-}
+export interface TLSRouteStatus extends RouteStatus {}
 
 export class TLSRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   Renderer.K8sApi.KubeObjectMetadata,
@@ -33,7 +25,6 @@ export class TLSRoute extends Renderer.K8sApi.LensExtensionKubeObject<
     apiVersions: ["gateway.networking.k8s.io/v1"],
     plural: "tlsroutes",
     singular: "tlsroute",
-    shortNames: ["tlsr"],
     title: "TLS Routes",
   };
 }

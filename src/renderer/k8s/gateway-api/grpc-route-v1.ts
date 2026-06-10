@@ -1,13 +1,10 @@
 import { Renderer } from "@freelensapp/extensions";
 import {
-  type BackendObjectReference,
   type BackendRef,
   type CommonRouteSpec,
   type GatewayKubeObjectCRD,
-  hasTrueCondition,
   type LocalObjectReference,
-  type ParentReference,
-  RouteStatus,
+  type RouteStatus,
   type SessionPersistence,
 } from "./types";
 
@@ -71,26 +68,6 @@ export class GRPCRoute extends Renderer.K8sApi.LensExtensionKubeObject<
     singular: "grpcroute",
     title: "gRPC Routes",
   };
-
-  getHostnames(): string[] {
-    return this.spec.hostnames ?? [];
-  }
-
-  getParentRefs(): ParentReference[] {
-    return this.spec.parentRefs ?? [];
-  }
-
-  getRulesCount(): number {
-    return this.spec.rules?.length ?? 0;
-  }
-
-  getBackendRefs(): BackendObjectReference[] {
-    return (this.spec.rules ?? []).flatMap((rule) => rule.backendRefs ?? []);
-  }
-
-  isAccepted(): boolean {
-    return this.status?.parents?.some((parent) => hasTrueCondition(parent.conditions, "Accepted")) ?? false;
-  }
 }
 
 export class GRPCRouteApi extends Renderer.K8sApi.KubeApi<GRPCRoute> {}

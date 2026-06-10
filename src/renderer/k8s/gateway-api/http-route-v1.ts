@@ -5,9 +5,7 @@ import {
   type CommonRouteSpec,
   type Fraction,
   type GatewayKubeObjectCRD,
-  hasTrueCondition,
   type LocalObjectReference,
-  ParentReference,
   type RouteStatus,
   type SessionPersistence,
 } from "./types";
@@ -208,26 +206,6 @@ export class HTTPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
     singular: "httproute",
     title: "HTTP Routes",
   };
-
-  getHostnames(): string[] {
-    return this.spec.hostnames ?? [];
-  }
-
-  getParentRefs(): ParentReference[] {
-    return this.spec.parentRefs ?? [];
-  }
-
-  getRulesCount(): number {
-    return this.spec.rules?.length ?? 0;
-  }
-
-  getBackendRefs(): HTTPBackendRef[] {
-    return (this.spec.rules ?? []).flatMap((rule) => rule.backendRefs ?? []);
-  }
-
-  isAccepted(): boolean {
-    return this.status?.parents?.some((parent) => hasTrueCondition(parent.conditions, "Accepted")) ?? false;
-  }
 }
 
 export class HTTPRouteApi extends Renderer.K8sApi.KubeApi<HTTPRoute> {}
