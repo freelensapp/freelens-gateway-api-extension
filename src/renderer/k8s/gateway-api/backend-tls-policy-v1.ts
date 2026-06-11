@@ -25,6 +25,7 @@ export class BackendTLSPolicy extends Renderer.K8sApi.LensExtensionKubeObject<
     apiVersions: ["gateway.networking.k8s.io/v1"],
     plural: "backendtlspolicies",
     singular: "backendtlspolicy",
+    shortNames: ["btlspolicy"],
     title: "Backend TLS Policies",
   };
 }
