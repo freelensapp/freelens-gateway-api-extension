@@ -1,25 +1,16 @@
 import { Renderer } from "@freelensapp/extensions";
-import {
-  type BackendObjectReference,
-  type GatewayCondition,
-  type GatewayKubeObjectCRD,
-  type ParentReference,
-} from "./types";
+import { type BackendRef, type CommonRouteSpec, type GatewayKubeObjectCRD, type RouteStatus } from "./types";
 
-export interface UDPRouteSpec {
-  hostnames?: string[];
-  parentRefs?: ParentReference[];
-  rules?: Array<{
-    backendRefs?: BackendObjectReference[];
-    filters?: Array<{ type: string }>;
-  }>;
+export interface UDPRouteRule {
+  name?: string;
+  backendRefs?: BackendRef[];
 }
 
-export interface UDPRouteStatus {
-  parents?: Array<{
-    conditions?: GatewayCondition[];
-  }>;
+export interface UDPRouteSpec extends CommonRouteSpec {
+  rules?: UDPRouteRule[];
 }
+
+export interface UDPRouteStatus extends RouteStatus {}
 
 export class UDPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   Renderer.K8sApi.KubeObjectMetadata,
@@ -33,7 +24,6 @@ export class UDPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
     apiVersions: ["gateway.networking.k8s.io/v1alpha2"],
     plural: "udproutes",
     singular: "udproute",
-    shortNames: ["udpr"],
     title: "UDP Routes",
   };
 }

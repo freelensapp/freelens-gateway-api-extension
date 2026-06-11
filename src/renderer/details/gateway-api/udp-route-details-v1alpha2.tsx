@@ -1,45 +1,116 @@
 import { Renderer } from "@freelensapp/extensions";
+import crypto from "crypto";
 import { UDPRoute } from "../../k8s/gateway-api";
 import { observer } from "../../observer";
-import { RouteDetails } from "./shared-route-details";
+import styles from "./common.module.scss";
+import stylesInline from "./common.module.scss?inline";
 
-function getParentRefs(object: UDPRoute): any[] {
-  if (typeof (object as any).getParentRefs === "function") {
-    return (object as any).getParentRefs();
-  }
-
-  const spec = (object as any).spec ?? {};
-
-  return [...(spec.commonParentRefs ?? []), ...(spec.parentRefs ?? [])];
-}
-
-function getBackends(object: UDPRoute): any[] {
-  if (typeof (object as any).getBackendRefs === "function") {
-    return (object as any).getBackendRefs();
-  }
-
-  return ((object as any).spec?.rules ?? []).flatMap((rule: any) => rule?.backendRefs ?? []);
-}
+const {
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Icon, Table, TableCell, TableHead, TableRow },
+} = Renderer;
 
 function isAccepted(object: UDPRoute): boolean {
-  return typeof (object as any).isAccepted === "function"
-    ? Boolean((object as any).isAccepted())
-    : (((object as any).status?.parents ?? []) as any[]).some((parent: any) =>
-        (parent?.conditions ?? []).some(
-          (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
-        ),
-      );
+  return (object.status?.parents ?? []).some((parent) =>
+    (parent?.conditions ?? []).some((condition) => condition?.type === "Accepted" && condition?.status === "True"),
+  );
+}
+
+function routeRef(namespace: string | undefined, kind: string, name: string) {
+  return {
+    apiVersion: "gateway.networking.k8s.io/v1",
+    kind,
+    name,
+    namespace,
+  };
 }
 
 export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<UDPRoute>) => {
   const { object } = props;
+  const objectNs = object.getNs();
+
+  const parentRefs = object.spec?.parentRefs ?? [];
+  const rules = object.spec?.rules ?? [];
+  const accepted = isAccepted(object);
 
   return (
-    <RouteDetails
-      object={object}
-      parentRefs={getParentRefs(object)}
-      backends={getBackends(object)}
-      accepted={isAccepted(object)}
-    />
+    <>
+      <style>{stylesInline}</style>
+      <div className={styles.details}>
+        <DrawerItem name="Accepted">
+          <BadgeBoolean value={accepted} />
+        </DrawerItem>
+
+        <DrawerTitle>Parent References</DrawerTitle>
+        {parentRefs.map((parentRef) => {
+          const namespace = parentRef.namespace || objectNs;
+          const kind = parentRef.kind ?? "Gateway";
+          const key = crypto.createHash("sha256").update(JSON.stringify(parentRefs)).digest("hex").substring(0, 16);
+
+          return (
+            <DrawerItem key={key}>
+              <LinkToObject object={object} objectRef={routeRef(namespace, kind, parentRef.name)} />
+            </DrawerItem>
+          );
+        })}
+        {parentRefs.length === 0 ? <DrawerItem name="Parent References">-</DrawerItem> : null}
+
+        {rules.length > 0 && (
+          <>
+            <DrawerTitle>Rules</DrawerTitle>
+            {rules.map((rule, index) => {
+              const key = crypto.createHash("sha256").update(JSON.stringify(rule)).digest("hex").substring(0, 16);
+              return (
+                <div key={key}>
+                  <div className={styles.title}>
+                    <Icon small material="list" />
+                    <span>Rule {index + 1}</span>
+                    {rule.name && <span style={{ color: "var(--textColorSecondary)" }}>({rule.name})</span>}
+                  </div>
+
+                  {rule.backendRefs && rule.backendRefs.length > 0 && (
+                    <DrawerItem name="Backend References">
+                      <Table selectable tableId="backendRefs" scrollable={false} sortSyncWithUrl={false}>
+                        <TableHead flat sticky={false}>
+                          <TableCell>Reference</TableCell>
+                          <TableCell>Port</TableCell>
+                          <TableCell>Weight</TableCell>
+                        </TableHead>
+                        {rule.backendRefs.map((backend) => {
+                          const kind = backend.kind ?? "Service";
+                          const namespace = backend.namespace || objectNs;
+                          const key = crypto
+                            .createHash("sha256")
+                            .update(JSON.stringify(backend))
+                            .digest("hex")
+                            .substring(0, 16);
+
+                          return (
+                            <TableRow key={key} nowrap>
+                              <TableCell>
+                                <LinkToObject
+                                  object={object}
+                                  objectRef={{
+                                    apiVersion: "v1",
+                                    kind,
+                                    name: backend.name,
+                                    namespace,
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell>{backend.port ?? "-"}</TableCell>
+                              <TableCell>{backend.weight ?? "-"}</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </Table>
+                    </DrawerItem>
+                  )}
+                </div>
+              );
+            })}
+          </>
+        )}
+      </div>
+    </>
   );
 });
