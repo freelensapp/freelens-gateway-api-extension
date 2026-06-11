@@ -3,6 +3,7 @@ import { GatewayClassesPage as GatewayClassesPage_v1 } from "./gateway-classes-p
 import { GatewaysPage as GatewaysPage_v1 } from "./gateways-page-v1";
 import { GRPCRoutesPage as GRPCRoutesPage_v1 } from "./grpc-routes-page-v1";
 import { HTTPRoutesPage as HTTPRoutesPage_v1 } from "./http-routes-page-v1";
+import { ListenerSetsPage as ListenerSetsPage_v1 } from "./listener-sets-page-v1";
 import { ReferenceGrantsPage as ReferenceGrantsPage_v1 } from "./reference-grants/reference-grants-page-v1";
 import { ReferenceGrantsPage as ReferenceGrantsPage_v1beta1 } from "./reference-grants/reference-grants-page-v1beta1";
 import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./tcp-routes-page-v1alpha2";
@@ -15,6 +16,7 @@ export {
   GatewaysPage_v1,
   GRPCRoutesPage_v1,
   HTTPRoutesPage_v1,
+  ListenerSetsPage_v1,
   ReferenceGrantsPage_v1,
   ReferenceGrantsPage_v1beta1,
   TCPRoutesPage_v1alpha2,
@@ -27,6 +29,7 @@ export const GatewayClassesPage = GatewayClassesPage_v1;
 export const GatewaysPage = GatewaysPage_v1;
 export const GRPCRoutesPage = GRPCRoutesPage_v1;
 export const HTTPRoutesPage = HTTPRoutesPage_v1;
+export const ListenerSetsPage = ListenerSetsPage_v1;
 export const ReferenceGrantsPage = ReferenceGrantsPage_v1;
 export const TCPRoutesPage = TCPRoutesPage_v1alpha2;
 export const TLSRoutesPage = TLSRoutesPage_v1;

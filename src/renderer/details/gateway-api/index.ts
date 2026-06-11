@@ -3,6 +3,7 @@ import { GatewayClassDetails as GatewayClassDetails_v1 } from "./gateway-class-d
 import { GatewayDetails as GatewayDetails_v1 } from "./gateway-details-v1";
 import { GRPCRouteDetails as GRPCRouteDetails_v1 } from "./grpc-route-details-v1";
 import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./http-route-details-v1";
+import { ListenerSetDetails as ListenerSetDetails_v1 } from "./listener-set-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1 } from "./reference-grant-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1beta1 } from "./reference-grant-details-v1beta1";
 import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./tcp-route-details-v1alpha2";
@@ -15,6 +16,7 @@ export {
   GatewayDetails_v1,
   GRPCRouteDetails_v1,
   HTTPRouteDetails_v1,
+  ListenerSetDetails_v1,
   ReferenceGrantDetails_v1,
   ReferenceGrantDetails_v1beta1,
   TCPRouteDetails_v1alpha2,
@@ -27,6 +29,7 @@ export const GatewayClassDetails = GatewayClassDetails_v1;
 export const GatewayDetails = GatewayDetails_v1;
 export const GRPCRouteDetails = GRPCRouteDetails_v1;
 export const HTTPRouteDetails = HTTPRouteDetails_v1;
+export const ListenerSetDetails = ListenerSetDetails_v1;
 export const ReferenceGrantDetails = ReferenceGrantDetails_v1;
 export const TCPRouteDetails = TCPRouteDetails_v1alpha2;
 export const TLSRouteDetails = TLSRouteDetails_v1;

@@ -20,6 +20,11 @@ import {
   HTTPRouteStore as HTTPRouteStore_v1,
 } from "./http-route-v1";
 import {
+  ListenerSet as ListenerSet_v1,
+  ListenerSetApi as ListenerSetApi_v1,
+  ListenerSetStore as ListenerSetStore_v1,
+} from "./listenerset-v1";
+import {
   ReferenceGrant as ReferenceGrant_v1,
   ReferenceGrantApi as ReferenceGrantApi_v1,
   ReferenceGrantStore as ReferenceGrantStore_v1,
@@ -77,6 +82,12 @@ export {
   HTTPRouteApi_v1 as HTTPRouteApi,
   HTTPRouteStore_v1,
   HTTPRouteStore_v1 as HTTPRouteStore,
+  ListenerSet_v1,
+  ListenerSet_v1 as ListenerSet,
+  ListenerSetApi_v1,
+  ListenerSetApi_v1 as ListenerSetApi,
+  ListenerSetStore_v1,
+  ListenerSetStore_v1 as ListenerSetStore,
   ReferenceGrant_v1,
   ReferenceGrant_v1 as ReferenceGrant,
   ReferenceGrant_v1beta1,

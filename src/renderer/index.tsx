@@ -10,6 +10,7 @@ import { GatewayClassDetails as GatewayClassDetails_v1 } from "./details/gateway
 import { GatewayDetails as GatewayDetails_v1 } from "./details/gateway-api/gateway-details-v1";
 import { GRPCRouteDetails as GRPCRouteDetails_v1 } from "./details/gateway-api/grpc-route-details-v1";
 import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./details/gateway-api/http-route-details-v1";
+import { ListenerSetDetails as ListenerSetDetails_v1 } from "./details/gateway-api/listener-set-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1 } from "./details/gateway-api/reference-grant-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1beta1 } from "./details/gateway-api/reference-grant-details-v1beta1";
 import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./details/gateway-api/tcp-route-details-v1alpha2";
@@ -21,6 +22,7 @@ import { GatewayClass as GatewayClass_v1 } from "./k8s/gateway-api/gateway-class
 import { Gateway as Gateway_v1 } from "./k8s/gateway-api/gateway-v1";
 import { GRPCRoute as GRPCRoute_v1 } from "./k8s/gateway-api/grpc-route-v1";
 import { HTTPRoute as HTTPRoute_v1 } from "./k8s/gateway-api/http-route-v1";
+import { ListenerSet as ListenerSet_v1 } from "./k8s/gateway-api/listenerset-v1";
 import { ReferenceGrant as ReferenceGrant_v1 } from "./k8s/gateway-api/reference-grant-v1";
 import { ReferenceGrant as ReferenceGrant_v1beta1 } from "./k8s/gateway-api/reference-grant-v1beta1";
 import { TCPRoute as TCPRoute_v1alpha2 } from "./k8s/gateway-api/tcp-route-v1alpha2";
@@ -31,6 +33,7 @@ import { GatewayClassesPage as GatewayClassesPage_v1 } from "./pages/gateway-api
 import { GatewaysPage as GatewaysPage_v1 } from "./pages/gateway-api/gateways-page-v1";
 import { GRPCRoutesPage as GRPCRoutesPage_v1 } from "./pages/gateway-api/grpc-routes-page-v1";
 import { HTTPRoutesPage as HTTPRoutesPage_v1 } from "./pages/gateway-api/http-routes-page-v1";
+import { ListenerSetsPage as ListenerSetsPage_v1 } from "./pages/gateway-api/listener-sets-page-v1";
 import { ReferenceGrantsPage as ReferenceGrantsPage_v1 } from "./pages/gateway-api/reference-grants/reference-grants-page-v1";
 import { ReferenceGrantsPage as ReferenceGrantsPage_v1beta1 } from "./pages/gateway-api/reference-grants/reference-grants-page-v1beta1";
 import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./pages/gateway-api/tcp-routes-page-v1alpha2";
@@ -116,6 +119,14 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       },
     },
     {
+      kind: ListenerSet_v1.kind,
+      apiVersions: ListenerSet_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <ListenerSetDetails_v1 {...props} />,
+      },
+    },
+    {
       kind: BackendTLSPolicy_v1.kind,
       apiVersions: BackendTLSPolicy_v1.crd.apiVersions,
       priority: 10,
@@ -192,6 +203,14 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       },
     },
     {
+      id: "listenerset",
+      components: {
+        Page: createAvailableVersionPage("Listener Sets", [
+          { kubeObjectClass: ListenerSet_v1, PageComponent: ListenerSetsPage_v1, version: "v1" },
+        ]),
+      },
+    },
+    {
       id: "backendtlspolicy",
       components: {
         Page: createAvailableVersionPage("Backend TLS Policies", [
@@ -263,6 +282,13 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       parentId: "gateway-api",
       title: "Reference Grants",
       target: { pageId: "referencegrant" },
+      components: {},
+    },
+    {
+      id: "listenerset",
+      parentId: "gateway-api",
+      title: "Listener Sets",
+      target: { pageId: "listenerset" },
       components: {},
     },
     {
