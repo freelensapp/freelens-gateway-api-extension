@@ -11,7 +11,6 @@ import { GatewayDetails as GatewayDetails_v1 } from "./details/gateway-api/gatew
 import { GRPCRouteDetails as GRPCRouteDetails_v1 } from "./details/gateway-api/grpc-route-details-v1";
 import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./details/gateway-api/http-route-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1 } from "./details/gateway-api/reference-grant-details-v1";
-import { ReferenceGrantDetails as ReferenceGrantDetails_v1beta1 } from "./details/gateway-api/reference-grant-details-v1beta1";
 import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./details/gateway-api/tcp-route-details-v1alpha2";
 import { TLSRouteDetails as TLSRouteDetails_v1 } from "./details/gateway-api/tls-route-details-v1";
 import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/gateway-api/udp-route-details-v1alpha2";
@@ -22,7 +21,6 @@ import { Gateway as Gateway_v1 } from "./k8s/gateway-api/gateway-v1";
 import { GRPCRoute as GRPCRoute_v1 } from "./k8s/gateway-api/grpc-route-v1";
 import { HTTPRoute as HTTPRoute_v1 } from "./k8s/gateway-api/http-route-v1";
 import { ReferenceGrant as ReferenceGrant_v1 } from "./k8s/gateway-api/reference-grant-v1";
-import { ReferenceGrant as ReferenceGrant_v1beta1 } from "./k8s/gateway-api/reference-grant-v1beta1";
 import { TCPRoute as TCPRoute_v1alpha2 } from "./k8s/gateway-api/tcp-route-v1alpha2";
 import { TLSRoute as TLSRoute_v1 } from "./k8s/gateway-api/tls-route-v1";
 import { UDPRoute as UDPRoute_v1alpha2 } from "./k8s/gateway-api/udp-route-v1alpha2";
@@ -32,7 +30,6 @@ import { GatewaysPage as GatewaysPage_v1 } from "./pages/gateway-api/gateways-pa
 import { GRPCRoutesPage as GRPCRoutesPage_v1 } from "./pages/gateway-api/grpc-routes-page-v1";
 import { HTTPRoutesPage as HTTPRoutesPage_v1 } from "./pages/gateway-api/http-routes-page-v1";
 import { ReferenceGrantsPage as ReferenceGrantsPage_v1 } from "./pages/gateway-api/reference-grants/reference-grants-page-v1";
-import { ReferenceGrantsPage as ReferenceGrantsPage_v1beta1 } from "./pages/gateway-api/reference-grants/reference-grants-page-v1beta1";
 import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./pages/gateway-api/tcp-routes-page-v1alpha2";
 import { TLSRoutesPage as TLSRoutesPage_v1 } from "./pages/gateway-api/tls-routes-page-v1";
 import { UDPRoutesPage as UDPRoutesPage_v1alpha2 } from "./pages/gateway-api/udp-routes-page-v1alpha2";
@@ -106,16 +103,6 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       },
     },
     {
-      kind: ReferenceGrant_v1beta1.kind,
-      apiVersions: ReferenceGrant_v1beta1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
-          <ReferenceGrantDetails_v1beta1 {...props} />
-        ),
-      },
-    },
-    {
       kind: BackendTLSPolicy_v1.kind,
       apiVersions: BackendTLSPolicy_v1.crd.apiVersions,
       priority: 10,
@@ -186,16 +173,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "referencegrant",
       components: {
         Page: createAvailableVersionPage("Reference Grants", [
-          {
-            kubeObjectClass: ReferenceGrant_v1,
-            PageComponent: ReferenceGrantsPage_v1,
-            version: "v1",
-          },
-          {
-            kubeObjectClass: ReferenceGrant_v1beta1,
-            PageComponent: ReferenceGrantsPage_v1beta1,
-            version: "v1beta1",
-          },
+          { kubeObjectClass: ReferenceGrant_v1, PageComponent: ReferenceGrantsPage_v1, version: "v1" },
         ]),
       },
     },

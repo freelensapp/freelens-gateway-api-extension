@@ -1,9 +1,21 @@
 import { Renderer } from "@freelensapp/extensions";
 import { type GatewayKubeObjectCRD } from "./types";
 
+export interface ReferenceGrantFrom {
+  group: string;
+  kind: string;
+  namespace?: string;
+}
+
+export interface ReferenceGrantTo {
+  group: string;
+  kind: string;
+  name?: string;
+}
+
 export interface ReferenceGrantSpec {
-  from?: Array<{ group: string; kind: string; namespace?: string }>;
-  to?: Array<{ group: string; kind: string; name?: string }>;
+  from: ReferenceGrantFrom[];
+  to: ReferenceGrantTo[];
 }
 
 export class ReferenceGrant extends Renderer.K8sApi.LensExtensionKubeObject<
@@ -21,14 +33,6 @@ export class ReferenceGrant extends Renderer.K8sApi.LensExtensionKubeObject<
     shortNames: ["refgrant"],
     title: "Reference Grants",
   };
-
-  getFromCount(): number {
-    return this.spec.from?.length ?? 0;
-  }
-
-  getToCount(): number {
-    return this.spec.to?.length ?? 0;
-  }
 }
 
 export class ReferenceGrantApi extends Renderer.K8sApi.KubeApi<ReferenceGrant> {}

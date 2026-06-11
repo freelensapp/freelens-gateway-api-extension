@@ -11,6 +11,9 @@ export const ReferenceGrantDetails = observer((props: Renderer.Component.KubeObj
 
   return (
     <>
+      <DrawerItem name="Name">{object.getName()}</DrawerItem>
+      <DrawerItem name="Namespace">{object.getNs() ?? "-"}</DrawerItem>
+
       <DrawerTitle>From</DrawerTitle>
       {object.spec.from?.map((entry, index) => (
         <DrawerItem key={`from-${index}`} name={`${entry.kind} ${index + 1}`}>
