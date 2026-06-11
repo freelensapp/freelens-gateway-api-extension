@@ -9,15 +9,6 @@ const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Icon, Table, TableCell, TableHead, TableRow },
 } = Renderer;
 
-function routeRef(namespace: string | undefined, kind: string, name: string) {
-  return {
-    apiVersion: "gateway.networking.k8s.io/v1",
-    kind,
-    name,
-    namespace,
-  };
-}
-
 function isAccepted(object: GRPCRoute): boolean {
   return (object.status?.parents ?? []).some((parent) =>
     (parent?.conditions ?? []).some((condition) => condition?.type === "Accepted" && condition?.status === "True"),
@@ -43,18 +34,44 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
         </DrawerItem>
 
         <DrawerTitle>Parent References</DrawerTitle>
-        {parentRefs.map((parentRef) => {
-          const namespace = parentRef.namespace || objectNs;
-          const kind = parentRef.kind ?? "Gateway";
-          const key = createHash(parentRefs);
+        {parentRefs.length > 0 ? (
+          <Table selectable tableId="parentRefs" scrollable={false} sortSyncWithUrl={false}>
+            <TableHead flat sticky={false}>
+              <TableCell>Group</TableCell>
+              <TableCell>Kind</TableCell>
+              <TableCell>Namespace</TableCell>
+              <TableCell>Section Name</TableCell>
+              <TableCell>Name</TableCell>
+            </TableHead>
+            {parentRefs.map((parentRef) => {
+              const namespace = parentRef.namespace || objectNs;
+              const kind = parentRef.kind ?? "Gateway";
+              const key = createHash(parentRef);
 
-          return (
-            <DrawerItem key={key}>
-              <LinkToObject object={object} objectRef={routeRef(namespace, kind, parentRef.name)} />
-            </DrawerItem>
-          );
-        })}
-        {parentRefs.length === 0 ? <DrawerItem name="Parent References">-</DrawerItem> : null}
+              return (
+                <TableRow key={key} nowrap>
+                  <TableCell>{parentRef.group || "gateway.networking.k8s.io"}</TableCell>
+                  <TableCell>{kind}</TableCell>
+                  <TableCell>{namespace ?? "-"}</TableCell>
+                  <TableCell>{parentRef.sectionName ?? "-"}</TableCell>
+                  <TableCell>
+                    <LinkToObject
+                      object={object}
+                      objectRef={{
+                        apiVersion: "gateway.networking.k8s.io/v1",
+                        kind,
+                        name: parentRef.name,
+                        namespace,
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </Table>
+        ) : (
+          <DrawerItem name="Parent References">-</DrawerItem>
+        )}
 
         {rules.length > 0 && (
           <>
