@@ -7,13 +7,15 @@ const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
-function isAccepted(item: any): boolean {
-  if (typeof item?.isAccepted === "function") {
-    return Boolean(item.isAccepted());
-  }
+interface HasStatusConditions {
+  status?: {
+    conditions?: Array<{ type: string; status: string }>;
+  };
+}
 
-  return (item?.status?.conditions ?? []).some(
-    (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
+function isAccepted(item: HasStatusConditions): boolean {
+  return (item.status?.conditions ?? []).some(
+    (condition) => condition.type === "Accepted" && condition.status === "True",
   );
 }
 
@@ -37,7 +39,7 @@ export function createPolicyPage<T extends Renderer.K8sApi.LensExtensionKubeObje
             name: (item: T) => item.getName(),
             namespace: (item: T) => item.getNs() ?? "",
             targets: (item: T) => getTargets(item),
-            accepted: (item: T) => String(isAccepted(item as any)),
+            accepted: (item: T) => String(isAccepted(item)),
             age: (item: T) => item.getCreationTimestamp(),
           }}
           searchFilters={[(item: T) => item.getSearchFields()]}
@@ -53,7 +55,7 @@ export function createPolicyPage<T extends Renderer.K8sApi.LensExtensionKubeObje
             <WithTooltip>{item.getName()}</WithTooltip>,
             namespaceCell(item.getNs()),
             <WithTooltip>{getTargets(item)}</WithTooltip>,
-            <BadgeBoolean value={isAccepted(item as any)} />,
+            <BadgeBoolean value={isAccepted(item)} />,
             <KubeObjectAge object={item} key="age" />,
           ]}
         />

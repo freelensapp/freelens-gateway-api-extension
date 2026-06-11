@@ -1,6 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
 import { withErrorPage } from "../../components/error-page";
 import { GatewayClass } from "../../k8s/gateway-api";
+import { hasTrueCondition } from "../../k8s/gateway-api/types";
 import { observer } from "../../observer";
 import styles from "./gateway-classes-page-v1.module.scss";
 import stylesInline from "./gateway-classes-page-v1.module.scss?inline";
@@ -11,17 +12,11 @@ const {
 } = Renderer;
 
 function getControllerName(item: GatewayClass): string {
-  return typeof (item as any).getControllerName === "function"
-    ? (item as any).getControllerName()
-    : ((item as any).spec?.controllerName ?? "");
+  return item.spec?.controllerName ?? "";
 }
 
 function isAccepted(item: GatewayClass): boolean {
-  return typeof (item as any).isAccepted === "function"
-    ? Boolean((item as any).isAccepted())
-    : ((item as any).status?.conditions ?? []).some(
-        (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
-      );
+  return hasTrueCondition(item.status?.conditions, "Accepted");
 }
 
 export const GatewayClassesPage = observer((props: GatewayPageProps) =>

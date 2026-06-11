@@ -1,5 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
 import { BackendTLSPolicy } from "../../k8s/gateway-api";
+import { hasTrueCondition } from "../../k8s/gateway-api/types";
 import { observer } from "../../observer";
 
 const {
@@ -7,31 +8,19 @@ const {
 } = Renderer;
 
 function isAccepted(object: BackendTLSPolicy): boolean {
-  return typeof (object as any).isAccepted === "function"
-    ? Boolean((object as any).isAccepted())
-    : ((object as any).status?.conditions ?? []).some(
-        (condition: any) => condition?.type === "Accepted" && condition?.status === "True",
-      );
+  return hasTrueCondition(object.status?.conditions, "Accepted");
 }
 
 function getTargetRefs(object: BackendTLSPolicy): Array<{ kind: string; name: string; namespace?: string }> {
-  return typeof (object as any).getTargetRefs === "function"
-    ? (object as any).getTargetRefs()
-    : ((object as any).spec?.targetRefs ?? []);
+  return object.spec?.targetRefs ?? [];
 }
 
 function getCaCertRefs(object: BackendTLSPolicy): Array<{ kind: string; name: string; namespace?: string }> {
-  return typeof (object as any).getCaCertRefs === "function"
-    ? (object as any).getCaCertRefs()
-    : ((object as any).spec?.validation?.caCertificateRefs ?? []);
+  return object.spec?.validation?.caCertificateRefs ?? [];
 }
 
 function getHostname(object: BackendTLSPolicy): string {
-  if (typeof (object as any).getHostname === "function") {
-    return (object as any).getHostname() ?? "-";
-  }
-
-  return (object as any).spec?.validation?.hostname ?? "-";
+  return object.spec?.validation?.hostname ?? "-";
 }
 
 export const BackendTLSPolicyDetails = observer(

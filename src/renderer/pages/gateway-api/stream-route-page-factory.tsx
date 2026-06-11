@@ -1,5 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
 import { withErrorPage } from "../../components/error-page";
+import { type BackendRef, type ParentReference } from "../../k8s/gateway-api/types";
 import { observer } from "../../observer";
 import { formatBackendRefs, formatParentRefs, type GatewayPageProps, namespaceCell } from "./shared";
 
@@ -7,31 +8,40 @@ const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
-function getParentRefs(item: any): any[] {
-  if (typeof item?.getParentRefs === "function") {
-    return item.getParentRefs();
-  }
+interface HasSpecWithParentRefs {
+  spec?: {
+    parentRefs?: ParentReference[];
+    commonParentRefs?: ParentReference[];
+  };
+}
 
-  const spec = item?.spec ?? {};
+interface HasSpecWithRules {
+  spec?: {
+    rules?: Array<{ backendRefs?: BackendRef[] }>;
+  };
+}
+
+interface HasStatusWithParents {
+  status?: {
+    parents?: Array<{
+      conditions?: Array<{ type: string; status: string }>;
+    }>;
+  };
+}
+
+function getParentRefs(item: HasSpecWithParentRefs): ParentReference[] {
+  const spec = item.spec ?? {};
 
   return [...(spec.commonParentRefs ?? []), ...(spec.parentRefs ?? [])];
 }
 
-function getBackendRefs(item: any): any[] {
-  if (typeof item?.getBackendRefs === "function") {
-    return item.getBackendRefs();
-  }
-
-  return (item?.spec?.rules ?? []).flatMap((rule: any) => rule?.backendRefs ?? []);
+function getBackendRefs(item: HasSpecWithRules): BackendRef[] {
+  return (item.spec?.rules ?? []).flatMap((rule) => rule?.backendRefs ?? []);
 }
 
-function isAccepted(item: any): boolean {
-  if (typeof item?.isAccepted === "function") {
-    return Boolean(item.isAccepted());
-  }
-
-  return (item?.status?.parents ?? []).some((parent: any) =>
-    (parent?.conditions ?? []).some((condition: any) => condition?.type === "Accepted" && condition?.status === "True"),
+function isAccepted(item: HasStatusWithParents): boolean {
+  return (item.status?.parents ?? []).some((parent) =>
+    (parent?.conditions ?? []).some((condition) => condition.type === "Accepted" && condition.status === "True"),
   );
 }
 
@@ -55,9 +65,9 @@ export function createStreamRoutePage<T extends Renderer.K8sApi.LensExtensionKub
             name: (item: T) => item.getName(),
             namespace: (item: T) => item.getNs() ?? "",
             hostnames: (item: T) => getHostnames?.(item)?.join(",") ?? "",
-            parentRefs: (item: T) => formatParentRefs(getParentRefs(item as any)),
-            backends: (item: T) => formatBackendRefs(getBackendRefs(item as any)),
-            accepted: (item: T) => String(isAccepted(item as any)),
+            parentRefs: (item: T) => formatParentRefs(getParentRefs(item)),
+            backends: (item: T) => formatBackendRefs(getBackendRefs(item)),
+            accepted: (item: T) => String(isAccepted(item)),
             age: (item: T) => item.getCreationTimestamp(),
           }}
           searchFilters={[(item: T) => item.getSearchFields(), (item: T) => getHostnames?.(item) ?? []]}
@@ -75,9 +85,9 @@ export function createStreamRoutePage<T extends Renderer.K8sApi.LensExtensionKub
             <WithTooltip>{item.getName()}</WithTooltip>,
             namespaceCell(item.getNs()),
             ...(getHostnames ? [<WithTooltip>{getHostnames(item).join(", ") || "*"}</WithTooltip>] : []),
-            <WithTooltip>{formatParentRefs(getParentRefs(item as any))}</WithTooltip>,
-            <WithTooltip>{formatBackendRefs(getBackendRefs(item as any))}</WithTooltip>,
-            <BadgeBoolean value={isAccepted(item as any)} />,
+            <WithTooltip>{formatParentRefs(getParentRefs(item))}</WithTooltip>,
+            <WithTooltip>{formatBackendRefs(getBackendRefs(item))}</WithTooltip>,
+            <BadgeBoolean value={isAccepted(item)} />,
             <KubeObjectAge object={item} key="age" />,
           ]}
         />

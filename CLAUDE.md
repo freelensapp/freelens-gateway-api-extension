@@ -63,7 +63,15 @@ Build output goes to `out/`.
 
 ## CRD KubeObject Pattern
 
-K8s object classes MUST use `static readonly` properties for metadata. Instance methods do NOT work because the Freelens host reads these from the class constructor statically:
+K8s object classes MUST use `static readonly` properties for metadata. **Instance methods do NOT work and MUST NOT be used.** The Freelens host reads properties from the class constructor statically — instance methods are not available at runtime because the host creates plain object copies of the K8s resource data, not instances of the extension's class. This means:
+
+- **Allowed**: `object.spec?.someField`, `object.status?.conditions` — direct property access on typed `spec`/`status` interfaces
+- **Allowed**: helper functions like `hasTrueCondition(conditions, "Accepted")` from `types.ts`
+- **Forbidden**: `object.someMethod()` — instance methods will never exist at runtime
+- **Forbidden**: `typeof (object as any).someMethod === "function" ? ...` — anti-pattern that always falls through to the fallback path
+- **Forbidden**: `as any` — use the existing typed `spec`/`status` interfaces directly; all CRD models already define proper `Spec`/`Status` interfaces
+
+Always access `spec` and `status` properties directly via their typed interfaces. Do not define instance methods on KubeObject subclasses — they will not be callable at runtime.
 
 ```typescript
 export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
@@ -114,3 +122,4 @@ Other dependencies ARE bundled into the extension output.
 - **Trunk** formats **SCSS, Markdown**, and other non-TS formats — use `pnpm trunk:fix`
 - Import order (enforced by biome organizeImports): built-in modules → `@freelensapp/**` → packages → relative paths
 - React 17 (no `react/jsx-runtime` in tsconfig needed, but handled by build)
+- **No emoji** in Markdown files (`.md`), comments, or any source code
