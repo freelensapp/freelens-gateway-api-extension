@@ -91,3 +91,13 @@ export interface RouteParentStatus {
 export interface RouteStatus {
   parents: RouteParentStatus[];
 }
+
+export interface PolicyAncestorStatus {
+  ancestorRef: ParentReference;
+  controllerName: string;
+  conditions?: Condition[];
+}
+
+export interface PolicyStatus {
+  conditions?: PolicyAncestorStatus[];
+}
