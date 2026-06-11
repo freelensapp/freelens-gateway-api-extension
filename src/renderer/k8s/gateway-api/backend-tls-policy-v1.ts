@@ -1,17 +1,38 @@
 import { Renderer } from "@freelensapp/extensions";
-import { type GatewayCondition, type GatewayKubeObjectCRD } from "./types";
+import { type GatewayKubeObjectCRD, type LocalObjectReference, type PolicyStatus } from "./types";
+
+export type SubjectAltNameType = "Hostname" | "URI";
+
+export interface LocalPolicyTargetReference {
+  group: string;
+  kind: string;
+  name: string;
+}
+
+export interface LocalPolicyTargetReferenceWithSectionName extends LocalPolicyTargetReference {
+  sectionName?: string;
+}
+
+export interface SubjectAltName {
+  type: SubjectAltNameType;
+  hostname?: string;
+  uri?: string;
+}
+
+export interface BackendTLSPolicyValidation {
+  caCertificateRefs?: LocalObjectReference[];
+  wellKnownCACertificates?: string;
+  hostname: string;
+  subjectAltNames?: SubjectAltName[];
+}
 
 export interface BackendTLSPolicySpec {
-  targetRefs?: Array<{ kind: string; name: string; namespace?: string }>;
-  validation?: {
-    caCertificateRefs?: Array<{ kind: string; name: string; namespace?: string }>;
-    hostname?: string;
-  };
+  targetRefs?: LocalPolicyTargetReferenceWithSectionName[];
+  validation: BackendTLSPolicyValidation;
+  options?: Record<string, string>;
 }
 
-export interface BackendTLSPolicyStatus {
-  conditions?: GatewayCondition[];
-}
+export interface BackendTLSPolicyStatus extends PolicyStatus {}
 
 export class BackendTLSPolicy extends Renderer.K8sApi.LensExtensionKubeObject<
   Renderer.K8sApi.KubeObjectMetadata,

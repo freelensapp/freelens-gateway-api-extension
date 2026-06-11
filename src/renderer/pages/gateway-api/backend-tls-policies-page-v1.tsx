@@ -1,10 +1,56 @@
+import { Renderer } from "@freelensapp/extensions";
+import { withErrorPage } from "../../components/error-page";
 import { BackendTLSPolicy } from "../../k8s/gateway-api";
-import { createPolicyPage } from "./policy-page-factory";
+import { observer } from "../../observer";
+import styles from "./backend-tls-policies-page-v1.module.scss";
+import stylesInline from "./backend-tls-policies-page-v1.module.scss?inline";
+import { type GatewayPageProps, namespaceCell } from "./shared";
 
-function getTargetsText(item: BackendTLSPolicy): string {
-  const targetRefs = item.spec?.targetRefs ?? [];
+const {
+  Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
+} = Renderer;
 
-  return targetRefs.map((targetRef) => `${targetRef.kind}/${targetRef.name}`).join(", ") || "-";
+function isAccepted(item: BackendTLSPolicy): boolean {
+  const ancestors = item.status?.conditions ?? [];
+
+  return ancestors.some((ancestor) =>
+    (ancestor.conditions ?? []).some((condition) => condition.type === "Accepted" && condition.status === "True"),
+  );
 }
 
-export const BackendTLSPoliciesPage = createPolicyPage<BackendTLSPolicy>(BackendTLSPolicy, getTargetsText);
+export const BackendTLSPoliciesPage = observer((props: GatewayPageProps) =>
+  withErrorPage(props, () => {
+    const store = BackendTLSPolicy.getStore<BackendTLSPolicy>();
+
+    return (
+      <>
+        <style>{stylesInline}</style>
+        <KubeObjectListLayout<BackendTLSPolicy, any>
+          tableId={`${BackendTLSPolicy.crd.plural}Table`}
+          className={styles.page}
+          store={store}
+          sortingCallbacks={{
+            name: (item: BackendTLSPolicy) => item.getName(),
+            namespace: (item: BackendTLSPolicy) => item.getNs() ?? "",
+            accepted: (item: BackendTLSPolicy) => String(isAccepted(item)),
+            age: (item: BackendTLSPolicy) => item.getCreationTimestamp(),
+          }}
+          searchFilters={[(item: BackendTLSPolicy) => item.getSearchFields()]}
+          renderHeaderTitle={BackendTLSPolicy.crd.title}
+          renderTableHeader={[
+            { title: "Name", sortBy: "name", className: styles.name },
+            { title: "Namespace", sortBy: "namespace", className: styles.namespace },
+            { title: "Accepted", sortBy: "accepted", className: styles.accepted },
+            { title: "Age", sortBy: "age", className: styles.age },
+          ]}
+          renderTableContents={(item: BackendTLSPolicy) => [
+            <WithTooltip>{item.getName()}</WithTooltip>,
+            namespaceCell(item.getNs()),
+            <BadgeBoolean value={isAccepted(item)} />,
+            <KubeObjectAge object={item} key="age" />,
+          ]}
+        />
+      </>
+    );
+  }),
+);
