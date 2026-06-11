@@ -1,7 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
-import crypto from "crypto";
 import { GRPCRoute } from "../../k8s/gateway-api";
 import { observer } from "../../observer";
+import { createHash } from "../../utils";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 
@@ -46,7 +46,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
         {parentRefs.map((parentRef) => {
           const namespace = parentRef.namespace || objectNs;
           const kind = parentRef.kind ?? "Gateway";
-          const key = crypto.createHash("sha256").update(JSON.stringify(parentRefs)).digest("hex").substring(0, 16);
+          const key = createHash(parentRefs);
 
           return (
             <DrawerItem key={key}>
@@ -60,7 +60,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
           <>
             <DrawerTitle>Rules</DrawerTitle>
             {rules.map((rule, index) => {
-              const key = crypto.createHash("sha256").update(JSON.stringify(rule)).digest("hex").substring(0, 16);
+              const key = createHash(rule);
               return (
                 <div key={key}>
                   <div className={styles.title}>
@@ -72,11 +72,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                   {rule.matches && rule.matches.length > 0 && (
                     <DrawerItem name="Matches">
                       {rule.matches.map((match) => {
-                        const key = crypto
-                          .createHash("sha256")
-                          .update(JSON.stringify(match))
-                          .digest("hex")
-                          .substring(0, 16);
+                        const key = createHash(match);
 
                         return (
                           <div key={key} style={{ marginBottom: "10px" }}>
@@ -111,11 +107,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                   {rule.filters && rule.filters.length > 0 && (
                     <DrawerItem name="Filters">
                       {rule.filters.map((filter) => {
-                        const key = crypto
-                          .createHash("sha256")
-                          .update(JSON.stringify(filter))
-                          .digest("hex")
-                          .substring(0, 16);
+                        const key = createHash(filter);
                         return <div key={key}>{filter.type}</div>;
                       })}
                     </DrawerItem>
@@ -132,11 +124,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                         {rule.backendRefs.map((backend) => {
                           const kind = backend.kind ?? "Service";
                           const namespace = backend.namespace || objectNs;
-                          const key = crypto
-                            .createHash("sha256")
-                            .update(JSON.stringify(backend))
-                            .digest("hex")
-                            .substring(0, 16);
+                          const key = createHash(backend);
 
                           return (
                             <TableRow key={key} nowrap>

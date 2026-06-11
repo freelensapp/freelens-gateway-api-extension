@@ -1,7 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
-import crypto from "crypto";
 import { UDPRoute } from "../../k8s/gateway-api";
 import { observer } from "../../observer";
+import { createHash } from "../../utils";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 
@@ -44,7 +44,7 @@ export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
         {parentRefs.map((parentRef) => {
           const namespace = parentRef.namespace || objectNs;
           const kind = parentRef.kind ?? "Gateway";
-          const key = crypto.createHash("sha256").update(JSON.stringify(parentRefs)).digest("hex").substring(0, 16);
+          const key = createHash(parentRefs);
 
           return (
             <DrawerItem key={key}>
@@ -58,7 +58,7 @@ export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
           <>
             <DrawerTitle>Rules</DrawerTitle>
             {rules.map((rule, index) => {
-              const key = crypto.createHash("sha256").update(JSON.stringify(rule)).digest("hex").substring(0, 16);
+              const key = createHash(rule);
               return (
                 <div key={key}>
                   <div className={styles.title}>
@@ -78,11 +78,7 @@ export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
                         {rule.backendRefs.map((backend) => {
                           const kind = backend.kind ?? "Service";
                           const namespace = backend.namespace || objectNs;
-                          const key = crypto
-                            .createHash("sha256")
-                            .update(JSON.stringify(backend))
-                            .digest("hex")
-                            .substring(0, 16);
+                          const key = createHash(backend);
 
                           return (
                             <TableRow key={key} nowrap>
