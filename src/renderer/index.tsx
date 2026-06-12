@@ -4,41 +4,44 @@
  */
 
 import { Renderer } from "@freelensapp/extensions";
+import { BackendTLSPolicy as BackendTLSPolicy_v1 } from "./api/k8s/backend-tls-policy-v1";
+import { GatewayClass as GatewayClass_v1 } from "./api/k8s/gateway-class-v1";
+import { Gateway as Gateway_v1 } from "./api/k8s/gateway-v1";
+import { GRPCRoute as GRPCRoute_v1 } from "./api/k8s/grpc-route-v1";
+import { HTTPRoute as HTTPRoute_v1 } from "./api/k8s/http-route-v1";
+import { ListenerSet as ListenerSet_v1 } from "./api/k8s/listenerset-v1";
+import { ReferenceGrant as ReferenceGrant_v1 } from "./api/k8s/reference-grant-v1";
+import { ReferenceGrant as ReferenceGrant_v1beta1 } from "./api/k8s/reference-grant-v1beta1";
+import { TCPRoute as TCPRoute_v1alpha2 } from "./api/k8s/tcp-route-v1alpha2";
+import { TLSRoute as TLSRoute_v1 } from "./api/k8s/tls-route-v1";
+import { UDPRoute as UDPRoute_v1alpha2 } from "./api/k8s/udp-route-v1alpha2";
+import { XBackendTrafficPolicy as XBackendTrafficPolicy_v1alpha1 } from "./api/x-k8s/x-backend-traffic-policy-v1alpha1";
 import { createAvailableVersionPage } from "./components/available-version";
-import { BackendTLSPolicyDetails as BackendTLSPolicyDetails_v1 } from "./details/gateway-api/backend-tls-policy-details-v1";
-import { GatewayClassDetails as GatewayClassDetails_v1 } from "./details/gateway-api/gateway-class-details-v1";
-import { GatewayDetails as GatewayDetails_v1 } from "./details/gateway-api/gateway-details-v1";
-import { GRPCRouteDetails as GRPCRouteDetails_v1 } from "./details/gateway-api/grpc-route-details-v1";
-import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./details/gateway-api/http-route-details-v1";
-import { ListenerSetDetails as ListenerSetDetails_v1 } from "./details/gateway-api/listener-set-details-v1";
-import { ReferenceGrantDetails as ReferenceGrantDetails_v1 } from "./details/gateway-api/reference-grant-details-v1";
-import { ReferenceGrantDetails as ReferenceGrantDetails_v1beta1 } from "./details/gateway-api/reference-grant-details-v1beta1";
-import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./details/gateway-api/tcp-route-details-v1alpha2";
-import { TLSRouteDetails as TLSRouteDetails_v1 } from "./details/gateway-api/tls-route-details-v1";
-import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/gateway-api/udp-route-details-v1alpha2";
+import { BackendTLSPolicyDetails as BackendTLSPolicyDetails_v1 } from "./details/k8s/backend-tls-policy-details-v1";
+import { GatewayClassDetails as GatewayClassDetails_v1 } from "./details/k8s/gateway-class-details-v1";
+import { GatewayDetails as GatewayDetails_v1 } from "./details/k8s/gateway-details-v1";
+import { GRPCRouteDetails as GRPCRouteDetails_v1 } from "./details/k8s/grpc-route-details-v1";
+import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./details/k8s/http-route-details-v1";
+import { ListenerSetDetails as ListenerSetDetails_v1 } from "./details/k8s/listener-set-details-v1";
+import { ReferenceGrantDetails as ReferenceGrantDetails_v1 } from "./details/k8s/reference-grant-details-v1";
+import { ReferenceGrantDetails as ReferenceGrantDetails_v1beta1 } from "./details/k8s/reference-grant-details-v1beta1";
+import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./details/k8s/tcp-route-details-v1alpha2";
+import { TLSRouteDetails as TLSRouteDetails_v1 } from "./details/k8s/tls-route-details-v1";
+import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/k8s/udp-route-details-v1alpha2";
+import { XBackendTrafficPolicyDetails as XBackendTrafficPolicyDetails_v1alpha1 } from "./details/x-k8s/x-backend-traffic-policy-details-v1alpha1";
 import { GatewayApiIcon } from "./icons";
-import { BackendTLSPolicy as BackendTLSPolicy_v1 } from "./k8s/gateway-api/backend-tls-policy-v1";
-import { GatewayClass as GatewayClass_v1 } from "./k8s/gateway-api/gateway-class-v1";
-import { Gateway as Gateway_v1 } from "./k8s/gateway-api/gateway-v1";
-import { GRPCRoute as GRPCRoute_v1 } from "./k8s/gateway-api/grpc-route-v1";
-import { HTTPRoute as HTTPRoute_v1 } from "./k8s/gateway-api/http-route-v1";
-import { ListenerSet as ListenerSet_v1 } from "./k8s/gateway-api/listenerset-v1";
-import { ReferenceGrant as ReferenceGrant_v1 } from "./k8s/gateway-api/reference-grant-v1";
-import { ReferenceGrant as ReferenceGrant_v1beta1 } from "./k8s/gateway-api/reference-grant-v1beta1";
-import { TCPRoute as TCPRoute_v1alpha2 } from "./k8s/gateway-api/tcp-route-v1alpha2";
-import { TLSRoute as TLSRoute_v1 } from "./k8s/gateway-api/tls-route-v1";
-import { UDPRoute as UDPRoute_v1alpha2 } from "./k8s/gateway-api/udp-route-v1alpha2";
-import { BackendTLSPoliciesPage as BackendTLSPoliciesPage_v1 } from "./pages/gateway-api/backend-tls-policies-page-v1";
-import { GatewayClassesPage as GatewayClassesPage_v1 } from "./pages/gateway-api/gateway-classes-page-v1";
-import { GatewaysPage as GatewaysPage_v1 } from "./pages/gateway-api/gateways-page-v1";
-import { GRPCRoutesPage as GRPCRoutesPage_v1 } from "./pages/gateway-api/grpc-routes-page-v1";
-import { HTTPRoutesPage as HTTPRoutesPage_v1 } from "./pages/gateway-api/http-routes-page-v1";
-import { ListenerSetsPage as ListenerSetsPage_v1 } from "./pages/gateway-api/listener-sets-page-v1";
-import { ReferenceGrantsPage as ReferenceGrantsPage_v1 } from "./pages/gateway-api/reference-grants/reference-grants-page-v1";
-import { ReferenceGrantsPage as ReferenceGrantsPage_v1beta1 } from "./pages/gateway-api/reference-grants/reference-grants-page-v1beta1";
-import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./pages/gateway-api/tcp-routes-page-v1alpha2";
-import { TLSRoutesPage as TLSRoutesPage_v1 } from "./pages/gateway-api/tls-routes-page-v1";
-import { UDPRoutesPage as UDPRoutesPage_v1alpha2 } from "./pages/gateway-api/udp-routes-page-v1alpha2";
+import { BackendTLSPoliciesPage as BackendTLSPoliciesPage_v1 } from "./pages/k8s/backend-tls-policies-page-v1";
+import { GatewayClassesPage as GatewayClassesPage_v1 } from "./pages/k8s/gateway-classes-page-v1";
+import { GatewaysPage as GatewaysPage_v1 } from "./pages/k8s/gateways-page-v1";
+import { GRPCRoutesPage as GRPCRoutesPage_v1 } from "./pages/k8s/grpc-routes-page-v1";
+import { HTTPRoutesPage as HTTPRoutesPage_v1 } from "./pages/k8s/http-routes-page-v1";
+import { ListenerSetsPage as ListenerSetsPage_v1 } from "./pages/k8s/listener-sets-page-v1";
+import { ReferenceGrantsPage as ReferenceGrantsPage_v1 } from "./pages/k8s/reference-grants/reference-grants-page-v1";
+import { ReferenceGrantsPage as ReferenceGrantsPage_v1beta1 } from "./pages/k8s/reference-grants/reference-grants-page-v1beta1";
+import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./pages/k8s/tcp-routes-page-v1alpha2";
+import { TLSRoutesPage as TLSRoutesPage_v1 } from "./pages/k8s/tls-routes-page-v1";
+import { UDPRoutesPage as UDPRoutesPage_v1alpha2 } from "./pages/k8s/udp-routes-page-v1alpha2";
+import { XBackendTrafficPoliciesPage as XBackendTrafficPoliciesPage_v1alpha1 } from "./pages/x-k8s/x-backend-traffic-policies-page-v1alpha1";
 
 export default class GatewayApiRenderer extends Renderer.LensExtension {
   async onActivate() {}
@@ -134,6 +137,16 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
         Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <BackendTLSPolicyDetails_v1 {...props} />,
       },
     },
+    {
+      kind: XBackendTrafficPolicy_v1alpha1.kind,
+      apiVersions: XBackendTrafficPolicy_v1alpha1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
+          <XBackendTrafficPolicyDetails_v1alpha1 {...props} />
+        ),
+      },
+    },
   ];
 
   clusterPages = [
@@ -218,6 +231,18 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
         ]),
       },
     },
+    {
+      id: "xbackendtrafficpolicy",
+      components: {
+        Page: createAvailableVersionPage("Backend Traffic Policies", [
+          {
+            kubeObjectClass: XBackendTrafficPolicy_v1alpha1,
+            PageComponent: XBackendTrafficPoliciesPage_v1alpha1,
+            version: "v1alpha1",
+          },
+        ]),
+      },
+    },
   ];
 
   clusterPageMenus = [
@@ -296,6 +321,13 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       parentId: "gateway-api",
       title: "Backend TLS Policies",
       target: { pageId: "backendtlspolicy" },
+      components: {},
+    },
+    {
+      id: "xbackendtrafficpolicy",
+      parentId: "gateway-api",
+      title: "Backend Traffic Policies",
+      target: { pageId: "xbackendtrafficpolicy" },
       components: {},
     },
   ];
