@@ -73,11 +73,17 @@ jobs:
             *-*) dist_tag=next;;
             *) dist_tag=latest;;
           esac
-          pnpm --color=always publish -r \
-            --no-git-checks \
-            --tag ${dist_tag}
+          if [[ -n ${NPM_TOKEN:-} ]]; then
+            NODE_AUTH_TOKEN="${NPM_TOKEN}" pnpm --color=always publish -r \
+              --no-git-checks \
+              --tag ${dist_tag}
+          else
+            NPM_CONFIG_PROVENANCE=true pnpm --color=always publish -r \
+              --no-git-checks \
+              --tag ${dist_tag}
+          fi
         env:
-          NPM_CONFIG_PROVENANCE: "true"
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         continue-on-error: true
 
       - name: Publish npm packages (retry)
@@ -88,11 +94,17 @@ jobs:
             *-*) dist_tag=next;;
             *) dist_tag=latest;;
           esac
-          pnpm --color=always publish -r \
-            --no-git-checks \
-            --tag ${dist_tag}
+          if [[ -n ${NPM_TOKEN:-} ]]; then
+            NODE_AUTH_TOKEN="${NPM_TOKEN}" pnpm --color=always publish -r \
+              --no-git-checks \
+              --tag ${dist_tag}
+          else
+            NPM_CONFIG_PROVENANCE=true pnpm --color=always publish -r \
+              --no-git-checks \
+              --tag ${dist_tag}
+          fi
         env:
-          NPM_CONFIG_PROVENANCE: "true"
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         continue-on-error: true
 
       - name: Publish npm packages (retry 2)
@@ -102,12 +114,17 @@ jobs:
             *-*) dist_tag=next;;
             *) dist_tag=latest;;
           esac
-          pnpm --color=always publish -r \
-            --no-git-checks \
-            --tag ${dist_tag}
+          if [[ -n ${NPM_TOKEN:-} ]]; then
+            NODE_AUTH_TOKEN="${NPM_TOKEN}" pnpm --color=always publish -r \
+              --no-git-checks \
+              --tag ${dist_tag}
+          else
+            NPM_CONFIG_PROVENANCE=true pnpm --color=always publish -r \
+              --no-git-checks \
+              --tag ${dist_tag}
+          fi
         env:
-          NPM_CONFIG_PROVENANCE: "true"
-
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
