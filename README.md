@@ -3,7 +3,7 @@
 <!-- markdownlint-disable MD013 -->
 
 [![Home](https://img.shields.io/badge/%F0%9F%8F%A0-freelens.app-02a7a0)](https://freelens.app)
-[![GitHub](https://img.shields.io/github/stars/freelensapp/freelens?style=flat&label=GitHub%20%E2%AD%90)](https://github.com/freelensapp/freelens)
+[![GitHub](https://img.shields.io/github/stars/freelensapp/freelens-gateway-api-extension?style=flat&label=GitHub%20%E2%AD%90)](https://github.com/freelensapp/freelens-gateway-api-extension)
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/freelensapp/freelens-gateway-api-extension)
 [![Release](https://img.shields.io/github/v/release/freelensapp/freelens-gateway-api-extension?display_name=tag&sort=semver)](https://github.com/freelensapp/freelens-gateway-api-extension)
 [![Integration tests](https://github.com/freelensapp/freelens-gateway-api-extension/actions/workflows/integration-tests.yaml/badge.svg?branch=main)](https://github.com/freelensapp/freelens-gateway-api-extension/actions/workflows/integration-tests.yaml)
