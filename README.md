@@ -11,37 +11,78 @@
 
 <!-- markdownlint-enable MD013 -->
 
-## WARNING
+## Overview
 
-Work in progress! This extension is not yet completed and useful.
+This extension adds support for the
+[Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) to
+[Freelens](https://freelens.app). The Gateway API is an official Kubernetes
+project that provides expressive, extensible, and role-oriented interfaces
+for service networking, designed as the successor to the Ingress API.
 
-This extension adds a support for [Gateway
-API](https://gateway-api.sigs.k8s.io/) to the [Freelens](https://freelens.app)
-application.
+The extension provides cluster pages, list views, and detail panels for all
+standard and experimental Gateway API resources across the
+`gateway.networking.k8s.io` and `gateway.networking.x-k8s.io` API groups.
+Each resource is accessible from the Freelens sidebar, with status
+conditions, spec fields, and related objects displayed in the detail view.
 
 ## Requirements
 
 - Kubernetes >= 1.26
 - Freelens >= 1.8.0
+- Gateway API CRDs installed in the cluster (see the [Gateway API installation guide](https://gateway-api.sigs.k8s.io/guides/))
+
+## Supported APIs
+
+### gateway.networking.k8s.io
+
+<!-- markdownlint-disable MD013 -->
+
+| API Version | Kind | Short Name | Scope | Description |
+| --- | --- | --- | --- | --- |
+| v1 | `GatewayClass` | `gc` | Cluster | Defines a class of Gateways sharing a common controller |
+| v1 | `Gateway` | `gtw` | Namespaced | Describes an instance of a service-traffic handling infrastructure |
+| v1 | `HTTPRoute` | | Namespaced | Routes HTTP and HTTPS traffic to backends |
+| v1 | `GRPCRoute` | | Namespaced | Routes gRPC traffic to backends |
+| v1 | `TLSRoute` | | Namespaced | Routes TLS traffic to backends based on SNI |
+| v1 | `BackendTLSPolicy` | `btlspolicy` | Namespaced | Configures TLS for connections from a Gateway to backends |
+| v1 | `ReferenceGrant` | `refgrant` | Namespaced | Allows cross-namespace references to Gateway API resources |
+| v1 | `ListenerSet` | `lset` | Namespaced | Extends a Gateway with additional listeners |
+| v1alpha2 | `TCPRoute` | | Namespaced | Routes TCP traffic to backends |
+| v1alpha2 | `UDPRoute` | | Namespaced | Routes UDP traffic to backends |
+| v1beta1 | `ReferenceGrant` | `refgrant` | Namespaced | Allows cross-namespace references (v1beta1 variant) |
+
+<!-- markdownlint-enable MD013 -->
+
+### gateway.networking.x-k8s.io
+
+Experimental APIs from the Kubernetes SIG Network incubation group.
+
+<!-- markdownlint-disable MD013 -->
+
+| API Version | Kind | Short Name | Scope | Description |
+| --- | --- | --- | --- | --- |
+| v1alpha1 | `XBackendTrafficPolicy` | `xbtrafficpolicy` | Namespaced | Configures backend traffic policies such as retry budgets and session persistence |
+| v1alpha1 | `XMesh` | `mesh` | Cluster | Describes a service mesh implementation |
+
+<!-- markdownlint-enable MD013 -->
 
 ## Install
 
-To install open Freelens and go to Extensions (`ctrl`+`shift`+`E` or
-`cmd`+`shift`+`E`), and install `@freelensapp/gateway-api-extension`.
+To install, open Freelens and go to Extensions (`ctrl`+`shift`+`E` or `cmd`+`shift`+`E`),
+then search for and install `@freelensapp/gateway-api-extension`.
 
-or:
+Alternatively, open the following URL in the browser to install directly:
 
-Use a following URL in the browser:
 [freelens://app/extensions/install/%40freelensapp%2Fgateway-api-extension](freelens://app/extensions/install/%40freelensapp%2Fgateway-api-extension)
 
 ## Build from the source
 
-You can build the extension using this repository.
+You can build the extension from this repository.
 
 ### Prerequisites
 
-Use [NVM](https://github.com/nvm-sh/nvm) or
-[mise-en-place](https://mise.jdx.dev/) or
+Use [NVM](https://github.com/nvm-sh/nvm),
+[mise-en-place](https://mise.jdx.dev/), or
 [windows-nvm](https://github.com/coreybutler/nvm-windows) to install the
 required Node.js version.
 
@@ -57,7 +98,7 @@ nvm install 24.15.0
 nvm use 24.15.0
 ```
 
-Install Pnpm:
+Install pnpm:
 
 ```sh
 corepack install
@@ -75,7 +116,7 @@ pnpm build
 pnpm pack
 ```
 
-One script to build then pack the extension to test:
+One script to build and pack the extension for testing:
 
 ```sh
 pnpm pack:dev
@@ -83,11 +124,9 @@ pnpm pack:dev
 
 ### Install built extension
 
-The tarball for the extension will be placed in the current directory. In
-Freelens, navigate to the Extensions list and provide the path to the tarball
-to be loaded, or drag and drop the extension tarball into the Freelens window.
-After loading for a moment, the extension should appear in the list of enabled
-extensions.
+The tarball will be placed in the current directory. In Freelens, navigate
+to the Extensions page and provide the path to the tarball, or drag and
+drop the `.tgz` file into the Freelens window.
 
 ### Check code statically
 
@@ -110,7 +149,7 @@ pnpm knip:check
 
 ### Testing the extension with unpublished Freelens
 
-In Freelens working repository:
+In the Freelens working repository:
 
 ```sh
 rm -f *.tgz
@@ -119,7 +158,7 @@ pnpm build
 pnpm pack -r
 ```
 
-then for extension:
+Then in the extension repository:
 
 ```sh
 echo "overrides:" >> pnpm-workspace.yaml
