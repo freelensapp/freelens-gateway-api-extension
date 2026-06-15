@@ -25,6 +25,8 @@ standard and experimental Gateway API resources across the
 Each resource is accessible from the Freelens sidebar, with status
 conditions, spec fields, and related objects displayed in the detail view.
 
+![](docs/images/screenshot.png)
+
 ## Requirements
 
 - Kubernetes >= 1.26
