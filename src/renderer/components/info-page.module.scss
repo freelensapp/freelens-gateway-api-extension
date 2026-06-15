@@ -1,0 +1,13 @@
+.infoPage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 32px;
+}
+
+.infoMessage {
+  color: var(--textColorSecondary);
+  font-size: 1.1em;
+  text-align: center;
+}
