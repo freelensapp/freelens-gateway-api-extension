@@ -1,0 +1,21 @@
+.chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  margin-bottom: 8px;
+  text-align: center;
+
+  a {
+    color: var(--textColorPrimary);
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+      color: var(--colorInfo);
+      text-decoration: underline;
+    }
+  }
+}

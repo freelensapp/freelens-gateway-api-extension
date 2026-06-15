@@ -43,6 +43,7 @@ import { ReferenceGrantsPage as ReferenceGrantsPage_v1beta1 } from "./pages/k8s/
 import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./pages/k8s/tcp-routes-page-v1alpha2";
 import { TLSRoutesPage as TLSRoutesPage_v1 } from "./pages/k8s/tls-routes-page-v1";
 import { UDPRoutesPage as UDPRoutesPage_v1alpha2 } from "./pages/k8s/udp-routes-page-v1alpha2";
+import { OverviewPage } from "./pages/overview";
 import { XBackendTrafficPoliciesPage as XBackendTrafficPoliciesPage_v1alpha1 } from "./pages/x-k8s/x-backend-traffic-policies-page-v1alpha1";
 import { XMeshesPage as XMeshesPage_v1alpha1 } from "./pages/x-k8s/xmeshes-page-v1alpha1";
 
@@ -162,6 +163,12 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
 
   clusterPages = [
     {
+      id: "overview",
+      components: {
+        Page: (props: { extension: Renderer.LensExtension }) => <OverviewPage {...props} />,
+      },
+    },
+    {
       id: "gatewayclass",
       components: {
         Page: createAvailableVersionPage("Gateway Classes", [
@@ -275,6 +282,13 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       components: {
         Icon: GatewayApiIcon,
       },
+    },
+    {
+      id: "overview",
+      parentId: "gateway-api",
+      title: "Overview",
+      target: { pageId: "overview" },
+      components: {},
     },
     {
       id: "gatewayclass",
