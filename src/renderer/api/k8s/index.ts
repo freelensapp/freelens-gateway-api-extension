@@ -50,6 +50,7 @@ import {
   UDPRouteStore as UDPRouteStore_v1alpha2,
 } from "./udp-route-v1alpha2";
 
+export * from "./statuses";
 export * from "./types";
 export {
   BackendTLSPolicy_v1,
