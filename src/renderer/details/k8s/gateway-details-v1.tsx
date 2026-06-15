@@ -10,9 +10,15 @@ const {
   Component: { BadgeBoolean, DrawerItem, DrawerItemLabels, DrawerTitle, Icon, LinkToObject, LinkToSecret },
 } = Renderer;
 
-function isReady(object: Gateway): boolean {
+function isAccepted(object: Gateway): boolean {
   return (object.status?.conditions ?? []).some(
-    (condition) => condition?.type === "Ready" && condition?.status === "True",
+    (condition) => condition?.type === "Accepted" && condition?.status === "True",
+  );
+}
+
+function isProgrammed(object: Gateway): boolean {
+  return (object.status?.conditions ?? []).some(
+    (condition) => condition?.type === "Programmed" && condition?.status === "True",
   );
 }
 
@@ -78,8 +84,11 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
             objectRef={routeRef(undefined, "GatewayClass", object.spec?.gatewayClassName ?? "")}
           />
         </DrawerItem>
-        <DrawerItem name="Ready">
-          <BadgeBoolean value={isReady(object)} />
+        <DrawerItem name="Accepted">
+          <BadgeBoolean value={isAccepted(object)} />
+        </DrawerItem>
+        <DrawerItem name="Programmed">
+          <BadgeBoolean value={isProgrammed(object)} />
         </DrawerItem>
         <DrawerItem name="Addresses">{}</DrawerItem>
 
