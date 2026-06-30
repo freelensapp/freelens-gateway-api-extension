@@ -35,6 +35,13 @@
     "react-router-dom",
   ],
   "packageRules": [
+    // group all @freelensapp/* updates into one PR
+    {
+      "matchPackageNames": [
+        "@freelensapp/**"
+      ],
+      "groupName": "freelensapp"
+    },
     // peerDependencies are widen
     {
       "matchDepTypes": [
