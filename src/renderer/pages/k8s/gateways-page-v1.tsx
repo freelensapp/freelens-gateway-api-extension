@@ -15,6 +15,12 @@ function getClassName(item: Gateway): string {
 }
 
 function getAddresses(item: Gateway): string[] {
+  const statusAddresses = item.status?.addresses?.map((address) => address.value).filter(Boolean) as string[];
+
+  if (statusAddresses && statusAddresses.length > 0) {
+    return statusAddresses;
+  }
+
   return (item.spec?.addresses?.map((address) => address.value).filter(Boolean) as string[]) ?? [];
 }
 
