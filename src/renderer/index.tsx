@@ -15,6 +15,9 @@ import { ReferenceGrant as ReferenceGrant_v1beta1 } from "./api/k8s/reference-gr
 import { TCPRoute as TCPRoute_v1alpha2 } from "./api/k8s/tcp-route-v1alpha2";
 import { TLSRoute as TLSRoute_v1 } from "./api/k8s/tls-route-v1";
 import { UDPRoute as UDPRoute_v1alpha2 } from "./api/k8s/udp-route-v1alpha2";
+import { ClientSettingsPolicy as ClientSettingsPolicy_v1alpha1 } from "./api/nginx/client-settings-policy-v1alpha1";
+import { ProxySettingsPolicy as ProxySettingsPolicy_v1alpha1 } from "./api/nginx/proxy-settings-policy-v1alpha1";
+import { UpstreamSettingsPolicy as UpstreamSettingsPolicy_v1alpha1 } from "./api/nginx/upstream-settings-policy-v1alpha1";
 import { XBackendTrafficPolicy as XBackendTrafficPolicy_v1alpha1 } from "./api/x-k8s/x-backend-traffic-policy-v1alpha1";
 import { XMesh as XMesh_v1alpha1 } from "./api/x-k8s/xmesh-v1alpha1";
 import { createAvailableVersionPage } from "./components/available-version";
@@ -157,6 +160,30 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       priority: 10,
       components: {
         Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <XMeshDetails_v1alpha1 {...props} />,
+      },
+    },
+    {
+      kind: ClientSettingsPolicy_v1alpha1.kind,
+      apiVersions: ClientSettingsPolicy_v1alpha1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: () => null,
+      },
+    },
+    {
+      kind: ProxySettingsPolicy_v1alpha1.kind,
+      apiVersions: ProxySettingsPolicy_v1alpha1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: () => null,
+      },
+    },
+    {
+      kind: UpstreamSettingsPolicy_v1alpha1.kind,
+      apiVersions: UpstreamSettingsPolicy_v1alpha1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: () => null,
       },
     },
   ];

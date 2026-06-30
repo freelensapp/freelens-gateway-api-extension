@@ -1,10 +1,22 @@
 import { Renderer } from "@freelensapp/extensions";
+import React from "react";
 import { Gateway } from "../../api/k8s";
+import {
+  ClientSettingsPolicy,
+  ClientSettingsPolicyApi,
+  ProxySettingsPolicy,
+  ProxySettingsPolicyApi,
+  UpstreamSettingsPolicy,
+  UpstreamSettingsPolicyApi,
+} from "../../api/nginx";
 import { observer } from "../../observer";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 
 import type { GatewaySpecAddress, ListenerStatus } from "../../api/k8s/gateway-v1";
+import type { ClientBody, ClientKeepAlive } from "../../api/nginx/client-settings-policy-v1alpha1";
+import type { ProxyBuffering, ProxyTimeout } from "../../api/nginx/proxy-settings-policy-v1alpha1";
+import type { UpstreamKeepAlive } from "../../api/nginx/upstream-settings-policy-v1alpha1";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerItemLabels, DrawerTitle, Icon, LinkToObject, LinkToSecret },
@@ -19,6 +31,171 @@ function isAccepted(object: Gateway): boolean {
 function isProgrammed(object: Gateway): boolean {
   return (object.status?.conditions ?? []).some(
     (condition) => condition?.type === "Programmed" && condition?.status === "True",
+  );
+}
+
+function useClientSettingsPolicies(object: Gateway): ClientSettingsPolicy[] {
+  const [items, setItems] = React.useState<ClientSettingsPolicy[]>([]);
+
+  React.useEffect(() => {
+    const api = new ClientSettingsPolicyApi({ objectConstructor: ClientSettingsPolicy });
+
+    api
+      .list({ namespace: object.getNs() })
+      .then((list) => {
+        const filtered = (list ?? []).filter((policy) => {
+          const targetRef = policy.spec?.targetRef;
+
+          if (!targetRef) return false;
+
+          const group = targetRef.group || "gateway.networking.k8s.io";
+
+          return (
+            group === "gateway.networking.k8s.io" && targetRef.kind === "Gateway" && targetRef.name === object.getName()
+          );
+        });
+
+        setItems(filtered);
+      })
+      .catch(() => setItems([]));
+  }, [object.getName(), object.getNs()]);
+
+  return items;
+}
+
+function useProxySettingsPolicies(object: Gateway): ProxySettingsPolicy[] {
+  const [items, setItems] = React.useState<ProxySettingsPolicy[]>([]);
+
+  React.useEffect(() => {
+    const api = new ProxySettingsPolicyApi({ objectConstructor: ProxySettingsPolicy });
+
+    api
+      .list({ namespace: object.getNs() })
+      .then((list) => {
+        const filtered = (list ?? []).filter((policy) => {
+          const targetRefs = policy.spec?.targetRefs ?? [];
+
+          return targetRefs.some((targetRef) => {
+            const group = targetRef.group || "gateway.networking.k8s.io";
+
+            return (
+              group === "gateway.networking.k8s.io" &&
+              targetRef.kind === "Gateway" &&
+              targetRef.name === object.getName()
+            );
+          });
+        });
+
+        setItems(filtered);
+      })
+      .catch(() => setItems([]));
+  }, [object.getName(), object.getNs()]);
+
+  return items;
+}
+
+function useUpstreamSettingsPolicies(object: Gateway): UpstreamSettingsPolicy[] {
+  const [items, setItems] = React.useState<UpstreamSettingsPolicy[]>([]);
+
+  React.useEffect(() => {
+    const api = new UpstreamSettingsPolicyApi({ objectConstructor: UpstreamSettingsPolicy });
+
+    api
+      .list({ namespace: object.getNs() })
+      .then((list) => {
+        const filtered = (list ?? []).filter((policy) => {
+          const targetRefs = policy.spec?.targetRefs ?? [];
+
+          return targetRefs.some((targetRef) => {
+            const group = targetRef.group || "gateway.networking.k8s.io";
+
+            return (
+              group === "gateway.networking.k8s.io" &&
+              targetRef.kind === "Gateway" &&
+              targetRef.name === object.getName()
+            );
+          });
+        });
+
+        setItems(filtered);
+      })
+      .catch(() => setItems([]));
+  }, [object.getName(), object.getNs()]);
+
+  return items;
+}
+
+function renderClientBody(body: ClientBody | undefined) {
+  if (!body) return null;
+
+  return (
+    <>
+      <DrawerItem name="Body Max Size">{body.maxSize ?? "-"}</DrawerItem>
+      <DrawerItem name="Body Timeout">{body.timeout ?? "-"}</DrawerItem>
+    </>
+  );
+}
+
+function renderClientKeepAlive(keepAlive: ClientKeepAlive | undefined) {
+  if (!keepAlive) return null;
+
+  return (
+    <>
+      <DrawerItem name="Keep-Alive Requests">{keepAlive.requests ?? "-"}</DrawerItem>
+      <DrawerItem name="Keep-Alive Time">{keepAlive.time ?? "-"}</DrawerItem>
+      <DrawerItem name="Keep-Alive Min Timeout">{keepAlive.minTimeout ?? "-"}</DrawerItem>
+      {keepAlive.timeout && (
+        <>
+          <DrawerItem name="Keep-Alive Timeout Server">{keepAlive.timeout.server ?? "-"}</DrawerItem>
+          <DrawerItem name="Keep-Alive Timeout Header">{keepAlive.timeout.header ?? "-"}</DrawerItem>
+        </>
+      )}
+    </>
+  );
+}
+
+function renderProxyBuffering(buffering: ProxyBuffering | undefined) {
+  if (!buffering) return null;
+
+  return (
+    <>
+      <DrawerItem name="Buffering Disabled">
+        <BadgeBoolean value={buffering.disable ?? false} />
+      </DrawerItem>
+      <DrawerItem name="Buffer Size">{buffering.bufferSize ?? "-"}</DrawerItem>
+      {buffering.buffers && (
+        <>
+          <DrawerItem name="Buffers Number">{buffering.buffers.number ?? "-"}</DrawerItem>
+          <DrawerItem name="Buffers Size">{buffering.buffers.size ?? "-"}</DrawerItem>
+        </>
+      )}
+      <DrawerItem name="Busy Buffers Size">{buffering.busyBuffersSize ?? "-"}</DrawerItem>
+    </>
+  );
+}
+
+function renderProxyTimeout(timeout: ProxyTimeout | undefined) {
+  if (!timeout) return null;
+
+  return (
+    <>
+      <DrawerItem name="Timeout Connect">{timeout.connect ?? "-"}</DrawerItem>
+      <DrawerItem name="Timeout Read">{timeout.read ?? "-"}</DrawerItem>
+      <DrawerItem name="Timeout Send">{timeout.send ?? "-"}</DrawerItem>
+    </>
+  );
+}
+
+function renderUpstreamKeepAlive(keepAlive: UpstreamKeepAlive | undefined) {
+  if (!keepAlive) return null;
+
+  return (
+    <>
+      <DrawerItem name="Keep-Alive Connections">{keepAlive.connections ?? "-"}</DrawerItem>
+      <DrawerItem name="Keep-Alive Requests">{keepAlive.requests ?? "-"}</DrawerItem>
+      <DrawerItem name="Keep-Alive Time">{keepAlive.time ?? "-"}</DrawerItem>
+      <DrawerItem name="Keep-Alive Timeout">{keepAlive.timeout ?? "-"}</DrawerItem>
+    </>
   );
 }
 
@@ -73,6 +250,9 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
   const frontendValidation = object.spec?.tls?.frontend?.default?.validation;
   const frontendPerPort = object.spec?.tls?.frontend?.perPort ?? [];
   const listenerStatuses = (object.status?.listeners ?? []) as ListenerStatus[];
+  const clientPolicies = useClientSettingsPolicies(object);
+  const proxyPolicies = useProxySettingsPolicies(object);
+  const upstreamPolicies = useUpstreamSettingsPolicies(object);
 
   return (
     <>
@@ -222,6 +402,44 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
               </DrawerItem>
             </div>
           ))}
+
+        {clientPolicies.length > 0 && (
+          <>
+            {clientPolicies.map((policy) => (
+              <div key={`csp-${policy.getName()}`}>
+                <DrawerTitle>Client Settings Policy: {policy.getName()}</DrawerTitle>
+                {renderClientBody(policy.spec?.body)}
+                {renderClientKeepAlive(policy.spec?.keepAlive)}
+              </div>
+            ))}
+          </>
+        )}
+
+        {proxyPolicies.length > 0 && (
+          <>
+            {proxyPolicies.map((policy) => (
+              <div key={`psp-${policy.getName()}`}>
+                <DrawerTitle>Proxy Settings Policy: {policy.getName()}</DrawerTitle>
+                {renderProxyBuffering(policy.spec?.buffering)}
+                {renderProxyTimeout(policy.spec?.timeout)}
+              </div>
+            ))}
+          </>
+        )}
+
+        {upstreamPolicies.length > 0 && (
+          <>
+            {upstreamPolicies.map((policy) => (
+              <div key={`usp-${policy.getName()}`}>
+                <DrawerTitle>Upstream Settings Policy: {policy.getName()}</DrawerTitle>
+                <DrawerItem name="Zone Size">{policy.spec?.zoneSize ?? "-"}</DrawerItem>
+                <DrawerItem name="Load Balancing Method">{policy.spec?.loadBalancingMethod ?? "-"}</DrawerItem>
+                <DrawerItem name="Hash Method Key">{policy.spec?.hashMethodKey ?? "-"}</DrawerItem>
+                {renderUpstreamKeepAlive(policy.spec?.keepAlive)}
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </>
   );
