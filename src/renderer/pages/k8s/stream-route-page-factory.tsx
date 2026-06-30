@@ -1,49 +1,12 @@
 import { Renderer } from "@freelensapp/extensions";
-import { type BackendRef, type ParentReference } from "../../api/k8s/types";
 import { withErrorPage } from "../../components/error-page";
 import { observer } from "../../observer";
 import { formatBackendRefs, formatParentRefs, type GatewayPageProps, namespaceCell } from "./shared";
+import { getBackendRefs, getParentRefs, isAccepted } from "./stream-route-derivations";
 
 const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
-
-interface HasSpecWithParentRefs {
-  spec?: {
-    parentRefs?: ParentReference[];
-    commonParentRefs?: ParentReference[];
-  };
-}
-
-interface HasSpecWithRules {
-  spec?: {
-    rules?: Array<{ backendRefs?: BackendRef[] }>;
-  };
-}
-
-interface HasStatusWithParents {
-  status?: {
-    parents?: Array<{
-      conditions?: Array<{ type: string; status: string }>;
-    }>;
-  };
-}
-
-function getParentRefs(item: HasSpecWithParentRefs): ParentReference[] {
-  const spec = item.spec ?? {};
-
-  return [...(spec.commonParentRefs ?? []), ...(spec.parentRefs ?? [])];
-}
-
-function getBackendRefs(item: HasSpecWithRules): BackendRef[] {
-  return (item.spec?.rules ?? []).flatMap((rule) => rule?.backendRefs ?? []);
-}
-
-function isAccepted(item: HasStatusWithParents): boolean {
-  return (item.status?.parents ?? []).some((parent) =>
-    (parent?.conditions ?? []).some((condition) => condition.type === "Accepted" && condition.status === "True"),
-  );
-}
 
 export function createStreamRoutePage<T extends Renderer.K8sApi.LensExtensionKubeObject<any, any, any>>(
   KubeObject: {
