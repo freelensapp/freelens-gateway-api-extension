@@ -115,4 +115,70 @@ describe("getStatusCategory", () => {
       }),
     ).toBe("NotReady");
   });
+
+  test("prefers NotReady over InProgress when both a terminal failure and an Unknown condition are present", () => {
+    expect(
+      getStatusCategory({
+        status: {
+          conditions: [
+            { type: "Accepted", status: "False", reason: "Invalid" },
+            { type: "Programmed", status: "Unknown", reason: "Pending" },
+          ],
+        },
+      }),
+    ).toBe("NotReady");
+  });
+
+  test.each([
+    "GatewayNotProgrammed",
+    "Reconciling",
+    "NotReconciled",
+    "Waiting",
+    "Pending",
+  ])("treats the transient reason %s as InProgress even when the status is False", (reason) => {
+    expect(
+      getStatusCategory({
+        status: {
+          conditions: [{ type: "Programmed", status: "False", reason }],
+        },
+      }),
+    ).toBe("InProgress");
+  });
+
+  test("treats a mix of True and Unknown conditions (no failures) as InProgress", () => {
+    expect(
+      getStatusCategory({
+        status: {
+          conditions: [
+            { type: "Accepted", status: "True", reason: "Accepted" },
+            { type: "Programmed", status: "Unknown", reason: "Pending" },
+          ],
+        },
+      }),
+    ).toBe("InProgress");
+  });
+
+  test("returns Unknown for a non-object status", () => {
+    expect(getStatusCategory({ status: "ready" })).toBe("Unknown");
+    expect(getStatusCategory({ status: 42 })).toBe("Unknown");
+    expect(getStatusCategory({ status: null })).toBe("Unknown");
+  });
+
+  test("ignores conditions that are missing a status field", () => {
+    expect(
+      getStatusCategory({
+        status: {
+          conditions: [{ type: "Accepted", reason: "Accepted" }],
+        },
+      }),
+    ).toBe("Unknown");
+  });
+
+  test("returns Unknown for empty parents and empty nested condition arrays", () => {
+    expect(getStatusCategory({ status: { parents: [] } })).toBe("Unknown");
+    expect(getStatusCategory({ status: { parents: [{ conditions: [] }] } })).toBe("Unknown");
+    expect(getStatusCategory({ status: { conditions: [{ ancestorRef: { name: "gw" }, conditions: [] }] } })).toBe(
+      "Unknown",
+    );
+  });
 });
