@@ -65,7 +65,7 @@
     "@freelensapp/extensions": "^1.10.2",
     "@freelensapp/kube-object": "^1.10.2",
     "@types/node": "~24.12.4",
-    "@types/react": "^17.0.91",
+    "@types/react": "^17.0.93",
     "@vitejs/plugin-react": "^6.0.1",
     "electron-vite": "^5.0.0",
     "react": "17.0.2",
