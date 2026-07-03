@@ -35,6 +35,11 @@ import {
   ReferenceGrantStore as ReferenceGrantStore_v1beta1,
 } from "./reference-grant-v1beta1";
 import {
+  TCPRoute as TCPRoute_v1,
+  TCPRouteApi as TCPRouteApi_v1,
+  TCPRouteStore as TCPRouteStore_v1,
+} from "./tcp-route-v1";
+import {
   TCPRoute as TCPRoute_v1alpha2,
   TCPRouteApi as TCPRouteApi_v1alpha2,
   TCPRouteStore as TCPRouteStore_v1alpha2,
@@ -44,6 +49,11 @@ import {
   TLSRouteApi as TLSRouteApi_v1,
   TLSRouteStore as TLSRouteStore_v1,
 } from "./tls-route-v1";
+import {
+  UDPRoute as UDPRoute_v1,
+  UDPRouteApi as UDPRouteApi_v1,
+  UDPRouteStore as UDPRouteStore_v1,
+} from "./udp-route-v1";
 import {
   UDPRoute as UDPRoute_v1alpha2,
   UDPRouteApi as UDPRouteApi_v1alpha2,
@@ -98,22 +108,28 @@ export {
   ReferenceGrantStore_v1,
   ReferenceGrantStore_v1 as ReferenceGrantStore,
   ReferenceGrantStore_v1beta1,
+  TCPRoute_v1,
+  TCPRoute_v1 as TCPRoute,
   TCPRoute_v1alpha2,
-  TCPRoute_v1alpha2 as TCPRoute,
+  TCPRouteApi_v1,
+  TCPRouteApi_v1 as TCPRouteApi,
   TCPRouteApi_v1alpha2,
-  TCPRouteApi_v1alpha2 as TCPRouteApi,
+  TCPRouteStore_v1,
+  TCPRouteStore_v1 as TCPRouteStore,
   TCPRouteStore_v1alpha2,
-  TCPRouteStore_v1alpha2 as TCPRouteStore,
   TLSRoute_v1,
   TLSRoute_v1 as TLSRoute,
   TLSRouteApi_v1,
   TLSRouteApi_v1 as TLSRouteApi,
   TLSRouteStore_v1,
   TLSRouteStore_v1 as TLSRouteStore,
+  UDPRoute_v1,
+  UDPRoute_v1 as UDPRoute,
   UDPRoute_v1alpha2,
-  UDPRoute_v1alpha2 as UDPRoute,
+  UDPRouteApi_v1,
+  UDPRouteApi_v1 as UDPRouteApi,
   UDPRouteApi_v1alpha2,
-  UDPRouteApi_v1alpha2 as UDPRouteApi,
+  UDPRouteStore_v1,
+  UDPRouteStore_v1 as UDPRouteStore,
   UDPRouteStore_v1alpha2,
-  UDPRouteStore_v1alpha2 as UDPRouteStore,
 };

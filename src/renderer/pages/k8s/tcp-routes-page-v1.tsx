@@ -1,10 +1,10 @@
 import { Renderer } from "@freelensapp/extensions";
-import { TCPRoute } from "../../api/k8s/tcp-route-v1alpha2";
+import { TCPRoute } from "../../api/k8s/tcp-route-v1";
 import { withErrorPage } from "../../components/error-page";
 import { observer } from "../../observer";
 import { type GatewayPageProps, namespaceCell } from "./shared";
-import styles from "./tcp-routes-page-v1alpha2.module.scss";
-import stylesInline from "./tcp-routes-page-v1alpha2.module.scss?inline";
+import styles from "./tcp-routes-page-v1.module.scss";
+import stylesInline from "./tcp-routes-page-v1.module.scss?inline";
 
 const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },

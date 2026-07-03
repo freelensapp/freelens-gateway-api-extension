@@ -1,5 +1,5 @@
 import { Renderer } from "@freelensapp/extensions";
-import { UDPRoute } from "../../api/k8s";
+import { UDPRoute } from "../../api/k8s/udp-route-v1alpha2";
 import { withErrorPage } from "../../components/error-page";
 import { observer } from "../../observer";
 import { type GatewayPageProps, namespaceCell } from "./shared";

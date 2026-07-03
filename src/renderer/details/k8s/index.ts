@@ -6,8 +6,10 @@ import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./http-route-details-v1
 import { ListenerSetDetails as ListenerSetDetails_v1 } from "./listener-set-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1 } from "./reference-grant-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1beta1 } from "./reference-grant-details-v1beta1";
+import { TCPRouteDetails as TCPRouteDetails_v1 } from "./tcp-route-details-v1";
 import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./tcp-route-details-v1alpha2";
 import { TLSRouteDetails as TLSRouteDetails_v1 } from "./tls-route-details-v1";
+import { UDPRouteDetails as UDPRouteDetails_v1 } from "./udp-route-details-v1";
 import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./udp-route-details-v1alpha2";
 
 export {
@@ -19,8 +21,10 @@ export {
   ListenerSetDetails_v1,
   ReferenceGrantDetails_v1,
   ReferenceGrantDetails_v1beta1,
+  TCPRouteDetails_v1,
   TCPRouteDetails_v1alpha2,
   TLSRouteDetails_v1,
+  UDPRouteDetails_v1,
   UDPRouteDetails_v1alpha2,
 };
 
@@ -31,6 +35,6 @@ export const GRPCRouteDetails = GRPCRouteDetails_v1;
 export const HTTPRouteDetails = HTTPRouteDetails_v1;
 export const ListenerSetDetails = ListenerSetDetails_v1;
 export const ReferenceGrantDetails = ReferenceGrantDetails_v1;
-export const TCPRouteDetails = TCPRouteDetails_v1alpha2;
+export const TCPRouteDetails = TCPRouteDetails_v1;
 export const TLSRouteDetails = TLSRouteDetails_v1;
-export const UDPRouteDetails = UDPRouteDetails_v1alpha2;
+export const UDPRouteDetails = UDPRouteDetails_v1;

@@ -1,5 +1,5 @@
 import { Renderer } from "@freelensapp/extensions";
-import { TCPRoute } from "../../api/k8s/tcp-route-v1alpha2";
+import { UDPRoute } from "../../api/k8s/udp-route-v1";
 import { observer } from "../../observer";
 import { createHash } from "../../utils";
 import styles from "./common.module.scss";
@@ -9,13 +9,13 @@ const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Icon, Table, TableCell, TableHead, TableRow },
 } = Renderer;
 
-function isAccepted(object: TCPRoute): boolean {
+function isAccepted(object: UDPRoute): boolean {
   return (object.status?.parents ?? []).some((parent) =>
     (parent?.conditions ?? []).some((condition) => condition?.type === "Accepted" && condition?.status === "True"),
   );
 }
 
-export const TCPRouteDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<TCPRoute>) => {
+export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<UDPRoute>) => {
   const { object } = props;
   const objectNs = object.getNs();
 
