@@ -12,8 +12,10 @@ import { HTTPRoute as HTTPRoute_v1 } from "./api/k8s/http-route-v1";
 import { ListenerSet as ListenerSet_v1 } from "./api/k8s/listenerset-v1";
 import { ReferenceGrant as ReferenceGrant_v1 } from "./api/k8s/reference-grant-v1";
 import { ReferenceGrant as ReferenceGrant_v1beta1 } from "./api/k8s/reference-grant-v1beta1";
+import { TCPRoute as TCPRoute_v1 } from "./api/k8s/tcp-route-v1";
 import { TCPRoute as TCPRoute_v1alpha2 } from "./api/k8s/tcp-route-v1alpha2";
 import { TLSRoute as TLSRoute_v1 } from "./api/k8s/tls-route-v1";
+import { UDPRoute as UDPRoute_v1 } from "./api/k8s/udp-route-v1";
 import { UDPRoute as UDPRoute_v1alpha2 } from "./api/k8s/udp-route-v1alpha2";
 import { XBackendTrafficPolicy as XBackendTrafficPolicy_v1alpha1 } from "./api/x-k8s/x-backend-traffic-policy-v1alpha1";
 import { XMesh as XMesh_v1alpha1 } from "./api/x-k8s/xmesh-v1alpha1";
@@ -26,8 +28,10 @@ import { HTTPRouteDetails as HTTPRouteDetails_v1 } from "./details/k8s/http-rout
 import { ListenerSetDetails as ListenerSetDetails_v1 } from "./details/k8s/listener-set-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1 } from "./details/k8s/reference-grant-details-v1";
 import { ReferenceGrantDetails as ReferenceGrantDetails_v1beta1 } from "./details/k8s/reference-grant-details-v1beta1";
+import { TCPRouteDetails as TCPRouteDetails_v1 } from "./details/k8s/tcp-route-details-v1";
 import { TCPRouteDetails as TCPRouteDetails_v1alpha2 } from "./details/k8s/tcp-route-details-v1alpha2";
 import { TLSRouteDetails as TLSRouteDetails_v1 } from "./details/k8s/tls-route-details-v1";
+import { UDPRouteDetails as UDPRouteDetails_v1 } from "./details/k8s/udp-route-details-v1";
 import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/k8s/udp-route-details-v1alpha2";
 import { XBackendTrafficPolicyDetails as XBackendTrafficPolicyDetails_v1alpha1 } from "./details/x-k8s/x-backend-traffic-policy-details-v1alpha1";
 import { XMeshDetails as XMeshDetails_v1alpha1 } from "./details/x-k8s/xmesh-details-v1alpha1";
@@ -40,8 +44,10 @@ import { HTTPRoutesPage as HTTPRoutesPage_v1 } from "./pages/k8s/http-routes-pag
 import { ListenerSetsPage as ListenerSetsPage_v1 } from "./pages/k8s/listener-sets-page-v1";
 import { ReferenceGrantsPage as ReferenceGrantsPage_v1 } from "./pages/k8s/reference-grants/reference-grants-page-v1";
 import { ReferenceGrantsPage as ReferenceGrantsPage_v1beta1 } from "./pages/k8s/reference-grants/reference-grants-page-v1beta1";
+import { TCPRoutesPage as TCPRoutesPage_v1 } from "./pages/k8s/tcp-routes-page-v1";
 import { TCPRoutesPage as TCPRoutesPage_v1alpha2 } from "./pages/k8s/tcp-routes-page-v1alpha2";
 import { TLSRoutesPage as TLSRoutesPage_v1 } from "./pages/k8s/tls-routes-page-v1";
+import { UDPRoutesPage as UDPRoutesPage_v1 } from "./pages/k8s/udp-routes-page-v1";
 import { UDPRoutesPage as UDPRoutesPage_v1alpha2 } from "./pages/k8s/udp-routes-page-v1alpha2";
 import { OverviewPage } from "./pages/overview";
 import { XBackendTrafficPoliciesPage as XBackendTrafficPoliciesPage_v1alpha1 } from "./pages/x-k8s/x-backend-traffic-policies-page-v1alpha1";
@@ -84,6 +90,14 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       },
     },
     {
+      kind: TCPRoute_v1.kind,
+      apiVersions: TCPRoute_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TCPRouteDetails_v1 {...props} />,
+      },
+    },
+    {
       kind: TCPRoute_v1alpha2.kind,
       apiVersions: TCPRoute_v1alpha2.crd.apiVersions,
       priority: 10,
@@ -97,6 +111,14 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       priority: 10,
       components: {
         Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TLSRouteDetails_v1 {...props} />,
+      },
+    },
+    {
+      kind: UDPRoute_v1.kind,
+      apiVersions: UDPRoute_v1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <UDPRouteDetails_v1 {...props} />,
       },
     },
     {
@@ -204,6 +226,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "tcproute",
       components: {
         Page: createAvailableVersionPage("TCP Routes", [
+          { kubeObjectClass: TCPRoute_v1, PageComponent: TCPRoutesPage_v1, version: "v1" },
           { kubeObjectClass: TCPRoute_v1alpha2, PageComponent: TCPRoutesPage_v1alpha2, version: "v1alpha2" },
         ]),
       },
@@ -220,6 +243,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "udproute",
       components: {
         Page: createAvailableVersionPage("UDP Routes", [
+          { kubeObjectClass: UDPRoute_v1, PageComponent: UDPRoutesPage_v1, version: "v1" },
           { kubeObjectClass: UDPRoute_v1alpha2, PageComponent: UDPRoutesPage_v1alpha2, version: "v1alpha2" },
         ]),
       },

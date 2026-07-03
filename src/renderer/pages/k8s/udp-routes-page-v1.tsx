@@ -1,16 +1,16 @@
 import { Renderer } from "@freelensapp/extensions";
-import { TCPRoute } from "../../api/k8s/tcp-route-v1alpha2";
+import { UDPRoute } from "../../api/k8s/udp-route-v1";
 import { withErrorPage } from "../../components/error-page";
 import { observer } from "../../observer";
 import { type GatewayPageProps, namespaceCell } from "./shared";
-import styles from "./tcp-routes-page-v1alpha2.module.scss";
-import stylesInline from "./tcp-routes-page-v1alpha2.module.scss?inline";
+import styles from "./udp-routes-page-v1.module.scss";
+import stylesInline from "./udp-routes-page-v1.module.scss?inline";
 
 const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
-function isAccepted(item: TCPRoute): boolean {
+function isAccepted(item: UDPRoute): boolean {
   return (
     item.status?.parents?.some((parent) =>
       parent.conditions?.some((condition) => condition.type === "Accepted" && condition.status === "True"),
@@ -18,32 +18,32 @@ function isAccepted(item: TCPRoute): boolean {
   );
 }
 
-export const TCPRoutesPage = observer((props: GatewayPageProps) =>
+export const UDPRoutesPage = observer((props: GatewayPageProps) =>
   withErrorPage(props, () => {
-    const store = TCPRoute.getStore<TCPRoute>();
+    const store = UDPRoute.getStore<UDPRoute>();
 
     return (
       <>
         <style>{stylesInline}</style>
-        <KubeObjectListLayout<TCPRoute, any>
-          tableId={`${TCPRoute.crd.plural}Table`}
+        <KubeObjectListLayout<UDPRoute, any>
+          tableId={`${UDPRoute.crd.plural}Table`}
           className={styles.page}
           store={store}
           sortingCallbacks={{
-            name: (item: TCPRoute) => item.getName(),
-            namespace: (item: TCPRoute) => item.getNs() ?? "",
-            accepted: (item: TCPRoute) => String(isAccepted(item)),
-            age: (item: TCPRoute) => item.getCreationTimestamp(),
+            name: (item: UDPRoute) => item.getName(),
+            namespace: (item: UDPRoute) => item.getNs() ?? "",
+            accepted: (item: UDPRoute) => String(isAccepted(item)),
+            age: (item: UDPRoute) => item.getCreationTimestamp(),
           }}
-          searchFilters={[(item: TCPRoute) => item.getSearchFields()]}
-          renderHeaderTitle={TCPRoute.crd.title}
+          searchFilters={[(item: UDPRoute) => item.getSearchFields()]}
+          renderHeaderTitle={UDPRoute.crd.title}
           renderTableHeader={[
             { title: "Name", sortBy: "name", className: styles.name },
             { title: "Namespace", sortBy: "namespace", className: styles.namespace },
             { title: "Accepted", sortBy: "accepted", className: styles.accepted },
             { title: "Age", sortBy: "age", className: styles.age },
           ]}
-          renderTableContents={(item: TCPRoute) => [
+          renderTableContents={(item: UDPRoute) => [
             <WithTooltip>{item.getName()}</WithTooltip>,
             namespaceCell(item.getNs()),
             <BadgeBoolean value={isAccepted(item)} />,

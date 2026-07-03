@@ -1,5 +1,5 @@
 import { Renderer } from "@freelensapp/extensions";
-import { TCPRoute } from "../../api/k8s/tcp-route-v1alpha2";
+import { TCPRoute } from "../../api/k8s/tcp-route-v1";
 import { observer } from "../../observer";
 import { createHash } from "../../utils";
 import styles from "./common.module.scss";

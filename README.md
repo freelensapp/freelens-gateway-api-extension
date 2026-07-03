@@ -46,11 +46,13 @@ conditions, spec fields, and related objects displayed in the detail view.
 | v1 | `HTTPRoute` | | Namespaced | Routes HTTP and HTTPS traffic to backends |
 | v1 | `GRPCRoute` | | Namespaced | Routes gRPC traffic to backends |
 | v1 | `TLSRoute` | | Namespaced | Routes TLS traffic to backends based on SNI |
+| v1 | `TCPRoute` | | Namespaced | Routes TCP traffic to backends |
+| v1 | `UDPRoute` | | Namespaced | Routes UDP traffic to backends |
 | v1 | `BackendTLSPolicy` | `btlspolicy` | Namespaced | Configures TLS for connections from a Gateway to backends |
 | v1 | `ReferenceGrant` | `refgrant` | Namespaced | Allows cross-namespace references to Gateway API resources |
 | v1 | `ListenerSet` | `lset` | Namespaced | Extends a Gateway with additional listeners |
-| v1alpha2 | `TCPRoute` | | Namespaced | Routes TCP traffic to backends |
-| v1alpha2 | `UDPRoute` | | Namespaced | Routes UDP traffic to backends |
+| v1alpha2 | `TCPRoute` | | Namespaced | Routes TCP traffic to backends (v1alpha2 variant) |
+| v1alpha2 | `UDPRoute` | | Namespaced | Routes UDP traffic to backends (v1alpha2 variant) |
 | v1beta1 | `ReferenceGrant` | `refgrant` | Namespaced | Allows cross-namespace references (v1beta1 variant) |
 
 <!-- markdownlint-enable MD013 -->

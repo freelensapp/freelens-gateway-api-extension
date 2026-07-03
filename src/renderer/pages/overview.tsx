@@ -7,9 +7,11 @@ import {
   GRPCRoute as GRPCRoute_v1,
   HTTPRoute as HTTPRoute_v1,
   ListenerSet as ListenerSet_v1,
-  TCPRoute as TCPRoute_v1alpha2,
+  TCPRoute_v1,
+  TCPRoute_v1alpha2,
   TLSRoute as TLSRoute_v1,
-  UDPRoute as UDPRoute_v1alpha2,
+  UDPRoute_v1,
+  UDPRoute_v1alpha2,
 } from "../api/k8s";
 import { XBackendTrafficPolicy as XBackendTrafficPolicy_v1alpha1, XMesh as XMesh_v1alpha1 } from "../api/x-k8s";
 import { GatewayApiEvents } from "../components/gateway-api-events";
@@ -34,8 +36,10 @@ const resources = [
   Gateway_v1,
   HTTPRoute_v1,
   GRPCRoute_v1,
+  TCPRoute_v1,
   TCPRoute_v1alpha2,
   TLSRoute_v1,
+  UDPRoute_v1,
   UDPRoute_v1alpha2,
   ListenerSet_v1,
   BackendTLSPolicy_v1,
