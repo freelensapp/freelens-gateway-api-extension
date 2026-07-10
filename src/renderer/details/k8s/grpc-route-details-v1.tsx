@@ -19,7 +19,6 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
   const { object } = props;
   const objectNs = object.getNs();
 
-  const hostnames = object.spec?.hostnames ?? [];
   const parentRefs = object.spec?.parentRefs ?? [];
   const rules = object.spec?.rules ?? [];
   const accepted = isAccepted(object);
@@ -28,7 +27,6 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
     <>
       <style>{stylesInline}</style>
       <div className={styles.details}>
-        {hostnames.length > 0 && <DrawerItem name="Hostnames">{hostnames.join(", ") || "*"}</DrawerItem>}
         <DrawerItem name="Accepted">
           <BadgeBoolean value={accepted} />
         </DrawerItem>
