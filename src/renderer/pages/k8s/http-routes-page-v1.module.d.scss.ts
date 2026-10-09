@@ -2,7 +2,7 @@ declare const classNames: {
   readonly page: "page";
   readonly name: "name";
   readonly namespace: "namespace";
-  readonly hostnames: "hostnames";
+  readonly routes: "routes";
   readonly accepted: "accepted";
   readonly age: "age";
 };
