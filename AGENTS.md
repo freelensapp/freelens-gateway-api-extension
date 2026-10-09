@@ -6,7 +6,11 @@ This file provides guidance to coding agents when working with code in this repo
 
 ## Project Overview
 
-Freelens extension for Kubernetes Gateway API CRDs (v1, v1alpha2, v1beta1). Provides cluster pages, detail views, and K8s object wrappers for Gateway API resources.
+Freelens extension for the Kubernetes Gateway API: the standard resources of `gateway.networking.k8s.io` (`v1`,
+`v1alpha2`, `v1beta1`) and the experimental ones of `gateway.networking.x-k8s.io` (`v1alpha1`). It provides an
+Overview page, a list page and details panel per kind, and a model per kind and API version. It is built on the
+patterns of the template, freelensapp/freelens-example-extension; a build, type-check or test pattern that is not
+specific to the Gateway API follows it.
 
 - **Language**: TypeScript 7.0.2
 - **Runtime**: Freelens >= 2.0.0 (extension API v2)
@@ -68,7 +72,7 @@ in the tree (`pnpm why <name>`; `pnpm dedupe` after an update).
 ```bash
 # Type checking
 pnpm type:check           # All programs below, in this order
-pnpm type:check:sources   # src/main, src/renderer, src/common
+pnpm type:check:sources   # src/main and src/renderer, each with src/common
 pnpm type:check:tests     # *.test.ts(x) under src/, and test/
 pnpm type:check:tooling   # Vite, Vitest and SVGO configs, build/
 pnpm type:check:environments # environment-tests/
@@ -80,13 +84,14 @@ pnpm trunk:check          # Markdown, YAML, TOML, SCSS, workflows, and Biome aga
 pnpm trunk:fix            # Auto-fix Markdown, YAML, SCSS, etc.
 pnpm lint:check           # Alias for biome:check
 pnpm lint:fix             # Alias for biome:fix
-pnpm knip:check           # Unused and unlisted dependencies (knip)
+pnpm knip:check           # Unused files, unused and unlisted dependencies (knip)
 
 # Tests
 pnpm test:unit            # vitest
 
 # Build
 pnpm build                # Both Vite runs, without the type check
+pnpm dev                  # Both Vite runs in watch mode, for a directory install
 
 # Pack for testing
 pnpm pack:dev             # Bump prerelease version, build, and create .tgz for install in Freelens app
@@ -101,31 +106,53 @@ pnpm clean:all            # Clean everything (dist, dts, node_modules, tgz)
 
 ```text
 src/
-  main/index.ts            # Extension entry point (main process, ESM)
-  renderer/index.tsx       # Extension entry point (renderer process, ESM)
-  renderer/k8s/gateway-api/ # K8s object model classes (one file per CRD)
-  renderer/details/gateway-api/ # Detail view components for CRDs
-  renderer/pages/gateway-api/  # Cluster page components
-  renderer/components/      # Shared components
-  renderer/icons/           # SVG icons
-  common/utils.ts           # Common utilities (e.g., maybe)
+  main/index.ts                  # Main entry (Main.LensExtension), empty
+  renderer/index.tsx             # Renderer entry (Renderer.LensExtension): every registration
+  renderer/api/k8s/              # Models of gateway.networking.k8s.io, one file per kind and version,
+                                 #   shared types (types.ts) and the status categories of the charts (statuses.ts)
+  renderer/api/x-k8s/            # Models of gateway.networking.x-k8s.io
+  renderer/pages/overview.tsx    # Overview page: a pie chart per kind and the events
+  renderer/pages/overview-kinds.ts # The Overview's kinds and the choice of one version per kind
+  renderer/pages/k8s/            # List page per kind and version, with its CSS module
+  renderer/pages/x-k8s/          # List pages of the experimental kinds
+  renderer/details/k8s/          # Details panel per kind and version, and their common CSS module
+  renderer/details/x-k8s/        # Details panels of the experimental kinds
+  renderer/components/           # createAvailableVersionPage, withErrorPage, the pie chart, the events list
+  renderer/icons/                # SVG icons, imported with ?raw
+  renderer/vars.scss             # SCSS variables
+test/freelens-extensions.ts      # Runtime stub of @freelensapp/extensions for Vitest
+environment-tests/               # Probes for the per-environment programs
+build/                           # Vite plugins: host modules, standard decorators, CSS module declarations
+integration/__tests__/           # Integration test, run inside a Freelens checkout
+docs/images/                     # Screenshot for README.md
 ```
 
 Build output goes to `dist/`: `main.js`, `renderer.js` and `renderer.css`, with
 source maps. `main` and `renderer` in `package.json` point at the two entries.
-The Vite plugins of the build are in `build/`.
+
+`src/renderer/index.tsx` registers one cluster page per kind under the "Gateway API" menu entry, with the kind's
+`crd.singular` as page id, and the Overview page as `overview`. Each kind's page is made by
+`createAvailableVersionPage` from the list pages of its versions, newest first. A details panel is registered for
+every kind and version, by `kind` and `crd.apiVersions`.
 
 ## CRD KubeObject Pattern
 
-K8s object classes MUST use `static readonly` properties for metadata. **Instance methods do NOT work and MUST NOT be used.** The Freelens host reads properties from the class constructor statically — instance methods are not available at runtime because the host creates plain object copies of the K8s resource data, not instances of the extension's class. This means:
+A model is a subclass of `Renderer.K8sApi.LensExtensionKubeObject`, one file per kind and API version, such as
+`src/renderer/api/k8s/gateway-v1.ts` or `tcp-route-v1alpha2.ts`.
 
-- **Allowed**: `object.spec?.someField`, `object.status?.conditions` — direct property access on typed `spec`/`status` interfaces
-- **Allowed**: helper functions like `hasTrueCondition(conditions, "Accepted")` from `types.ts`
-- **Forbidden**: `object.someMethod()` — instance methods will never exist at runtime
-- **Forbidden**: `typeof (object as any).someMethod === "function" ? ...` — anti-pattern that always falls through to the fallback path
-- **Forbidden**: `as any` — use the existing typed `spec`/`status` interfaces directly; all CRD models already define proper `Spec`/`Status` interfaces
+The host reads the model's metadata from the class, through `static readonly` properties. The objects the extension
+gets, in a list, a details panel or the items of a store, come from the host's store for the resource: they are
+instances of the host's `KubeObject`, not of the extension's subclass. The methods of `KubeObject` itself are there (`getName()`,
+`getNs()`, `getCreationTimestamp()`, `getSearchFields()`); a method the subclass defines is not, and calling it
+throws. So:
 
-Always access `spec` and `status` properties directly via their typed interfaces. Do not define instance methods on KubeObject subclasses — they will not be callable at runtime.
+- **Metadata**: `static readonly` `kind`, `namespaced`, `apiBase` and `crd`.
+- **Per-object logic**: a function that takes the object or its fields, such as
+  `hasTrueCondition(conditions, "Accepted")` from `api/k8s/types.ts` or `getStatusCategory(object)` from
+  `api/k8s/statuses.ts`.
+- **Fields**: read `object.spec` and `object.status` through the model's typed `Spec` and `Status` interfaces.
+- **Forbidden**: instance methods on the subclass; a fallback such as
+  `typeof (object as any).someMethod === "function" ? ...`, which always takes the fallback; `as any`.
 
 ```typescript
 export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
@@ -145,34 +172,109 @@ export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
   };
 }
 
-// Also export Api and Store classes (always needed):
 export class GatewayApi extends Renderer.K8sApi.KubeApi<Gateway> {}
 export class GatewayStore extends Renderer.K8sApi.KubeObjectStore<Gateway, GatewayApi> {}
 ```
 
-Each CRD file exports three classes: the KubeObject, the KubeApi, and the KubeObjectStore. They are registered in `src/renderer/index.tsx` via `kubeObjectDetailItems`, `clusterPages`, and `clusterPageMenus`.
+Each model file also exports a `KubeApi` and a `KubeObjectStore` subclass. Neither is instantiated: the store comes
+from the host, through the model's static `getStore()`. `api/k8s/index.ts` and `api/x-k8s/index.ts` re-export the
+three classes of every model with its version as a suffix (`TCPRoute_v1`).
+
+A details component takes `Renderer.Component.KubeObjectDetailsProps<Model>` of its own model class and version, and
+its registration passes it as it is (`Details: GatewayDetails_v1`), not through a wrapper typed
+`KubeObjectDetailsProps<any>`. The registration type has `any` for `spec` and `status`, so the type check accepts any
+details component for any kind: that `kind`, `apiVersions` and `Details` of one entry belong to the same model is up to
+the code.
 
 Kubernetes types that the models share with the host, such as `Condition`, `LabelSelector` and `ObjectReference`,
 come from `Renderer.K8sApi` (`Renderer.K8sApi.Condition`).
 
+A kind served in more than one API version has one model class per version (`TCPRoute_v1`, `TCPRoute_v1alpha2`).
+The host has a store for every served version of a CRD, so the static `getStore()` of every class whose version is
+served returns one, and code that goes over all classes meets such a kind once per served version. Code that shows a
+kind once lists its classes in order of preference and takes the first whose `getStore()` returns a store without
+throwing: `createAvailableVersionPage` for the cluster pages, `getAvailableResource` for the Overview. The Overview's
+list of kinds and that function are in `src/renderer/pages/overview-kinds.ts`, apart from the page, so that a test
+covers them without rendering it. A model added to the extension fails that test until it is listed there, or, for a
+kind without status like ReferenceGrant, named in the test as omitted.
+
 The host renders a cluster page with `params` as its only prop. A page that needs the extension instance, as every
-page here does for its error page, is created once at module level and registered as
-`Page: () => <Page extension={this} />`. Creating it inside the `clusterPages` initializer with `this` as an argument
-makes TypeScript infer the field circularly (TS7022).
+page here does (the list pages for their error page, the Overview for its links), is created once at module level and
+registered as `Page: () => <Page extension={this} />`. Creating it inside the `clusterPages` initializer with `this`
+as an argument makes TypeScript infer the field circularly (TS7022). `PageComponents.Page` is typed with the props
+the host passes, `Common.Types.PageComponentProps`, so the type check rejects a page that requires another prop. It
+does not reject one that declares another prop as optional next to `params`; that prop is `undefined`.
 
 ## Renderer Components
 
 - Components that read observables are wrapped in `observer` from `mobx-react`. The build resolves `mobx-react` to the
   host's instance (see "Modules provided by the host"), so the components react to the host's stores.
+- The list pages render through `withErrorPage(props, () => ...)` from `src/renderer/components/error-page.tsx`. It
+  catches what the render throws, logs it with `extension.name` and renders the error instead, so its props need
+  `extension`.
 - React keys derived from an object's content come from `Renderer.Util.createReactKey`. It serializes with
   `JSON.stringify`, so it throws for `undefined`, and the key depends on the order of the object's keys.
+- A link to one of the extension's own pages calls `extension.navigate(pageId)`. `Renderer.Navigation.navigate` is
+  for absolute locations, such as the URL `getDetailsUrl` returns: the host's history does not support a relative
+  pathname.
 - A component imports its CSS module for the class names. The rules reach the page through `renderer.css` (see
   "CSS"), so there is no `?inline` copy and no `<style>` tag.
 - SCSS modules get TypeScript declarations (`*.module.d.scss.ts`), written during the renderer build (see
   "CSS module declarations"). They are committed, because `pnpm type:check` runs without a build; commit the
   regenerated file with a change to its SCSS module. `pnpm clean:dts` removes them.
 - Common detail view styles are in `src/renderer/details/k8s/common.module.scss` and
-  `src/renderer/details/x-k8s/common.module.scss`.
+  `src/renderer/details/x-k8s/common.module.scss`. SCSS variables are in `src/renderer/vars.scss`, used with
+  `@use` and a relative path, such as `@use "../../vars"`.
+- Icons are SVG files imported with `?raw` and rendered by `Renderer.Component.Icon` through its `svg` prop.
+
+## Rules That Fail Silently
+
+Each of these compiles when it is broken, and breaks the extension at runtime
+or not visibly at all. The sections named in parentheses explain the
+mechanism; this is the list to check a change against.
+
+- **The host's React and mobx, one copy each.** Import `react`, `react-dom`,
+  `mobx` and `mobx-react` by their bare module ids. A second React throws
+  `invalid hook call`; a second mobx throws nothing, and the host never reacts
+  to its observables. The build fails on the ways a second copy gets in
+  ("Modules provided by the host").
+- **Standard decorators.** An observable field is `@observable accessor`, and
+  the class does not call `makeObservable(this)`. Without `accessor` the
+  production build of mobx leaves the field unobservable ("Decorators").
+- **No Node or Electron in renderer and common code.** They are `undefined` in
+  the renderer. The build fails on an import, `pnpm type:check` on a global
+  ("Process-specific settings").
+- **One CSS asset, `dist/renderer.css`.** Any other name, or a second asset,
+  leaves the extension unstyled. Nothing checks it; look at `dist/` after a
+  change to the CSS setup ("CSS").
+- **One tsconfig per environment.** Each program has only its runtime's `lib`
+  and `types`, and no declaration may load Node into the renderer or the DOM
+  into main; otherwise a wrong API type-checks and is `undefined` at runtime.
+  The environment tests fail on a leak ("TypeScript").
+- **No instance method on a KubeObject subclass.** The objects from the host
+  do not have it, and the call throws. Nothing checks it
+  ("CRD KubeObject Pattern").
+- **A details registration pairs `kind`, `apiVersions` and `Details` of one
+  model.** The registration type accepts any details component for any kind
+  ("CRD KubeObject Pattern").
+- **A kind served in two versions is shown once.** Code that goes over all
+  model classes meets it once per served version; take the first served
+  version in order of preference ("CRD KubeObject Pattern").
+- **A cluster page gets the extension from its registration.** The host passes
+  `params` only. The type check rejects a page that requires another prop, but
+  not one that declares it optional ("CRD KubeObject Pattern").
+- **A link to an own page goes through `extension.navigate(pageId)`.**
+  `Renderer.Navigation.navigate` with a relative pathname is pushed as it is
+  and lands only where the browser happens to resolve it ("Renderer
+  Components").
+- **An ESM `main`, and the entries in `package.json` unchanged while
+  `pnpm dev` runs.** The host refuses to reload a CommonJS main and logs why,
+  and it watches only the entries it started with, so a manifest change needs
+  Freelens restarted.
+
+Neither `pnpm build`, `pnpm dev` nor the unit tests run the type check, so a
+Node global in renderer code passes them; `pnpm type:check` and
+`type-check.yaml` catch it.
 
 ## Build
 
@@ -182,9 +284,11 @@ main` builds main next to it. The two runs share no chunk; each bundle carries
 its own copy of the `src/common/` code it imports. Nothing is minified.
 `pnpm build` runs both and no type check.
 
-A watch build of the renderer (`vite build --watch`) needs `--no-emptyOutDir`.
-In watch mode Vite empties the output directory again before every rebuild, so
-a renderer rebuild would delete `dist/main.js`.
+`pnpm dev` runs the same two builds in watch mode, side by side, for a
+directory install: the host reloads the extension when either entry is
+rewritten. Its renderer run passes `--no-emptyOutDir`. In watch mode Vite
+empties the output directory again before every rebuild, so a renderer rebuild
+would delete `dist/main.js`, and the host would have no main entry to reload.
 
 ### Modules provided by the host
 
@@ -312,6 +416,14 @@ uses only what both runtimes have: `globalThis.crypto`, `TextEncoder` and
 only. Its `WebWorker` lib is the closest single match and an approximation:
 `self` and `postMessage` compile there and fail in the main program.
 
+`src/common/` has no source file, only that config. `type:check:sources`
+therefore compiles the main and renderer configs only: `tsc` fails on a config
+whose `include` matches no file (TS18003). The common program still runs, in
+`type:check:environments`: `environment-tests/tsconfig.json` extends
+`src/common/tsconfig.json` and keeps its `include`, so common code added later
+is compiled there in the common environment, next to the probes. Keep the
+config when `src/common/` is empty.
+
 The split does not cover the API namespaces: `Main` and `Renderer` compile in
 every program, and the one the process does not have is `undefined` at runtime.
 Common code uses `Common`.
@@ -399,6 +511,11 @@ the host's does for a CRD version it has no API for. A test that needs a version
 to be served spies on `getStore` of that model class
 (`src/renderer/components/available-version.test.tsx`).
 
+The stub's `KubeApi` and `KubeObjectStore` are empty classes. Every model module
+defines its Api and Store classes by extending them, so a test that imports the
+models, as `src/renderer/pages/overview-kinds.test.ts` does, needs them to exist;
+no test calls them.
+
 The root `tsconfig.json` checks the tooling files. It has `checkJs`, so the
 Vite config and the build plugins are type-checked too; give their function
 parameters JSDoc types.
@@ -437,12 +554,19 @@ the one of the `biome` script in `package.json`.
 
 ### Knip
 
-`pnpm knip:check` runs knip twice, for dependencies only: a development pass
-over everything, and a `--production --strict` pass over the code that reaches
-the bundles, which are the entries marked with `!` in `knip.jsonc`. In the
-production pass only `dependencies` count, so a bundled library that the
-extension's code imports belongs there. The host-provided modules are
-devDependencies, for their types, and are ignored.
+`pnpm knip:check` runs knip twice, for unused files and for dependencies: a
+development pass over everything, and a `--production --strict` pass over the
+code that reaches the bundles, which are the entries marked with `!` in
+`knip.jsonc`. In the production pass only `dependencies` count, so a bundled
+library that the extension's code imports belongs there. The host-provided
+modules are devDependencies, for their types, and are ignored.
+
+A file is unused when no entry reaches it: a leftover module, a barrel that
+nothing imports. The production pass starts from the `!` entries only, so it
+also reports a module that only tests import. The fix is to remove the file,
+not to ignore it. The check does not include unused exports and types: on this
+tree they are the exported types of the models' spec and status, which no
+module imports.
 
 `knip.jsonc` lists the entries knip cannot find: the two source entries, the
 Vitest alias target `test/freelens-extensions.ts` and the probes in
@@ -454,6 +578,15 @@ that only the production pass needs is reported as redundant by the other.
 knip also reads the binaries the workflows in `.github/workflows/` call, and
 reports one that no dependency provides; `yq`, which comes from mise, is
 ignored.
+
+Two more settings keep the file check to real findings. `project` leaves out
+the CSS module declarations with `!src/**/*.d.scss.ts`: TypeScript reaches them
+through `allowArbitraryExtensions`, while knip resolves
+`import styles from "./x.module.scss"` to the stylesheet, so nothing would
+import them. The negation has no trailing `!`, which would apply it to the
+production pass only. And the SVGO plugin is on (`"svgo": true`), so that
+`svgo.config.mjs` is an entry: Trunk runs SVGO, and no dependency turns the
+plugin on.
 
 ### Workflows
 
@@ -480,6 +613,82 @@ the release publishes it, checks out and packages Freelens, copies
 there under Freelens's Vitest, with its helpers. The test installs the tarball
 from the extensions page, waits for the extension to be listed as enabled, and
 fails on any error logged by either process.
+
+## Checking the Extension in Freelens Dev
+
+The functional checks of a change run against Freelens started with
+`pnpm dev` from a freelensapp/freelens checkout. That script starts Electron
+with `--remoteDebuggingPort 9223`, so an agent can drive the app over the
+Chrome DevTools Protocol. How to attach Playwright MCP to it is in Freelens's
+`DEVELOPMENT.md`, "Inspecting the running dev app from an AI agent"; start
+Freelens before the session connects. Playwright MCP writes its snapshots to
+`.playwright-mcp/`, which is git-ignored.
+
+Without the MCP server, a `playwright-core` script with
+`chromium.connectOverCDP("http://127.0.0.1:9223")` does the same. End such a
+script by exiting the process; do not close the browser, which belongs to
+Freelens.
+
+### Installing the checkout
+
+1. `pnpm install`, then `pnpm build`. After a branch switch, `node_modules`
+   can still hold another stack, and Freelens loads the extension from
+   `dist/`.
+2. On the Extensions page, enter the checkout's directory and press
+   "Install". Freelens then asks whether to load the extension in place;
+   confirm that too. The table lists the extension as "in place, unverified"
+   and enabled.
+3. A rebuild, by `pnpm build` or by `pnpm dev` of the extension, reloads it
+   once in the root frame and once in each cluster frame.
+
+### Test data
+
+The cluster needs the Gateway API CRDs, from the `standard-install.yaml` or
+`experimental-install.yaml` asset of a
+[kubernetes-sigs/gateway-api release](https://github.com/kubernetes-sigs/gateway-api/releases),
+applied with `kubectl apply --server-side -f <url>`:
+
+- The experimental channel installs every kind the extension shows, with both
+  versions of TCPRoute and UDPRoute served and the `gateway.networking.x-k8s.io`
+  kinds. Use it for the version choice ("CRD KubeObject Pattern").
+- The standard channel installs no `gateway.networking.x-k8s.io` kind, so the
+  "Backend Traffic Policies" and "Meshes" pages show that the cluster serves
+  none.
+
+The CRDs come without objects, and a kind with no objects has no chart on the
+Overview. Create at least one object per kind under check. Without a Gateway
+API controller in the cluster nothing sets their status: the charts show no
+object as Ready, and the details show only the pending conditions that some
+CRDs, such as Gateway's, put in by default. After a CRD is deleted,
+the host keeps its stores until the cluster frame is reloaded, and keeps
+watching it, logging the 404s; neither comes from the extension.
+
+### Driving the UI
+
+- Every cluster renders in a cross-origin `<clusterId>.renderer.freelens.app`
+  iframe. Pages, menus and details of the extension live in that frame, not
+  in the main page.
+- Pages of the extension have URLs like `/extension/<name>/<pageId>`, with the
+  package name's `@` dropped and `/` turned into `--`. Here that is
+  `/extension/freelensapp--gateway-api-extension/<pageId>`, with `overview`
+  or a kind's `crd.singular` as page id, for example
+  `/extension/freelensapp--gateway-api-extension/httproute`. The sidebar
+  entries navigate in `onClick`; their `href` is not the page URL.
+- Playwright's actionability checks can fail on the hotbar, where
+  `#ScrollSpyRoot` intercepts pointer events; a DOM `click()` on the element
+  works.
+- Views fill in once the host's stores have loaded. Wait for the expected
+  content, not a fixed time, before deciding that a page is empty.
+
+### Reading the console
+
+The renderer console also carries the output of Freelens's terminal dock
+(`%cMESSAGE` lines), which can include the user's shell prompt, account names
+and paths. Keep only warnings, errors, page errors and the extension's own
+lines, and never paste the full console into a PR, an issue or a report.
+React reports key problems as console errors ("Each child in a list should
+have a unique key", "Encountered two children with the same key"); they count
+as failures of the "no error in DevTools" check.
 
 ## Code Style
 
@@ -526,7 +735,8 @@ Code in `src/common/` is shared between both processes.
 
 1. Check that files are not in ignored output directories (`dist/`, `node_modules/`)
 2. Full clean and rebuild: `pnpm clean:all && pnpm install && pnpm build`
-3. Reinstall the extension in Freelens (or restart the app in dev mode)
+3. With a directory install and `pnpm dev` running, look for a refused reload in the Freelens log, and restart
+   Freelens after a change to `main` or `renderer` in `package.json`; reinstall an extension installed from a tarball
 
 ### Build Failures
 
@@ -630,6 +840,28 @@ When asked to implement a change on a PR:
    separately. Do not batch multiple independent fixes into a single
    commit. This keeps the history bisectable and makes each change easy
    to revert individually.
+
+### Modifying GitHub Actions Workflows
+
+Claude cannot push changes to files under `.github/workflows/` directly,
+because the GitHub token used by the action lacks the `workflows` permission.
+Any patch to a workflow file MUST therefore be delivered as a new, complete
+file under the `github-workflow-fix/` directory in the repository root instead
+of editing the file in place:
+
+1. Write the full, final contents of the workflow to
+   `github-workflow-fix/<workflow-file-name>`, with the same file name as in
+   `.github/workflows/` (e.g. `github-workflow-fix/check.yaml`). Do **not**
+   edit the original file under `.github/workflows/`.
+2. Make it a **complete** file — the entire workflow as it should look after
+   the change, not just a diff or fragment — so it can be copied verbatim.
+3. Commit it with the change that needs it, and list it in the report. In the
+   PR description, note it as a proposed workflow change that a maintainer
+   must move from `github-workflow-fix/` to `.github/workflows/`.
+
+A maintainer moves the file into `.github/workflows/` in a separate commit and
+removes `github-workflow-fix/`. Pull before continuing on the branch, as it may
+have gained such a commit.
 
 ### Branch Naming Conventions
 

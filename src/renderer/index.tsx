@@ -121,7 +121,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: GatewayClass_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GatewayClassDetails_v1 {...props} />,
+        Details: GatewayClassDetails_v1,
       },
     },
     {
@@ -129,7 +129,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: Gateway_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GatewayDetails_v1 {...props} />,
+        Details: GatewayDetails_v1,
       },
     },
     {
@@ -137,7 +137,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: HTTPRoute_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <HTTPRouteDetails_v1 {...props} />,
+        Details: HTTPRouteDetails_v1,
       },
     },
     {
@@ -145,7 +145,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: GRPCRoute_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <GRPCRouteDetails_v1 {...props} />,
+        Details: GRPCRouteDetails_v1,
       },
     },
     {
@@ -153,7 +153,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: TCPRoute_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TCPRouteDetails_v1 {...props} />,
+        Details: TCPRouteDetails_v1,
       },
     },
     {
@@ -161,7 +161,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: TCPRoute_v1alpha2.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TCPRouteDetails_v1alpha2 {...props} />,
+        Details: TCPRouteDetails_v1alpha2,
       },
     },
     {
@@ -169,7 +169,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: TLSRoute_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <TLSRouteDetails_v1 {...props} />,
+        Details: TLSRouteDetails_v1,
       },
     },
     {
@@ -177,7 +177,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: UDPRoute_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <UDPRouteDetails_v1 {...props} />,
+        Details: UDPRouteDetails_v1,
       },
     },
     {
@@ -185,7 +185,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: UDPRoute_v1alpha2.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <UDPRouteDetails_v1alpha2 {...props} />,
+        Details: UDPRouteDetails_v1alpha2,
       },
     },
     {
@@ -193,7 +193,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: ReferenceGrant_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <ReferenceGrantDetails_v1 {...props} />,
+        Details: ReferenceGrantDetails_v1,
       },
     },
     {
@@ -201,9 +201,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: ReferenceGrant_v1beta1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
-          <ReferenceGrantDetails_v1beta1 {...props} />
-        ),
+        Details: ReferenceGrantDetails_v1beta1,
       },
     },
     {
@@ -211,7 +209,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: ListenerSet_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <ListenerSetDetails_v1 {...props} />,
+        Details: ListenerSetDetails_v1,
       },
     },
     {
@@ -219,7 +217,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: BackendTLSPolicy_v1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <BackendTLSPolicyDetails_v1 {...props} />,
+        Details: BackendTLSPolicyDetails_v1,
       },
     },
     {
@@ -227,9 +225,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: XBackendTrafficPolicy_v1alpha1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
-          <XBackendTrafficPolicyDetails_v1alpha1 {...props} />
-        ),
+        Details: XBackendTrafficPolicyDetails_v1alpha1,
       },
     },
     {
@@ -237,7 +233,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: XMesh_v1alpha1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <XMeshDetails_v1alpha1 {...props} />,
+        Details: XMeshDetails_v1alpha1,
       },
     },
   ];

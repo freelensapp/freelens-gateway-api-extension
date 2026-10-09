@@ -3,7 +3,6 @@ import { observer } from "mobx-react";
 import { GRPCRoute } from "../../api/k8s";
 import { withErrorPage } from "../../components/error-page";
 import styles from "./grpc-routes-page-v1.module.scss";
-import stylesInline from "./grpc-routes-page-v1.module.scss?inline";
 import { type GatewayPageProps, namespaceCell } from "./shared";
 
 const {
@@ -27,37 +26,34 @@ export const GRPCRoutesPage = observer((props: GatewayPageProps) =>
     const store = GRPCRoute.getStore<GRPCRoute>();
 
     return (
-      <>
-        <style>{stylesInline}</style>
-        <KubeObjectListLayout<GRPCRoute, any>
-          tableId={`${GRPCRoute.crd.plural}Table`}
-          className={styles.page}
-          store={store}
-          sortingCallbacks={{
-            name: (item: GRPCRoute) => item.getName(),
-            namespace: (item: GRPCRoute) => item.getNs() ?? "",
-            hostnames: (item: GRPCRoute) => getHostnames(item).join(","),
-            accepted: (item: GRPCRoute) => String(isAccepted(item)),
-            age: (item: GRPCRoute) => item.getCreationTimestamp(),
-          }}
-          searchFilters={[(item: GRPCRoute) => item.getSearchFields(), (item: GRPCRoute) => getHostnames(item)]}
-          renderHeaderTitle={GRPCRoute.crd.title}
-          renderTableHeader={[
-            { title: "Name", sortBy: "name", className: styles.name },
-            { title: "Namespace", sortBy: "namespace", className: styles.namespace },
-            { title: "Hostnames", sortBy: "hostnames", className: styles.hostnames },
-            { title: "Accepted", sortBy: "accepted", className: styles.accepted },
-            { title: "Age", sortBy: "age", className: styles.age },
-          ]}
-          renderTableContents={(item: GRPCRoute) => [
-            <WithTooltip>{item.getName()}</WithTooltip>,
-            namespaceCell(item.getNs()),
-            <WithTooltip>{getHostnames(item).join(", ") || "*"}</WithTooltip>,
-            <BadgeBoolean value={isAccepted(item)} />,
-            <KubeObjectAge object={item} key="age" />,
-          ]}
-        />
-      </>
+      <KubeObjectListLayout<GRPCRoute, any>
+        tableId={`${GRPCRoute.crd.plural}Table`}
+        className={styles.page}
+        store={store}
+        sortingCallbacks={{
+          name: (item: GRPCRoute) => item.getName(),
+          namespace: (item: GRPCRoute) => item.getNs() ?? "",
+          hostnames: (item: GRPCRoute) => getHostnames(item).join(","),
+          accepted: (item: GRPCRoute) => String(isAccepted(item)),
+          age: (item: GRPCRoute) => item.getCreationTimestamp(),
+        }}
+        searchFilters={[(item: GRPCRoute) => item.getSearchFields(), (item: GRPCRoute) => getHostnames(item)]}
+        renderHeaderTitle={GRPCRoute.crd.title}
+        renderTableHeader={[
+          { title: "Name", sortBy: "name", className: styles.name },
+          { title: "Namespace", sortBy: "namespace", className: styles.namespace },
+          { title: "Hostnames", sortBy: "hostnames", className: styles.hostnames },
+          { title: "Accepted", sortBy: "accepted", className: styles.accepted },
+          { title: "Age", sortBy: "age", className: styles.age },
+        ]}
+        renderTableContents={(item: GRPCRoute) => [
+          <WithTooltip>{item.getName()}</WithTooltip>,
+          namespaceCell(item.getNs()),
+          <WithTooltip>{getHostnames(item).join(", ") || "*"}</WithTooltip>,
+          <BadgeBoolean value={isAccepted(item)} />,
+          <KubeObjectAge object={item} key="age" />,
+        ]}
+      />
     );
   }),
 );

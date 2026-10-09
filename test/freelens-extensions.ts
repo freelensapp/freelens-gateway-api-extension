@@ -20,8 +20,15 @@ class LensExtensionKubeObject {
   }
 }
 
+// The models' Api and Store classes extend these, so a test that imports a
+// model module needs them to exist. No test calls them.
+class KubeApi {}
+class KubeObjectStore {}
+
 export const Renderer = {
   K8sApi: {
+    KubeApi,
+    KubeObjectStore,
     LensExtensionKubeObject,
   },
 };

@@ -2,7 +2,6 @@ import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { BackendTLSPolicy } from "../../api/k8s";
 import styles from "./common.module.scss";
-import stylesInline from "./common.module.scss?inline";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Table, TableCell, TableHead, TableRow },
@@ -28,69 +27,66 @@ export const BackendTLSPolicyDetails = observer(
     const caCertRefs = object.spec?.validation?.caCertificateRefs ?? [];
 
     return (
-      <>
-        <style>{stylesInline}</style>
-        <div className={styles.details}>
-          <DrawerItem name="Hostname">{getHostname(object)}</DrawerItem>
-          <DrawerItem name="Accepted">
-            <BadgeBoolean value={isAccepted(object)} />
-          </DrawerItem>
+      <div className={styles.details}>
+        <DrawerItem name="Hostname">{getHostname(object)}</DrawerItem>
+        <DrawerItem name="Accepted">
+          <BadgeBoolean value={isAccepted(object)} />
+        </DrawerItem>
 
-          <DrawerTitle>Target Refs</DrawerTitle>
-          {targetRefs.length > 0 ? (
-            <Table selectable tableId="backendTLSPolicyTargetRefs" scrollable={false} sortSyncWithUrl={false}>
-              <TableHead flat sticky={false}>
-                <TableCell>Group</TableCell>
-                <TableCell>Kind</TableCell>
-                <TableCell>Section Name</TableCell>
-                <TableCell>Name</TableCell>
-              </TableHead>
-              {targetRefs.map((targetRef) => {
-                const key = createReactKey(targetRef);
+        <DrawerTitle>Target Refs</DrawerTitle>
+        {targetRefs.length > 0 ? (
+          <Table selectable tableId="backendTLSPolicyTargetRefs" scrollable={false} sortSyncWithUrl={false}>
+            <TableHead flat sticky={false}>
+              <TableCell>Group</TableCell>
+              <TableCell>Kind</TableCell>
+              <TableCell>Section Name</TableCell>
+              <TableCell>Name</TableCell>
+            </TableHead>
+            {targetRefs.map((targetRef) => {
+              const key = createReactKey(targetRef);
 
-                return (
-                  <TableRow key={key} nowrap>
-                    <TableCell>{targetRef.group || "-"}</TableCell>
-                    <TableCell>{targetRef.kind}</TableCell>
-                    <TableCell>{targetRef.sectionName ?? "-"}</TableCell>
-                    <TableCell>
-                      <LinkToObject objectRef={targetRef} object={object} />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </Table>
-          ) : (
-            <DrawerItem name="Target Refs">-</DrawerItem>
-          )}
+              return (
+                <TableRow key={key} nowrap>
+                  <TableCell>{targetRef.group || "-"}</TableCell>
+                  <TableCell>{targetRef.kind}</TableCell>
+                  <TableCell>{targetRef.sectionName ?? "-"}</TableCell>
+                  <TableCell>
+                    <LinkToObject objectRef={targetRef} object={object} />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </Table>
+        ) : (
+          <DrawerItem name="Target Refs">-</DrawerItem>
+        )}
 
-          <DrawerTitle>CA Cert Refs</DrawerTitle>
-          {caCertRefs.length > 0 ? (
-            <Table selectable tableId="backendTLSPolicyCaCertRefs" scrollable={false} sortSyncWithUrl={false}>
-              <TableHead flat sticky={false}>
-                <TableCell>Group</TableCell>
-                <TableCell>Kind</TableCell>
-                <TableCell>Name</TableCell>
-              </TableHead>
-              {caCertRefs.map((caCertRef) => {
-                const key = createReactKey(caCertRef);
+        <DrawerTitle>CA Cert Refs</DrawerTitle>
+        {caCertRefs.length > 0 ? (
+          <Table selectable tableId="backendTLSPolicyCaCertRefs" scrollable={false} sortSyncWithUrl={false}>
+            <TableHead flat sticky={false}>
+              <TableCell>Group</TableCell>
+              <TableCell>Kind</TableCell>
+              <TableCell>Name</TableCell>
+            </TableHead>
+            {caCertRefs.map((caCertRef) => {
+              const key = createReactKey(caCertRef);
 
-                return (
-                  <TableRow key={key} nowrap>
-                    <TableCell>{caCertRef.group || "-"}</TableCell>
-                    <TableCell>{caCertRef.kind}</TableCell>
-                    <TableCell>
-                      <LinkToObject objectRef={caCertRef} object={object} />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </Table>
-          ) : (
-            <DrawerItem name="CA Cert Refs">-</DrawerItem>
-          )}
-        </div>
-      </>
+              return (
+                <TableRow key={key} nowrap>
+                  <TableCell>{caCertRef.group || "-"}</TableCell>
+                  <TableCell>{caCertRef.kind}</TableCell>
+                  <TableCell>
+                    <LinkToObject objectRef={caCertRef} object={object} />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </Table>
+        ) : (
+          <DrawerItem name="CA Cert Refs">-</DrawerItem>
+        )}
+      </div>
     );
   },
 );

@@ -1,7 +1,5 @@
 import { Renderer } from "@freelensapp/extensions";
 
-export { formatBackendRefs, formatParentRefs } from "./route-summaries";
-
 const {
   Component: { LinkToNamespace, WithTooltip },
 } = Renderer;
