@@ -455,6 +455,32 @@ knip also reads the binaries the workflows in `.github/workflows/` call, and
 reports one that no dependency provides; `yq`, which comes from mise, is
 ignored.
 
+### Workflows
+
+| Workflow                 | Runs                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `type-check.yaml`        | `pnpm type:check`                                                             |
+| `check.yaml`             | `pnpm build`, `pnpm lint:check`, `pnpm knip:check`                            |
+| `unit-tests.yaml`        | `pnpm test:unit`                                                              |
+| `trunk-check.yaml`       | `trunk check --all`                                                           |
+| `integration-tests.yaml` | the integration tests in `integration/`, against a Freelens build             |
+| `mise-lock-check.yaml`   | on a change to `mise.lock`: no checksum changed for an unchanged tool version |
+
+The type check has a workflow of its own, on pull requests and on pushes to
+`main`, as in Freelens. It runs every program, tests, tooling and environment
+tests included, which no build reaches, and a type error shows as its own
+failed check rather than as a failed build. `check.yaml` builds without the
+type check for the same reason, so it does not run twice.
+
+The integration tests run inside a Freelens checkout of `main`, the only ref
+with the v2 extension API until Freelens 2.0.0 is released: the workflow builds
+the extension, packs it with a `.tgz.sha256` checksum next to the tarball, as
+the release publishes it, checks out and packages Freelens, copies
+`integration/__tests__/` into `freelens/integration/__tests__/` and runs them
+there under Freelens's Vitest, with its helpers. The test installs the tarball
+from the extensions page, waits for the extension to be listed as enabled, and
+fails on any error logged by either process.
+
 ## Code Style
 
 - **Biome** formats **TypeScript/TSX, JS, JSON, CSS, HTML, SVG**: double quotes, semicolons, trailing commas, 2-space indent, 120 char line width — use `pnpm biome:fix`
