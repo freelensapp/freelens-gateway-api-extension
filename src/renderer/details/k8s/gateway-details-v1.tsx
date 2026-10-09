@@ -178,7 +178,11 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
               </DrawerItem>
               <DrawerItem name="TLS Certs" hidden={!listener.tls?.certificateRefs?.length}>
                 {listener.tls?.certificateRefs?.map((certificateRef) => (
-                  <LinkToSecret name={certificateRef.name} namespace={certificateRef.namespace ?? object.getNs()} />
+                  <LinkToSecret
+                    key={createReactKey(certificateRef)}
+                    name={certificateRef.name}
+                    namespace={certificateRef.namespace ?? object.getNs()}
+                  />
                 ))}
               </DrawerItem>
               <DrawerItemLabels
