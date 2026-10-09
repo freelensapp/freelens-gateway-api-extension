@@ -84,7 +84,7 @@ pnpm trunk:check          # Markdown, YAML, TOML, SCSS, workflows, and Biome aga
 pnpm trunk:fix            # Auto-fix Markdown, YAML, SCSS, etc.
 pnpm lint:check           # Alias for biome:check
 pnpm lint:fix             # Alias for biome:fix
-pnpm knip:check           # Unused and unlisted dependencies (knip)
+pnpm knip:check           # Unused files, unused and unlisted dependencies (knip)
 
 # Tests
 pnpm test:unit            # vitest
@@ -554,12 +554,19 @@ the one of the `biome` script in `package.json`.
 
 ### Knip
 
-`pnpm knip:check` runs knip twice, for dependencies only: a development pass
-over everything, and a `--production --strict` pass over the code that reaches
-the bundles, which are the entries marked with `!` in `knip.jsonc`. In the
-production pass only `dependencies` count, so a bundled library that the
-extension's code imports belongs there. The host-provided modules are
-devDependencies, for their types, and are ignored.
+`pnpm knip:check` runs knip twice, for unused files and for dependencies: a
+development pass over everything, and a `--production --strict` pass over the
+code that reaches the bundles, which are the entries marked with `!` in
+`knip.jsonc`. In the production pass only `dependencies` count, so a bundled
+library that the extension's code imports belongs there. The host-provided
+modules are devDependencies, for their types, and are ignored.
+
+A file is unused when no entry reaches it: a leftover module, a barrel that
+nothing imports. The production pass starts from the `!` entries only, so it
+also reports a module that only tests import. The fix is to remove the file,
+not to ignore it. The check does not include unused exports and types: on this
+tree they are the exported types of the models' spec and status, which no
+module imports.
 
 `knip.jsonc` lists the entries knip cannot find: the two source entries, the
 Vitest alias target `test/freelens-extensions.ts` and the probes in
@@ -571,6 +578,15 @@ that only the production pass needs is reported as redundant by the other.
 knip also reads the binaries the workflows in `.github/workflows/` call, and
 reports one that no dependency provides; `yq`, which comes from mise, is
 ignored.
+
+Two more settings keep the file check to real findings. `project` leaves out
+the CSS module declarations with `!src/**/*.d.scss.ts`: TypeScript reaches them
+through `allowArbitraryExtensions`, while knip resolves
+`import styles from "./x.module.scss"` to the stylesheet, so nothing would
+import them. The negation has no trailing `!`, which would apply it to the
+production pass only. And the SVGO plugin is on (`"svgo": true`), so that
+`svgo.config.mjs` is an entry: Trunk runs SVGO, and no dependency turns the
+plugin on.
 
 ### Workflows
 

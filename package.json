@@ -40,7 +40,7 @@
     "lint": "pnpm lint:check",
     "lint:check": "pnpm biome:check",
     "lint:fix": "pnpm biome:fix",
-    "knip": "pnpm dlx knip@6.39.0 --dependencies --no-gitignore --no-config-hints",
+    "knip": "pnpm dlx knip@6.39.0 --dependencies --files --no-gitignore --no-config-hints",
     "knip:check": "pnpm \"/^knip:(development|production)\\$/\"",
     "knip:development": "pnpm knip",
     "knip:production": "pnpm knip --production --strict",
