@@ -185,6 +185,9 @@ Neither `pnpm build` nor `pnpm dev` type-checks; run `pnpm type:check` for
 that. A change to `main` or `renderer` in `package.json` needs Freelens
 restarted once.
 
+To check the extension in Freelens with an AI agent, see "Checking the
+Extension in Freelens Dev" in [AGENTS.md](AGENTS.md).
+
 ### Check the code
 
 ```sh

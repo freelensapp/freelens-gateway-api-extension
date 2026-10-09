@@ -591,6 +591,82 @@ there under Freelens's Vitest, with its helpers. The test installs the tarball
 from the extensions page, waits for the extension to be listed as enabled, and
 fails on any error logged by either process.
 
+## Checking the Extension in Freelens Dev
+
+The functional checks of a change run against Freelens started with
+`pnpm dev` from a freelensapp/freelens checkout. That script starts Electron
+with `--remoteDebuggingPort 9223`, so an agent can drive the app over the
+Chrome DevTools Protocol. How to attach Playwright MCP to it is in Freelens's
+`DEVELOPMENT.md`, "Inspecting the running dev app from an AI agent"; start
+Freelens before the session connects. Playwright MCP writes its snapshots to
+`.playwright-mcp/`, which is git-ignored.
+
+Without the MCP server, a `playwright-core` script with
+`chromium.connectOverCDP("http://127.0.0.1:9223")` does the same. End such a
+script by exiting the process; do not close the browser, which belongs to
+Freelens.
+
+### Installing the checkout
+
+1. `pnpm install`, then `pnpm build`. After a branch switch, `node_modules`
+   can still hold another stack, and Freelens loads the extension from
+   `dist/`.
+2. On the Extensions page, enter the checkout's directory and press
+   "Install". Freelens then asks whether to load the extension in place;
+   confirm that too. The table lists the extension as "in place, unverified"
+   and enabled.
+3. A rebuild, by `pnpm build` or by `pnpm dev` of the extension, reloads it
+   once in the root frame and once in each cluster frame.
+
+### Test data
+
+The cluster needs the Gateway API CRDs, from the `standard-install.yaml` or
+`experimental-install.yaml` asset of a
+[kubernetes-sigs/gateway-api release](https://github.com/kubernetes-sigs/gateway-api/releases),
+applied with `kubectl apply --server-side -f <url>`:
+
+- The experimental channel installs every kind the extension shows, with both
+  versions of TCPRoute and UDPRoute served and the `gateway.networking.x-k8s.io`
+  kinds. Use it for the version choice ("CRD KubeObject Pattern").
+- The standard channel installs no `gateway.networking.x-k8s.io` kind, so the
+  "Backend Traffic Policies" and "Meshes" pages show that the cluster serves
+  none.
+
+The CRDs come without objects, and a kind with no objects has no chart on the
+Overview. Create at least one object per kind under check. Without a Gateway
+API controller in the cluster nothing sets their status: the charts show no
+object as Ready, and the details show only the pending conditions that some
+CRDs, such as Gateway's, put in by default. After a CRD is deleted,
+the host keeps its stores until the cluster frame is reloaded, and keeps
+watching it, logging the 404s; neither comes from the extension.
+
+### Driving the UI
+
+- Every cluster renders in a cross-origin `<clusterId>.renderer.freelens.app`
+  iframe. Pages, menus and details of the extension live in that frame, not
+  in the main page.
+- Pages of the extension have URLs like `/extension/<name>/<pageId>`, with the
+  package name's `@` dropped and `/` turned into `--`. Here that is
+  `/extension/freelensapp--gateway-api-extension/<pageId>`, with `overview`
+  or a kind's `crd.singular` as page id, for example
+  `/extension/freelensapp--gateway-api-extension/httproute`. The sidebar
+  entries navigate in `onClick`; their `href` is not the page URL.
+- Playwright's actionability checks can fail on the hotbar, where
+  `#ScrollSpyRoot` intercepts pointer events; a DOM `click()` on the element
+  works.
+- Views fill in once the host's stores have loaded. Wait for the expected
+  content, not a fixed time, before deciding that a page is empty.
+
+### Reading the console
+
+The renderer console also carries the output of Freelens's terminal dock
+(`%cMESSAGE` lines), which can include the user's shell prompt, account names
+and paths. Keep only warnings, errors, page errors and the extension's own
+lines, and never paste the full console into a PR, an issue or a report.
+React reports key problems as console errors ("Each child in a list should
+have a unique key", "Encountered two children with the same key"); they count
+as failures of the "no error in DevTools" check.
+
 ## Code Style
 
 - **Biome** formats **TypeScript/TSX, JS, JSON, CSS, HTML, SVG**: double quotes, semicolons, trailing commas, 2-space indent, 120 char line width — use `pnpm biome:fix`
