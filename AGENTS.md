@@ -71,16 +71,15 @@ pnpm lint:fix             # Alias for biome:fix
 pnpm test:unit            # vitest
 
 # Build
-pnpm build                # Full build (type-check + electron-vite)
-pnpm build:production     # Production build (no preserveModules)
+pnpm build                # Both Vite runs, without the type check
 
 # Pack for testing
 pnpm pack:dev             # Bump prerelease version, build, and create .tgz for install in Freelens app
 
 # Clean
-pnpm clean                # Clean out/
+pnpm clean                # Clean dist/
 pnpm clean:dts            # Remove generated *.d.scss.ts files
-pnpm clean:all            # Clean everything (dts, node_modules, out, tgz)
+pnpm clean:all            # Clean everything (dist, dts, node_modules, tgz)
 ```
 
 ## Architecture
@@ -99,7 +98,9 @@ src/
   common/utils.ts           # Common utilities (e.g., maybe)
 ```
 
-Build output goes to `out/`.
+Build output goes to `dist/`: `main.js`, `renderer.js` and `renderer.css`, with
+source maps. `main` and `renderer` in `package.json` point at the two entries.
+The Vite plugins of the build are in `build/`.
 
 ## CRD KubeObject Pattern
 
@@ -141,20 +142,91 @@ Each CRD file exports three classes: the KubeObject, the KubeApi, and the KubeOb
 ## Renderer Components
 
 - Detail views use the `observer` wrapper from `../../observer` (re-exports MobX `observer`).
-- SCSS modules generate TypeScript type files (`*.module.d.scss.ts`) via `vite-plugin-sass-dts`. These are auto-generated and should be cleaned with `pnpm clean:dts` when SCSS changes.
+- SCSS modules get TypeScript declarations (`*.module.d.scss.ts`) from `vite-plugin-sass-dts`, written during the
+  renderer build. They are committed; commit the regenerated file with a change to its SCSS module. `pnpm clean:dts`
+  removes them.
 - Common detail view styles are in `src/renderer/details/gateway-api/common.module.scss`.
 
-## Key Dependencies (provided by Freelens host at runtime)
+## Build
 
-These are NOT bundled, they come from the Freelens host as globals:
-- `@freelensapp/extensions` → `global.LensExtensions`
-- `mobx` → `global.Mobx`
-- `react` → `global.React`
-- `react-dom` → `global.ReactDom`
-- `mobx-react` → `global.MobxReact`
-- `react-router-dom` → `global.ReactRouterDom`
+`vite.config.mjs` builds one entry point per run, in library mode, as ESM:
+`vite build` builds the renderer and empties `dist/`, and `vite build --mode
+main` builds main next to it. The two runs share no chunk; each bundle carries
+its own copy of the `src/common/` code it imports. Nothing is minified.
+`pnpm build` runs both and no type check.
 
-Other dependencies ARE bundled into the extension output.
+A watch build of the renderer (`vite build --watch`) needs `--no-emptyOutDir`.
+In watch mode Vite empties the output directory again before every rebuild, so
+a renderer rebuild would delete `dist/main.js`.
+
+### Modules provided by the host
+
+The host publishes its singletons on `globalThis.FreelensExtensionApi`, and
+each process publishes only the ones it has. This is contract C3 of the
+Freelens extension API (`docs/extensions/api.md`):
+
+| Module id           | Global            | Published in |
+| ------------------- | ----------------- | ------------ |
+| `react`             | `React`           | renderer     |
+| `react-dom`         | `ReactDom`        | renderer     |
+| `react/jsx-runtime` | `ReactJsxRuntime` | renderer     |
+| `mobx`              | `Mobx`            | both         |
+| `mobx-react`        | `MobxReact`       | renderer     |
+| `monaco-editor`     | `MonacoEditor`    | renderer     |
+
+`build/vite-plugin-host-modules.mjs` replaces a bare import of one of these
+with a module that reads the global, in the extension's code and in every
+library it bundles. Its named exports are the members of the copy installed as
+a devDependency, which is pinned to the host's version, so the module graph is
+static and an import of a name the host's version lacks fails the build. The
+plugin also fails the build on an import of a host module that the process does
+not publish (`react` in main), and on a subpath of a host package that the host
+does not publish (`react-dom/client`, `react/jsx-dev-runtime`). Both would
+otherwise either read `undefined` at runtime or bundle a second copy. A second
+React throws `invalid hook call`; a second mobx throws nothing, and the host
+simply never reacts to its observables.
+
+Everything else is bundled. That includes `@freelensapp/extensions`, a shim of
+three lines that reads `Common`, `Main` and `Renderer` off the same global; it
+must not be mapped. `react-router-dom` is not provided by the host. The host
+installs no dependencies of an extension, so whatever the code needs at runtime
+and the host does not provide has to be in the bundle.
+
+### Process-specific settings
+
+- **Renderer**: nothing is external. Renderer code gets no Node or Electron, and
+  an import of a Node builtin or of `electron` fails the build (Vite would
+  otherwise replace it with an empty module and only warn).
+  `process.env.NODE_ENV` is replaced at build time, because library mode
+  leaves it for a consumer's bundler and the page has no `process`.
+- **Main**: Node builtins (`node:*` and bare) and `electron` stay external.
+  Bundled packages resolve with Vite's server conditions, so main gets their
+  Node builds rather than their browser builds.
+
+### Decorators
+
+MobX 7 supports standard decorators only, and Oxc, which transpiles TypeScript
+for Vite, passes them through unlowered, while neither Node nor Chromium runs
+them yet. `build/vite-plugin-standard-decorators.mjs`, copied from Freelens,
+hands every module with a decorator to esbuild first, which lowers the
+decorators and their `accessor` fields. A decorator that reaches the host
+unlowered is a syntax error when the module is evaluated.
+
+An observable field is an `accessor` (`@observable accessor enabled = false;`),
+and the class does not call `makeObservable(this)`. `@observable` on a plain
+field type-checks and builds; the development build of mobx throws when the
+class is defined, and the production build leaves the field unobservable.
+
+### CSS
+
+The host links the stylesheet named after the renderer entry, `renderer.css`
+next to `renderer.js`. Library mode extracts the CSS of the whole bundle into
+that one file (`build.lib.cssFileName`), so a CSS module imported for its class
+names reaches the page through it. A build that emits more than one CSS asset,
+or a differently named one, leaves the extension unstyled; nothing checks it,
+so look at `dist/` after a change to the CSS setup. CSS modules use
+`camelCaseOnly` class names. `vite-plugin-sass-dts` writes the
+`*.module.d.scss.ts` declarations during the renderer run.
 
 ## Code Style
 
@@ -199,7 +271,7 @@ Code in `src/common/` is shared between both processes.
 
 ### Changes Not Appearing
 
-1. Check that files are not in ignored output directories (`out/`, `dist/`, `node_modules/`)
+1. Check that files are not in ignored output directories (`dist/`, `node_modules/`)
 2. Full clean and rebuild: `pnpm clean:all && pnpm build`
 3. Reinstall the extension in Freelens (or restart the app in dev mode)
 
@@ -216,7 +288,7 @@ Code in `src/common/` is shared between both processes.
 2. Check the terminal where Freelens was launched for main process errors
 3. Look for stack traces with file:line numbers
 4. Verify all CRD objects have proper `static readonly` properties (kind, apiBase, crd)
-5. Validate both with `pnpm type:check` **and** `pnpm build` — runtime failures can appear only in bundled `out/` code
+5. Validate both with `pnpm type:check` **and** `pnpm build` — runtime failures can appear only in the bundled `dist/` code
 
 ## Best Practices
 
