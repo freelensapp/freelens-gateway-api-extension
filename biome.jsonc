@@ -25,16 +25,8 @@
       }
     }
   },
-  "css": {
-    "formatter": {
-      "enabled": true
-    },
-    "linter": {
-      "enabled": true
-    }
-  },
   "files": {
-    "includes": ["**", "!**/.trunk/**", "!**/build/**", "!**/dist/**", "!**/*.svg"]
+    "includes": ["**", "!**/.trunk/**", "!**/build/**", "!**/dist/**", "**/build/*.{js,cjs,mjs}"]
   },
   "formatter": {
     "attributePosition": "auto",
@@ -98,6 +90,7 @@
             "strictCase": false
           }
         },
+        "useNodejsImportProtocol": "error",
         // should be error later
         "useTemplate": "off"
       },
@@ -147,6 +140,19 @@
         "rules": {
           "style": {
             "noRestrictedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      // Renderer and common code, as the extension migration guide recommends:
+      // a Node builtin import belongs in the main entry point only. Tests are
+      // left out, as they are of the renderer and common programs.
+      "includes": ["**/src/common/**", "**/src/renderer/**", "!**/*.test.*"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noNodejsModules": "error"
           }
         }
       }
