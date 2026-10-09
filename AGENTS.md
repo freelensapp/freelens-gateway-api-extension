@@ -155,6 +155,12 @@ Each CRD file exports three classes: the KubeObject, the KubeApi, and the KubeOb
 Kubernetes types that the models share with the host, such as `Condition`, `LabelSelector` and `ObjectReference`,
 come from `Renderer.K8sApi` (`Renderer.K8sApi.Condition`).
 
+A kind served in more than one API version has one model class per version (`TCPRoute_v1`, `TCPRoute_v1alpha2`).
+The host has a store for every served version of a CRD, so the static `getStore()` of every class whose version is
+served returns one, and code that goes over all classes meets such a kind once per served version. Code that shows a
+kind once lists its classes in order of preference and takes the first whose `getStore()` returns a store without
+throwing: `createAvailableVersionPage` for the cluster pages, `getAvailableResource` for the Overview.
+
 The host renders a cluster page with `params` as its only prop. A page that needs the extension instance, as every
 page here does for its error page, is created once at module level and registered as
 `Page: () => <Page extension={this} />`. Creating it inside the `clusterPages` initializer with `this` as an argument
@@ -166,6 +172,9 @@ makes TypeScript infer the field circularly (TS7022).
   host's instance (see "Modules provided by the host"), so the components react to the host's stores.
 - React keys derived from an object's content come from `Renderer.Util.createReactKey`. It serializes with
   `JSON.stringify`, so it throws for `undefined`, and the key depends on the order of the object's keys.
+- A link to one of the extension's own pages calls `extension.navigate(pageId)`. `Renderer.Navigation.navigate` is
+  for absolute locations, such as the URL `getDetailsUrl` returns: the host's history does not support a relative
+  pathname.
 - A component imports its CSS module for the class names. The rules reach the page through `renderer.css` (see
   "CSS"), so there is no `?inline` copy and no `<style>` tag.
 - SCSS modules get TypeScript declarations (`*.module.d.scss.ts`), written during the renderer build (see

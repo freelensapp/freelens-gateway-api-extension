@@ -1,4 +1,4 @@
-import { Common, Renderer } from "@freelensapp/extensions";
+import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -19,39 +19,49 @@ import { GatewayApiEvents } from "../components/gateway-api-events";
 import { InfoPage } from "../components/info-page";
 import { PieChart } from "../components/pie-chart";
 import styles from "./overview.module.scss";
-import stylesInline from "./overview.module.scss?inline";
 
 const {
   Component: { NamespaceSelectFilter, TabLayout },
 } = Renderer;
 
-const {
-  Util: { cssNames },
-} = Common;
-
-// Resources whose status can be summarized. ReferenceGrant is omitted because
-// it has no status subresource.
-const resources = [
-  GatewayClass_v1,
-  Gateway_v1,
-  HTTPRoute_v1,
-  GRPCRoute_v1,
-  TCPRoute_v1,
-  TCPRoute_v1alpha2,
-  TLSRoute_v1,
-  UDPRoute_v1,
-  UDPRoute_v1alpha2,
-  ListenerSet_v1,
-  BackendTLSPolicy_v1,
-  XBackendTrafficPolicy_v1alpha1,
-  XMesh_v1alpha1,
+// Kinds whose status can be summarized, each with its model classes in the
+// order the cluster pages prefer them. ReferenceGrant is omitted because it has
+// no status subresource.
+const kinds = [
+  [GatewayClass_v1],
+  [Gateway_v1],
+  [HTTPRoute_v1],
+  [GRPCRoute_v1],
+  [TCPRoute_v1, TCPRoute_v1alpha2],
+  [TLSRoute_v1],
+  [UDPRoute_v1, UDPRoute_v1alpha2],
+  [ListenerSet_v1],
+  [BackendTLSPolicy_v1],
+  [XBackendTrafficPolicy_v1alpha1],
+  [XMesh_v1alpha1],
 ];
 
-export interface OverviewPageProps {
-  extension?: Renderer.LensExtension;
+type Resource = (typeof kinds)[number][number];
+
+// The first version of a kind that has a store. The host has a store for every
+// served version, so a kind served in two versions is shown once.
+function getAvailableResource(versions: Resource[]) {
+  for (const resource of versions) {
+    try {
+      const store = resource.getStore();
+      if (store) return { resource, store };
+    } catch (_) {
+      // version not served
+    }
+  }
+  return undefined;
 }
 
-export const OverviewPage = observer((_props: OverviewPageProps) => {
+export interface OverviewPageProps {
+  extension: Renderer.LensExtension;
+}
+
+export const OverviewPage = observer(({ extension }: OverviewPageProps) => {
   const [crds, setCrds] = useState<Renderer.K8sApi.CustomResourceDefinition[]>([]);
   const [loaded, setLoaded] = useState(false);
   const watches = useRef<(() => void)[]>([]);
@@ -65,25 +75,25 @@ export const OverviewPage = observer((_props: OverviewPageProps) => {
   );
 
   const getChart = useCallback(
-    (resource: (typeof resources)[number]) => {
-      try {
-        const store = resource.getStore();
-        if (!store) return null;
-        const crd = getCrd(store);
-        if (!crd) return null;
+    (versions: Resource[]) => {
+      const available = getAvailableResource(versions);
+      if (!available) return null;
+      const { resource, store } = available;
+      if (!getCrd(store)) return null;
 
-        const items = store.contextItems;
+      const items = store.contextItems;
 
-        return (
-          <div key={resource.crd.plural} className={cssNames(styles.chartColumn, "column")} hidden={!items.length}>
-            <PieChart title={resource.crd.title} objects={items} crd={crd} />
-          </div>
-        );
-      } catch (_) {
-        return null;
-      }
+      return (
+        <div key={resource.crd.plural} className={styles.chartColumn} hidden={!items.length}>
+          <PieChart
+            title={resource.crd.title}
+            objects={items}
+            onTitleClick={() => void extension.navigate(resource.crd.singular)}
+          />
+        </div>
+      );
     },
-    [getCrd],
+    [getCrd, extension],
   );
 
   useEffect(() => {
@@ -101,14 +111,14 @@ export const OverviewPage = observer((_props: OverviewPageProps) => {
 
       const namespaces = namespaceStore.items.map((ns) => ns.getName());
 
-      for (const resource of resources) {
+      for (const versions of kinds) {
+        const store = getAvailableResource(versions)?.store;
+        if (!store) continue;
         try {
-          const store = resource.getStore();
-          if (!store) continue;
           await store.loadAll({ namespaces, reqInit: { signal } });
           watches.current.push(store.subscribe());
         } catch (_) {
-          continue;
+          // a kind that fails to load has no chart
         }
       }
 
@@ -136,22 +146,19 @@ export const OverviewPage = observer((_props: OverviewPageProps) => {
   }
 
   return (
-    <>
-      <style>{stylesInline}</style>
-      <TabLayout>
-        <div className={styles.overviewContent}>
-          <header>
-            <h5>Gateway API Overview</h5>
-            <NamespaceSelectFilter id="gateway-api-overview-namespace-select-filter-input" />
-          </header>
+    <TabLayout>
+      <div className={styles.overviewContent}>
+        <header>
+          <h5>Gateway API Overview</h5>
+          <NamespaceSelectFilter id="gateway-api-overview-namespace-select-filter-input" />
+        </header>
 
-          <div className={styles.overviewStatuses}>
-            <div className={styles.statuses}>{resources.map((resource) => getChart(resource))}</div>
-          </div>
-
-          <GatewayApiEvents compact compactLimit={100} />
+        <div className={styles.overviewStatuses}>
+          <div className={styles.statuses}>{kinds.map((versions) => getChart(versions))}</div>
         </div>
-      </TabLayout>
-    </>
+
+        <GatewayApiEvents compact compactLimit={100} />
+      </div>
+    </TabLayout>
   );
 });

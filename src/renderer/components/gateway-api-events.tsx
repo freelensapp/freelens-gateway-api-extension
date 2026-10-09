@@ -84,7 +84,7 @@ export const GatewayApiEvents = observer((props: GatewayApiEventsProps) => {
 
   const visibleItems = compact ? items.slice(0, compactLimit) : items;
 
-  const customizeHeader = ({ info, title, ...headerPlaceholders }: any) => {
+  const customizeHeader: Renderer.Component.HeaderCustomizer = ({ info, title, ...headerPlaceholders }) => {
     const allEventsAreShown = visibleItems.length === items.length;
 
     if (compact) {
