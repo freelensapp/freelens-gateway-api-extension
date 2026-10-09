@@ -35,6 +35,7 @@ import { UDPRouteDetails as UDPRouteDetails_v1 } from "./details/k8s/udp-route-d
 import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/k8s/udp-route-details-v1alpha2";
 import { XBackendTrafficPolicyDetails as XBackendTrafficPolicyDetails_v1alpha1 } from "./details/x-k8s/x-backend-traffic-policy-details-v1alpha1";
 import { XMeshDetails as XMeshDetails_v1alpha1 } from "./details/x-k8s/xmesh-details-v1alpha1";
+import { ensureStoresRegistered } from "./ensure-stores";
 import { GatewayApiIcon } from "./icons";
 import { BackendTLSPoliciesPage as BackendTLSPoliciesPage_v1 } from "./pages/k8s/backend-tls-policies-page-v1";
 import { GatewayClassesPage as GatewayClassesPage_v1 } from "./pages/k8s/gateway-classes-page-v1";
@@ -54,7 +55,9 @@ import { XBackendTrafficPoliciesPage as XBackendTrafficPoliciesPage_v1alpha1 } f
 import { XMeshesPage as XMeshesPage_v1alpha1 } from "./pages/x-k8s/xmeshes-page-v1alpha1";
 
 export default class GatewayApiRenderer extends Renderer.LensExtension {
-  async onActivate() {}
+  async onActivate() {
+    ensureStoresRegistered();
+  }
 
   kubeObjectDetailItems = [
     {
