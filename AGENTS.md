@@ -159,7 +159,10 @@ A kind served in more than one API version has one model class per version (`TCP
 The host has a store for every served version of a CRD, so the static `getStore()` of every class whose version is
 served returns one, and code that goes over all classes meets such a kind once per served version. Code that shows a
 kind once lists its classes in order of preference and takes the first whose `getStore()` returns a store without
-throwing: `createAvailableVersionPage` for the cluster pages, `getAvailableResource` for the Overview.
+throwing: `createAvailableVersionPage` for the cluster pages, `getAvailableResource` for the Overview. The Overview's
+list of kinds and that function are in `src/renderer/pages/overview-kinds.ts`, apart from the page, so that a test
+covers them without rendering it. A model added to the extension fails that test until it is listed there, or, for a
+kind without status like ReferenceGrant, named in the test as omitted.
 
 The host renders a cluster page with `params` as its only prop. A page that needs the extension instance, as every
 page here does for its error page, is created once at module level and registered as
@@ -407,6 +410,11 @@ The stub's static `getStore()` of `LensExtensionKubeObject` always throws, as
 the host's does for a CRD version it has no API for. A test that needs a version
 to be served spies on `getStore` of that model class
 (`src/renderer/components/available-version.test.tsx`).
+
+The stub's `KubeApi` and `KubeObjectStore` are empty classes. Every model module
+defines its Api and Store classes by extending them, so a test that imports the
+models, as `src/renderer/pages/overview-kinds.test.ts` does, needs them to exist;
+no test calls them.
 
 The root `tsconfig.json` checks the tooling files. It has `checkJs`, so the
 Vite config and the build plugins are type-checked too; give their function
