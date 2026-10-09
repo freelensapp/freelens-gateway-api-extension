@@ -108,13 +108,11 @@ export const ListenerSetDetails = observer((props: Renderer.Component.KubeObject
               <DrawerItem name="TLS Mode" hidden={!listener.tls}>
                 {listener.tls?.mode ?? "Terminate"}
               </DrawerItem>
-              <DrawerItem name="TLS Certs" hidden={!listener.tls?.certificateRefs?.length}>
+              <DrawerItem name="TLS Certs" hidden={!listener.tls?.certificateRefs?.length} labelsOnly>
                 {listener.tls?.certificateRefs?.map((certificateRef) => (
-                  <LinkToSecret
-                    key={`${certificateRef.name}-${certificateRef.namespace ?? objectNs}`}
-                    name={certificateRef.name}
-                    namespace={certificateRef.namespace ?? objectNs}
-                  />
+                  <div key={`${certificateRef.name}-${certificateRef.namespace ?? objectNs}`}>
+                    <LinkToSecret name={certificateRef.name} namespace={certificateRef.namespace ?? objectNs} />
+                  </div>
                 ))}
               </DrawerItem>
               <DrawerItemLabels
