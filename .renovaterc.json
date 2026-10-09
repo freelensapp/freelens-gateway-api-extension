@@ -69,16 +69,6 @@
       "groupName": "Freelens"
     },
     {
-      "description": "pnpm takes the version of packageManager in the root package.json of Freelens on main. The custom datasource has no release dates, so minimumReleaseAge is off.",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["packageManager"],
-      "matchDepNames": ["pnpm"],
-      "overrideDatasource": "custom.freelens-package-manager",
-      "rangeStrategy": "replace",
-      "minimumReleaseAge": "0 days",
-      "groupName": "Freelens"
-    },
-    {
       "description": "Tools run with pnpm dlx, and the Biome and Prettier that Trunk runs, take the version Freelens runs with pnpm dlx in the scripts of its root package.json on main, except the ones excluded with ! here, which Freelens does not run. The custom datasource has no release dates, so minimumReleaseAge is off.",
       "matchManagers": ["custom.regex"],
       "matchFileNames": ["package.json", ".trunk/trunk.yaml"],
@@ -150,14 +140,6 @@
       "defaultRegistryUrlTemplate": "https://raw.githubusercontent.com/freelensapp/freelens/main/pnpm-workspace.yaml",
       "format": "yaml",
       "transformTemplates": ["{\"releases\": [{\"version\": catalog.`{{{packageName}}}`}]}"]
-    },
-    "freelens-package-manager": {
-      "description": "The pnpm version of packageManager in the root package.json of Freelens on main, without the hash.",
-      "defaultRegistryUrlTemplate": "https://raw.githubusercontent.com/freelensapp/freelens/main/package.json",
-      "format": "json",
-      "transformTemplates": [
-        "{\"releases\": [{\"version\": $substringBefore($substringAfter(packageManager, \"{{{packageName}}}@\"), \"+\")}]}"
-      ]
     },
     "freelens-dlx": {
       "description": "The version of a tool that a script in the root package.json of Freelens on main runs with pnpm dlx: the text after `dlx <name>@` up to the next space or the end of the script.",

@@ -32,8 +32,13 @@ with the `@freelensapp/extensions` nightly. A dependency added to
 `package.json` follows the Freelens catalog unless the catalog rule excludes
 it; one that Freelens does not have must be excluded there, or its lookup fails
 on the Dependency Dashboard. What Freelens does not define (GitHub Actions, the
-tool versions in the workflows, `shx`) Renovate updates as usual. Lock file
-maintenance runs for `mise.lock` only. `.renovaterc.json` is plain JSON: each
+tool versions in the workflows, `shx`) Renovate updates as usual.
+pnpm is the exception: Renovate updates it from the npm registry, in a pull
+request of its own, and not to the version of Freelens's `packageManager`.
+`packageManager` carries a Corepack hash (`+sha512.…`), and Renovate updates
+the hash only from the digest of the new version, which the registry has and a
+custom datasource does not; without it the update fails with "no valid digest
+available". Lock file maintenance runs for `mise.lock` only. `.renovaterc.json` is plain JSON: each
 rule explains itself in its `description`.
 
 `mise.lock` pins a checksum and a URL per tool for all eight platforms; after
