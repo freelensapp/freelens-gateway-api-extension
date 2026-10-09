@@ -6,5 +6,5 @@
     "jsx": "react-jsx",
     "allowArbitraryExtensions": true
   },
-  "include": ["./**/*.test.ts", "./**/*.test.tsx"]
+  "include": ["./**/*.test.ts", "./**/*.test.tsx", "../test/**/*"]
 }

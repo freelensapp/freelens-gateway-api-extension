@@ -59,7 +59,7 @@ in the tree (`pnpm why <name>`; `pnpm dedupe` after an update).
 # Type checking
 pnpm type:check           # All programs below, in this order
 pnpm type:check:sources   # src/main, src/renderer, src/common
-pnpm type:check:tests     # *.test.ts(x) under src/
+pnpm type:check:tests     # *.test.ts(x) under src/, and test/
 pnpm type:check:tooling   # Vite, Vitest and SVGO configs, build/
 pnpm type:check:environments # environment-tests/
 
@@ -227,7 +227,8 @@ MobX 7 supports standard decorators only, and Oxc, which transpiles TypeScript
 for Vite, passes them through unlowered, while neither Node nor Chromium runs
 them yet. `build/vite-plugin-standard-decorators.mjs`, copied from Freelens,
 hands every module with a decorator to esbuild first, which lowers the
-decorators and their `accessor` fields. A decorator that reaches the host
+decorators and their `accessor` fields. `vite.config.mjs` and
+`vitest.config.ts` both use it. A decorator that reaches the host or a test
 unlowered is a syntax error when the module is evaluated.
 
 An observable field is an `accessor` (`@observable accessor enabled = false;`),
@@ -257,7 +258,7 @@ does not have fails `pnpm type:check` rather than the extension:
 | `src/main/tsconfig.json`     | ES2024                    | `node`                | `src/main/`, `src/common/`                                         |
 | `src/renderer/tsconfig.json` | ES2024, DOM, DOM.Iterable | `vite/client`         | `src/renderer/`, `src/common/`                                     |
 | `src/common/tsconfig.json`   | ES2024, WebWorker         | none                  | `src/common/`                                                      |
-| `src/tsconfig.json`          | ES2024, DOM, DOM.Iterable | `node`, `vite/client` | `*.test.ts(x)` under `src/`                                        |
+| `src/tsconfig.json`          | ES2024, DOM, DOM.Iterable | `node`, `vite/client` | `*.test.ts(x)` under `src/`, and `test/`                           |
 | `tsconfig.json`              | ES2024                    | `node`                | `vite.config.mjs`, `vitest.config.ts`, `svgo.config.mjs`, `build/` |
 
 The three source configs exclude the test files. All configs extend
@@ -325,20 +326,49 @@ declaration with `pnpm patch`.
 
 ### Tests and tooling
 
-Tests are not in the environment programs. Vitest runs them in Node, so
-`src/tsconfig.json` gives them Node, and the DOM for the renderer code they
-import. It sits in `src/` so that an editor finds it for a test file: the
+Tests are not in the environment programs. Vitest runs them in Node, with
+jsdom for files that ask for it, so `src/tsconfig.json` gives them the DOM and
+Node. It sits in `src/` so that an editor finds it for a test file: the
 environment config next to the test excludes it, and the editor goes on to the
 next `tsconfig.json` up the tree. Tests compile against the real
-`@freelensapp/extensions` declaration.
+`@freelensapp/extensions` declaration, while Vitest replaces the package with
+`test/freelens-extensions.ts` at runtime.
 
 No config declares the Vitest globals. TypeScript has no per-file globals, so
 declaring `describe` or `vi` for tests would declare them for every file in the
-program. Test files import what they use:
+program. Test and test-support files import what they use:
 
 ```ts
 import { describe, expect, it, vi } from "vitest";
 ```
+
+The module resolves from every program, so Biome keeps it out of the
+extension's code: `style/noRestrictedImports` rejects an import of `vitest`
+outside `src/**/*.test.*`, `test/` and `integration/`. `globals: true` stays on
+in `vitest.config.ts` at runtime only, because React Testing Library registers
+its automatic cleanup only when `afterEach` is a global.
+
+The default environment is `node`. A test that renders a component starts with
+`// @vitest-environment jsdom` and uses React Testing Library
+(`src/renderer/components/error-page.test.tsx`). Vitest does not compile the
+stylesheets; a CSS module import gives hashed class names
+(`_errorPage_f24b79`), so tests find elements by text or role, not by class.
+
+`@freelensapp/extensions` is stubbed because the real package cannot run in a
+test: it is a shim that reads `Common`, `Main` and `Renderer` off
+`globalThis.FreelensExtensionApi`, which only the host sets, and it ships no
+mocks. The `alias` in `vitest.config.ts` points the import at
+`test/freelens-extensions.ts`, for the tests and for the extension code they
+import. The stub covers only what the tests use, at runtime only; the type
+check still uses the real declaration. So a test that reaches a member the stub
+lacks compiles and fails on `undefined`: add the member to the stub, as small as
+the test needs. The other host modules are not stubbed: `react`, `mobx` and
+`mobx-react` resolve to the devDependencies, the host's versions.
+
+The stub's static `getStore()` of `LensExtensionKubeObject` always throws, as
+the host's does for a CRD version it has no API for. A test that needs a version
+to be served spies on `getStore` of that model class
+(`src/renderer/components/available-version.test.tsx`).
 
 The root `tsconfig.json` checks the tooling files. It has `checkJs`, so the
 Vite config and the build plugins are type-checked too; give their function
