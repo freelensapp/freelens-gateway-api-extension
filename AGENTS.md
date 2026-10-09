@@ -193,7 +193,10 @@ A kind served in more than one API version has one model class per version (`TCP
 The host has a store for every served version of a CRD, so the static `getStore()` of every class whose version is
 served returns one, and code that goes over all classes meets such a kind once per served version. Code that shows a
 kind once lists its classes in order of preference and takes the first whose `getStore()` returns a store without
-throwing: `createAvailableVersionPage` for the cluster pages, `getAvailableResource` for the Overview. The Overview's
+throwing: `createAvailableVersionPage` for the cluster pages, `getAvailableResource` for the Overview. A component
+that makes this choice is an `observer`. `getStore()` reads the host's observable API registry, which fills in only
+after the cluster frame has loaded the CRDs, and Freelens restores the last page when a cluster is opened, so a page
+rendered before that would otherwise keep showing the kind as not installed. The Overview's
 list of kinds and that function are in `src/renderer/pages/overview-kinds.ts`, apart from the page, so that a test
 covers them without rendering it. A model added to the extension fails that test until it is listed there, or, for a
 kind without status like ReferenceGrant, named in the test as omitted.
@@ -260,6 +263,10 @@ mechanism; this is the list to check a change against.
 - **A kind served in two versions is shown once.** Code that goes over all
   model classes meets it once per served version; take the first served
   version in order of preference ("CRD KubeObject Pattern").
+- **A component that chooses the served version is an `observer`.** The
+  host registers the APIs after the cluster frame starts; a page rendered
+  earlier shows the kind as not installed until it is opened again
+  ("CRD KubeObject Pattern").
 - **A cluster page gets the extension from its registration.** The host passes
   `params` only. The type check rejects a page that requires another prop, but
   not one that declares it optional ("CRD KubeObject Pattern").

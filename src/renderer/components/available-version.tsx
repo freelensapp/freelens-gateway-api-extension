@@ -1,4 +1,5 @@
 import { Common, Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import styles from "./available-version.module.scss";
 
 export interface AvailableVersionPageProps {
@@ -20,6 +21,10 @@ interface VersionVariant<T extends AvailableVersionPageProps> {
  * Tries versions in order and renders the first available one.
  * Shows a helpful message if no versions are available (CRD not installed).
  *
+ * The component is an observer: `getStore()` reads the host's observable API registry, so the page renders again
+ * when the host registers an API after the page was first rendered, as it does for a page opened while the cluster
+ * frame is still loading its CRDs.
+ *
  * @param resourceName - Human-readable resource name (e.g., "OCI Repositories")
  * @param variants - Array of version variants, ordered by preference
  * @returns A page component that auto-detects a valid API version if present
@@ -39,7 +44,7 @@ export function createAvailableVersionPage<T extends AvailableVersionPageProps>(
   resourceName: string,
   variants: VersionVariant<T>[],
 ): React.ComponentType<T> {
-  return (props: T) => {
+  return observer((props: T) => {
     for (const variant of variants) {
       try {
         const store = variant.kubeObjectClass.getStore();
@@ -75,5 +80,5 @@ export function createAvailableVersionPage<T extends AvailableVersionPageProps>(
         </div>
       </div>
     );
-  };
+  });
 }

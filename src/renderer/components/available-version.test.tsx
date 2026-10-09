@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 
 import { Renderer } from "@freelensapp/extensions";
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
+import { observable, runInAction } from "mobx";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { type AvailableVersionPageProps, createAvailableVersionPage } from "./available-version";
 
@@ -59,5 +60,26 @@ describe("createAvailableVersionPage", () => {
 
     expect(screen.getByText("Routes Not Available")).toBeDefined();
     expect(screen.getByText("v1, v1alpha2")).toBeDefined();
+  });
+
+  it("renders the version's page once the host serves it after the first render", () => {
+    // The host's `getStore()` reads its observable API registry. The spy reads an
+    // observable in its place, so that serving the version is a change the page sees.
+    const served = observable.box(false);
+    vi.spyOn(Route_v1, "getStore").mockImplementation(() => {
+      if (!served.get()) {
+        throw new Error("no API for Route_v1");
+      }
+      return {} as Renderer.K8sApi.KubeObjectStore<any, any, any>;
+    });
+
+    render(<RoutesPage extension={extension} />);
+
+    expect(screen.getByText("Routes Not Available")).toBeDefined();
+
+    act(() => runInAction(() => served.set(true)));
+
+    expect(screen.getByText("v1 page of gateway-api-extension")).toBeDefined();
+    expect(screen.queryByText("Routes Not Available")).toBeNull();
   });
 });
