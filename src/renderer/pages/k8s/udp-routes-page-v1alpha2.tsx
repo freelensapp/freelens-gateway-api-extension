@@ -1,7 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { UDPRoute } from "../../api/k8s/udp-route-v1alpha2";
 import { withErrorPage } from "../../components/error-page";
-import { observer } from "../../observer";
 import { type GatewayPageProps, namespaceCell } from "./shared";
 import styles from "./udp-routes-page-v1alpha2.module.scss";
 import stylesInline from "./udp-routes-page-v1alpha2.module.scss?inline";

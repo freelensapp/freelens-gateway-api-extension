@@ -1,6 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { withErrorPage } from "../../components/error-page";
-import { observer } from "../../observer";
 import { type GatewayPageProps, namespaceCell } from "./shared";
 
 const {

@@ -1,7 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { HTTPRoute } from "../../api/k8s";
 import { withErrorPage } from "../../components/error-page";
-import { observer } from "../../observer";
 import styles from "./http-routes-page-v1.module.scss";
 import stylesInline from "./http-routes-page-v1.module.scss?inline";
 import { type GatewayPageProps, namespaceCell } from "./shared";

@@ -1,6 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { Gateway } from "../../api/k8s";
-import { observer } from "../../observer";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 

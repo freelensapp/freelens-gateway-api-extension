@@ -1,12 +1,10 @@
 import { Renderer } from "@freelensapp/extensions";
 
-import type { Condition } from "@freelensapp/kube-object";
-
 export interface GatewayKubeObjectCRD extends Renderer.K8sApi.LensExtensionKubeObjectCRD {
   title: string;
 }
 
-export interface GatewayCondition extends Condition {
+export interface GatewayCondition extends Renderer.K8sApi.Condition {
   type: "Accepted" | "Programmed" | "Ready";
 }
 
@@ -95,7 +93,7 @@ export interface RouteStatus {
 export interface PolicyAncestorStatus {
   ancestorRef: ParentReference;
   controllerName: string;
-  conditions?: Condition[];
+  conditions?: Renderer.K8sApi.Condition[];
 }
 
 export interface PolicyStatus {

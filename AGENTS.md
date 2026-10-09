@@ -90,15 +90,13 @@ pnpm clean:all            # Clean everything (dist, dts, node_modules, tgz)
 
 ```text
 src/
-  main/index.ts            # Extension entry point (main process, CJS)
-  renderer/index.tsx       # Extension entry point (renderer process, CJS)
+  main/index.ts            # Extension entry point (main process, ESM)
+  renderer/index.tsx       # Extension entry point (renderer process, ESM)
   renderer/k8s/gateway-api/ # K8s object model classes (one file per CRD)
   renderer/details/gateway-api/ # Detail view components for CRDs
   renderer/pages/gateway-api/  # Cluster page components
   renderer/components/      # Shared components
   renderer/icons/           # SVG icons
-  renderer/observer.ts      # MobX observer helper
-  renderer/utils.ts         # Utility functions (e.g., createHash)
   common/utils.ts           # Common utilities (e.g., maybe)
 ```
 
@@ -143,13 +141,29 @@ export class GatewayStore extends Renderer.K8sApi.KubeObjectStore<Gateway, Gatew
 
 Each CRD file exports three classes: the KubeObject, the KubeApi, and the KubeObjectStore. They are registered in `src/renderer/index.tsx` via `kubeObjectDetailItems`, `clusterPages`, and `clusterPageMenus`.
 
+Kubernetes types that the models share with the host, such as `Condition`, `LabelSelector` and `ObjectReference`,
+come from `Renderer.K8sApi` (`Renderer.K8sApi.Condition`).
+
+The host renders a cluster page with `params` as its only prop. A page that needs the extension instance, as every
+page here does for its error page, is created once at module level and registered as
+`Page: () => <Page extension={this} />`. Creating it inside the `clusterPages` initializer with `this` as an argument
+makes TypeScript infer the field circularly (TS7022).
+
 ## Renderer Components
 
-- Detail views use the `observer` wrapper from `../../observer` (re-exports MobX `observer`).
+- Components that read observables are wrapped in `observer` from `mobx-react`. The build resolves `mobx-react` to the
+  host's instance (see "Modules provided by the host"), so the components react to the host's stores.
+- React keys derived from an object's content come from `Renderer.Util.createReactKey`. It serializes with
+  `JSON.stringify`, so it throws for `undefined`, and the key depends on the order of the object's keys.
+- A component imports its CSS module for the class names. The rules reach the page through `renderer.css` (see
+  "CSS"), so there is no `?inline` copy and no `<style>` tag.
 - SCSS modules get TypeScript declarations (`*.module.d.scss.ts`) from `vite-plugin-sass-dts`, written during the
   renderer build. They are committed; commit the regenerated file with a change to its SCSS module. `pnpm clean:dts`
-  removes them.
-- Common detail view styles are in `src/renderer/details/gateway-api/common.module.scss`.
+  removes them. A failed renderer build can leave some of them empty, because the process exits while the plugin is
+  still writing; `pnpm type:check` then fails with TS2306 (`is not a module`). The next passing build rewrites them;
+  run `git status` after a failed build and do not commit an empty declaration.
+- Common detail view styles are in `src/renderer/details/k8s/common.module.scss` and
+  `src/renderer/details/x-k8s/common.module.scss`.
 
 ## Build
 

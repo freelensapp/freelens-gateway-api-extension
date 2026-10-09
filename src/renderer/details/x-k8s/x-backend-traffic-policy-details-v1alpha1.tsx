@@ -1,12 +1,12 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { XBackendTrafficPolicy } from "../../api/x-k8s";
-import { observer } from "../../observer";
-import { createHash } from "../../utils";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 
 const {
   Component: { DrawerItem, DrawerTitle, LinkToObject, Table, TableCell, TableHead, TableRow },
+  Util: { createReactKey },
 } = Renderer;
 
 export const XBackendTrafficPolicyDetails = observer(
@@ -29,16 +29,14 @@ export const XBackendTrafficPolicyDetails = observer(
                 <TableCell>Name</TableCell>
               </TableHead>
               {targetRefs.map((targetRef) => {
-                const key = createHash(targetRef);
+                const key = createReactKey(targetRef);
 
                 return (
                   <TableRow key={key} nowrap>
                     <TableCell>{targetRef.group || "-"}</TableCell>
                     <TableCell>{targetRef.kind}</TableCell>
                     <TableCell>
-                      <LinkToObject objectRef={targetRef} object={object}>
-                        {targetRef.name}
-                      </LinkToObject>
+                      <LinkToObject objectRef={targetRef} object={object} />
                     </TableCell>
                   </TableRow>
                 );

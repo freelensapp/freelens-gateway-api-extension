@@ -1,12 +1,12 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { UDPRoute } from "../../api/k8s/udp-route-v1";
-import { observer } from "../../observer";
-import { createHash } from "../../utils";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Icon, Table, TableCell, TableHead, TableRow },
+  Util: { createReactKey },
 } = Renderer;
 
 function isAccepted(object: UDPRoute): boolean {
@@ -44,7 +44,7 @@ export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
             {parentRefs.map((parentRef) => {
               const namespace = parentRef.namespace || objectNs;
               const kind = parentRef.kind ?? "Gateway";
-              const key = createHash(parentRef);
+              const key = createReactKey(parentRef);
 
               return (
                 <TableRow key={key} nowrap>
@@ -75,7 +75,7 @@ export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
           <>
             <DrawerTitle>Rules</DrawerTitle>
             {rules.map((rule, index) => {
-              const key = createHash(rule);
+              const key = createReactKey(rule);
               return (
                 <div key={key}>
                   <div className={styles.title}>
@@ -95,7 +95,7 @@ export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
                         {rule.backendRefs.map((backend) => {
                           const kind = backend.kind ?? "Service";
                           const namespace = backend.namespace || objectNs;
-                          const key = createHash(backend);
+                          const key = createReactKey(backend);
 
                           return (
                             <TableRow key={key} nowrap>

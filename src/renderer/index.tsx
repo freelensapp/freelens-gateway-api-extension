@@ -53,6 +53,65 @@ import { OverviewPage } from "./pages/overview";
 import { XBackendTrafficPoliciesPage as XBackendTrafficPoliciesPage_v1alpha1 } from "./pages/x-k8s/x-backend-traffic-policies-page-v1alpha1";
 import { XMeshesPage as XMeshesPage_v1alpha1 } from "./pages/x-k8s/xmeshes-page-v1alpha1";
 
+const GatewayClassesPage = createAvailableVersionPage("Gateway Classes", [
+  { kubeObjectClass: GatewayClass_v1, PageComponent: GatewayClassesPage_v1, version: "v1" },
+]);
+
+const GatewaysPage = createAvailableVersionPage("Gateways", [
+  { kubeObjectClass: Gateway_v1, PageComponent: GatewaysPage_v1, version: "v1" },
+]);
+
+const HTTPRoutesPage = createAvailableVersionPage("HTTP Routes", [
+  { kubeObjectClass: HTTPRoute_v1, PageComponent: HTTPRoutesPage_v1, version: "v1" },
+]);
+
+const GRPCRoutesPage = createAvailableVersionPage("gRPC Routes", [
+  { kubeObjectClass: GRPCRoute_v1, PageComponent: GRPCRoutesPage_v1, version: "v1" },
+]);
+
+const TCPRoutesPage = createAvailableVersionPage("TCP Routes", [
+  { kubeObjectClass: TCPRoute_v1, PageComponent: TCPRoutesPage_v1, version: "v1" },
+  { kubeObjectClass: TCPRoute_v1alpha2, PageComponent: TCPRoutesPage_v1alpha2, version: "v1alpha2" },
+]);
+
+const TLSRoutesPage = createAvailableVersionPage("TLS Routes", [
+  { kubeObjectClass: TLSRoute_v1, PageComponent: TLSRoutesPage_v1, version: "v1" },
+]);
+
+const UDPRoutesPage = createAvailableVersionPage("UDP Routes", [
+  { kubeObjectClass: UDPRoute_v1, PageComponent: UDPRoutesPage_v1, version: "v1" },
+  { kubeObjectClass: UDPRoute_v1alpha2, PageComponent: UDPRoutesPage_v1alpha2, version: "v1alpha2" },
+]);
+
+const ReferenceGrantsPage = createAvailableVersionPage("Reference Grants", [
+  { kubeObjectClass: ReferenceGrant_v1, PageComponent: ReferenceGrantsPage_v1, version: "v1" },
+  { kubeObjectClass: ReferenceGrant_v1beta1, PageComponent: ReferenceGrantsPage_v1beta1, version: "v1beta1" },
+]);
+
+const ListenerSetsPage = createAvailableVersionPage("Listener Sets", [
+  { kubeObjectClass: ListenerSet_v1, PageComponent: ListenerSetsPage_v1, version: "v1" },
+]);
+
+const BackendTLSPoliciesPage = createAvailableVersionPage("Backend TLS Policies", [
+  { kubeObjectClass: BackendTLSPolicy_v1, PageComponent: BackendTLSPoliciesPage_v1, version: "v1" },
+]);
+
+const XBackendTrafficPoliciesPage = createAvailableVersionPage("Backend Traffic Policies", [
+  {
+    kubeObjectClass: XBackendTrafficPolicy_v1alpha1,
+    PageComponent: XBackendTrafficPoliciesPage_v1alpha1,
+    version: "v1alpha1",
+  },
+]);
+
+const XMeshesPage = createAvailableVersionPage("Meshes", [
+  {
+    kubeObjectClass: XMesh_v1alpha1,
+    PageComponent: XMeshesPage_v1alpha1,
+    version: "v1alpha1",
+  },
+]);
+
 export default class GatewayApiRenderer extends Renderer.LensExtension {
   async onActivate() {}
 
@@ -187,114 +246,79 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
     {
       id: "overview",
       components: {
-        Page: (props: { extension: Renderer.LensExtension }) => <OverviewPage {...props} />,
+        Page: () => <OverviewPage extension={this} />,
       },
     },
     {
       id: "gatewayclass",
       components: {
-        Page: createAvailableVersionPage("Gateway Classes", [
-          { kubeObjectClass: GatewayClass_v1, PageComponent: GatewayClassesPage_v1, version: "v1" },
-        ]),
+        Page: () => <GatewayClassesPage extension={this} />,
       },
     },
     {
       id: "gateway",
       components: {
-        Page: createAvailableVersionPage("Gateways", [
-          { kubeObjectClass: Gateway_v1, PageComponent: GatewaysPage_v1, version: "v1" },
-        ]),
+        Page: () => <GatewaysPage extension={this} />,
       },
     },
     {
       id: "httproute",
       components: {
-        Page: createAvailableVersionPage("HTTP Routes", [
-          { kubeObjectClass: HTTPRoute_v1, PageComponent: HTTPRoutesPage_v1, version: "v1" },
-        ]),
+        Page: () => <HTTPRoutesPage extension={this} />,
       },
     },
     {
       id: "grpcroute",
       components: {
-        Page: createAvailableVersionPage("gRPC Routes", [
-          { kubeObjectClass: GRPCRoute_v1, PageComponent: GRPCRoutesPage_v1, version: "v1" },
-        ]),
+        Page: () => <GRPCRoutesPage extension={this} />,
       },
     },
     {
       id: "tcproute",
       components: {
-        Page: createAvailableVersionPage("TCP Routes", [
-          { kubeObjectClass: TCPRoute_v1, PageComponent: TCPRoutesPage_v1, version: "v1" },
-          { kubeObjectClass: TCPRoute_v1alpha2, PageComponent: TCPRoutesPage_v1alpha2, version: "v1alpha2" },
-        ]),
+        Page: () => <TCPRoutesPage extension={this} />,
       },
     },
     {
       id: "tlsroute",
       components: {
-        Page: createAvailableVersionPage("TLS Routes", [
-          { kubeObjectClass: TLSRoute_v1, PageComponent: TLSRoutesPage_v1, version: "v1" },
-        ]),
+        Page: () => <TLSRoutesPage extension={this} />,
       },
     },
     {
       id: "udproute",
       components: {
-        Page: createAvailableVersionPage("UDP Routes", [
-          { kubeObjectClass: UDPRoute_v1, PageComponent: UDPRoutesPage_v1, version: "v1" },
-          { kubeObjectClass: UDPRoute_v1alpha2, PageComponent: UDPRoutesPage_v1alpha2, version: "v1alpha2" },
-        ]),
+        Page: () => <UDPRoutesPage extension={this} />,
       },
     },
     {
       id: "referencegrant",
       components: {
-        Page: createAvailableVersionPage("Reference Grants", [
-          { kubeObjectClass: ReferenceGrant_v1, PageComponent: ReferenceGrantsPage_v1, version: "v1" },
-          { kubeObjectClass: ReferenceGrant_v1beta1, PageComponent: ReferenceGrantsPage_v1beta1, version: "v1beta1" },
-        ]),
+        Page: () => <ReferenceGrantsPage extension={this} />,
       },
     },
     {
       id: "listenerset",
       components: {
-        Page: createAvailableVersionPage("Listener Sets", [
-          { kubeObjectClass: ListenerSet_v1, PageComponent: ListenerSetsPage_v1, version: "v1" },
-        ]),
+        Page: () => <ListenerSetsPage extension={this} />,
       },
     },
     {
       id: "backendtlspolicy",
       components: {
-        Page: createAvailableVersionPage("Backend TLS Policies", [
-          { kubeObjectClass: BackendTLSPolicy_v1, PageComponent: BackendTLSPoliciesPage_v1, version: "v1" },
-        ]),
+        Page: () => <BackendTLSPoliciesPage extension={this} />,
       },
     },
     {
       id: "xbackendtrafficpolicy",
       components: {
-        Page: createAvailableVersionPage("Backend Traffic Policies", [
-          {
-            kubeObjectClass: XBackendTrafficPolicy_v1alpha1,
-            PageComponent: XBackendTrafficPoliciesPage_v1alpha1,
-            version: "v1alpha1",
-          },
-        ]),
+        Page: () => <XBackendTrafficPoliciesPage extension={this} />,
       },
     },
     {
       id: "xmesh",
       components: {
-        Page: createAvailableVersionPage("Meshes", [
-          {
-            kubeObjectClass: XMesh_v1alpha1,
-            PageComponent: XMeshesPage_v1alpha1,
-            version: "v1alpha1",
-          },
-        ]),
+        Page: () => <XMeshesPage extension={this} />,
       },
     },
   ];

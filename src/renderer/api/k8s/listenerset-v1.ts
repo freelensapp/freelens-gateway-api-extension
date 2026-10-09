@@ -2,8 +2,6 @@ import { Renderer } from "@freelensapp/extensions";
 import { type AllowedRoutes, type ListenerTLSConfig, type ProtocolType, type RouteGroupKind } from "./gateway-v1";
 import { type GatewayKubeObjectCRD } from "./types";
 
-import type { Condition } from "@freelensapp/kube-object";
-
 export interface ParentGatewayReference {
   /** default: `"gateway.networking.k8s.io"` */
   group?: string;
@@ -31,11 +29,11 @@ export interface ListenerEntryStatus {
   name: string;
   supportedKinds?: RouteGroupKind[];
   attachedRoutes: number;
-  conditions?: Condition[];
+  conditions?: Renderer.K8sApi.Condition[];
 }
 
 export interface ListenerSetStatus {
-  conditions?: Condition[];
+  conditions?: Renderer.K8sApi.Condition[];
   listeners?: ListenerEntryStatus[];
 }
 
