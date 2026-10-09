@@ -152,6 +152,12 @@ export class GatewayStore extends Renderer.K8sApi.KubeObjectStore<Gateway, Gatew
 
 Each CRD file exports three classes: the KubeObject, the KubeApi, and the KubeObjectStore. They are registered in `src/renderer/index.tsx` via `kubeObjectDetailItems`, `clusterPages`, and `clusterPageMenus`.
 
+A details component takes `Renderer.Component.KubeObjectDetailsProps<Model>` of its own model class and version, and
+its registration passes it as it is (`Details: GatewayDetails_v1`), not through a wrapper typed
+`KubeObjectDetailsProps<any>`. The registration type has `any` for `spec` and `status`, so the type check accepts any
+details component for any kind: that `kind`, `apiVersions` and `Details` of one entry belong to the same model is up to
+the code.
+
 Kubernetes types that the models share with the host, such as `Condition`, `LabelSelector` and `ObjectReference`,
 come from `Renderer.K8sApi` (`Renderer.K8sApi.Condition`).
 

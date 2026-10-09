@@ -4,7 +4,6 @@ import { TCPRoute } from "../../api/k8s/tcp-route-v1";
 import { withErrorPage } from "../../components/error-page";
 import { type GatewayPageProps, namespaceCell } from "./shared";
 import styles from "./tcp-routes-page-v1.module.scss";
-import stylesInline from "./tcp-routes-page-v1.module.scss?inline";
 
 const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
@@ -23,34 +22,31 @@ export const TCPRoutesPage = observer((props: GatewayPageProps) =>
     const store = TCPRoute.getStore<TCPRoute>();
 
     return (
-      <>
-        <style>{stylesInline}</style>
-        <KubeObjectListLayout<TCPRoute, any>
-          tableId={`${TCPRoute.crd.plural}Table`}
-          className={styles.page}
-          store={store}
-          sortingCallbacks={{
-            name: (item: TCPRoute) => item.getName(),
-            namespace: (item: TCPRoute) => item.getNs() ?? "",
-            accepted: (item: TCPRoute) => String(isAccepted(item)),
-            age: (item: TCPRoute) => item.getCreationTimestamp(),
-          }}
-          searchFilters={[(item: TCPRoute) => item.getSearchFields()]}
-          renderHeaderTitle={TCPRoute.crd.title}
-          renderTableHeader={[
-            { title: "Name", sortBy: "name", className: styles.name },
-            { title: "Namespace", sortBy: "namespace", className: styles.namespace },
-            { title: "Accepted", sortBy: "accepted", className: styles.accepted },
-            { title: "Age", sortBy: "age", className: styles.age },
-          ]}
-          renderTableContents={(item: TCPRoute) => [
-            <WithTooltip>{item.getName()}</WithTooltip>,
-            namespaceCell(item.getNs()),
-            <BadgeBoolean value={isAccepted(item)} />,
-            <KubeObjectAge object={item} key="age" />,
-          ]}
-        />
-      </>
+      <KubeObjectListLayout<TCPRoute, any>
+        tableId={`${TCPRoute.crd.plural}Table`}
+        className={styles.page}
+        store={store}
+        sortingCallbacks={{
+          name: (item: TCPRoute) => item.getName(),
+          namespace: (item: TCPRoute) => item.getNs() ?? "",
+          accepted: (item: TCPRoute) => String(isAccepted(item)),
+          age: (item: TCPRoute) => item.getCreationTimestamp(),
+        }}
+        searchFilters={[(item: TCPRoute) => item.getSearchFields()]}
+        renderHeaderTitle={TCPRoute.crd.title}
+        renderTableHeader={[
+          { title: "Name", sortBy: "name", className: styles.name },
+          { title: "Namespace", sortBy: "namespace", className: styles.namespace },
+          { title: "Accepted", sortBy: "accepted", className: styles.accepted },
+          { title: "Age", sortBy: "age", className: styles.age },
+        ]}
+        renderTableContents={(item: TCPRoute) => [
+          <WithTooltip>{item.getName()}</WithTooltip>,
+          namespaceCell(item.getNs()),
+          <BadgeBoolean value={isAccepted(item)} />,
+          <KubeObjectAge object={item} key="age" />,
+        ]}
+      />
     );
   }),
 );
