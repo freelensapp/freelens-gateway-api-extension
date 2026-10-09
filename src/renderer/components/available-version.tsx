@@ -1,6 +1,5 @@
 import { Common, Renderer } from "@freelensapp/extensions";
 import styles from "./available-version.module.scss";
-import stylesInline from "./available-version.module.scss?inline";
 
 export interface AvailableVersionPageProps {
   extension: Renderer.LensExtension;
@@ -64,20 +63,17 @@ export function createAvailableVersionPage<T extends AvailableVersionPageProps>(
     );
 
     return (
-      <>
-        <style>{stylesInline}</style>
-        <div className={styles.unavailablePage}>
-          <div className={styles.unavailableContent}>
-            <h3 className={styles.unavailableTitle}>{resourceName} Not Available</h3>
-            <p className={styles.unavailableMessage}>
-              The <strong>{resourceName}</strong> CRDs are not installed in this cluster.
-            </p>
-            <p className={styles.unavailableDetails}>
-              Tried API versions: <code>{triedVersions}</code>
-            </p>
-          </div>
+      <div className={styles.unavailablePage}>
+        <div className={styles.unavailableContent}>
+          <h3 className={styles.unavailableTitle}>{resourceName} Not Available</h3>
+          <p className={styles.unavailableMessage}>
+            The <strong>{resourceName}</strong> CRDs are not installed in this cluster.
+          </p>
+          <p className={styles.unavailableDetails}>
+            Tried API versions: <code>{triedVersions}</code>
+          </p>
         </div>
-      </>
+      </div>
     );
   };
 }

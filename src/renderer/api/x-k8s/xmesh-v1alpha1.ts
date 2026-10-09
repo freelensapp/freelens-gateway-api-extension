@@ -2,8 +2,6 @@ import { Renderer } from "@freelensapp/extensions";
 import { type ParametersReference, type SupportedFeature } from "../k8s/gateway-class-v1";
 import { type GatewayKubeObjectCRD } from "../k8s/types";
 
-import type { Condition } from "@freelensapp/kube-object";
-
 export interface MeshSpec {
   controllerName?: string;
   parametersRef?: ParametersReference;
@@ -11,7 +9,7 @@ export interface MeshSpec {
 }
 
 export interface MeshStatus {
-  conditions?: Condition[];
+  conditions?: Renderer.K8sApi.Condition[];
   supportedFeatures?: SupportedFeature[];
 }
 

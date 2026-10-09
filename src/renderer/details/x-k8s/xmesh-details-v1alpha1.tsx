@@ -1,6 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { XMesh } from "../../api/x-k8s";
-import { observer } from "../../observer";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 
@@ -38,9 +38,7 @@ export const XMeshDetails = observer((props: Renderer.Component.KubeObjectDetail
             <DrawerItem name="Group">{object.spec.parametersRef.group}</DrawerItem>
             <DrawerItem name="Kind">{object.spec.parametersRef.kind}</DrawerItem>
             <DrawerItem name="Name">
-              <LinkToObject objectRef={object.spec.parametersRef} object={object}>
-                {object.spec.parametersRef.name}
-              </LinkToObject>
+              <LinkToObject objectRef={object.spec.parametersRef} object={object} />
             </DrawerItem>
             <DrawerItem name="Namespace" hidden={!object.spec.parametersRef.namespace}>
               {object.spec.parametersRef.namespace}

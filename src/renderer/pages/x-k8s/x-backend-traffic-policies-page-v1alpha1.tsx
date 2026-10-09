@@ -1,7 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { XBackendTrafficPolicy } from "../../api/x-k8s";
 import { withErrorPage } from "../../components/error-page";
-import { observer } from "../../observer";
 import { type GatewayPageProps, namespaceCell } from "../k8s/shared";
 import styles from "./x-backend-traffic-policies-page-v1alpha1.module.scss";
 import stylesInline from "./x-backend-traffic-policies-page-v1alpha1.module.scss?inline";

@@ -1,6 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { GatewayClass } from "../../api/k8s";
-import { observer } from "../../observer";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject },
@@ -33,9 +33,7 @@ export const GatewayClassDetails = observer((props: Renderer.Component.KubeObjec
               <DrawerItem name="Group">{object.spec.parametersRef.group}</DrawerItem>
               <DrawerItem name="Kind">{object.spec.parametersRef.kind}</DrawerItem>
               <DrawerItem name="Name">
-                <LinkToObject objectRef={object.spec.parametersRef} object={object}>
-                  {object.spec.parametersRef.name}
-                </LinkToObject>
+                <LinkToObject objectRef={object.spec.parametersRef} object={object} />
               </DrawerItem>
               <DrawerItem name="Namespace" hidden={!object.spec.parametersRef.namespace}>
                 {object.spec.parametersRef.namespace}

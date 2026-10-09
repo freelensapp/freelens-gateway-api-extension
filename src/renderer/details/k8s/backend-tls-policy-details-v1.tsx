@@ -1,12 +1,12 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { BackendTLSPolicy } from "../../api/k8s";
-import { observer } from "../../observer";
-import { createHash } from "../../utils";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Table, TableCell, TableHead, TableRow },
+  Util: { createReactKey },
 } = Renderer;
 
 function isAccepted(object: BackendTLSPolicy): boolean {
@@ -46,7 +46,7 @@ export const BackendTLSPolicyDetails = observer(
                 <TableCell>Name</TableCell>
               </TableHead>
               {targetRefs.map((targetRef) => {
-                const key = createHash(targetRef);
+                const key = createReactKey(targetRef);
 
                 return (
                   <TableRow key={key} nowrap>
@@ -54,9 +54,7 @@ export const BackendTLSPolicyDetails = observer(
                     <TableCell>{targetRef.kind}</TableCell>
                     <TableCell>{targetRef.sectionName ?? "-"}</TableCell>
                     <TableCell>
-                      <LinkToObject objectRef={targetRef} object={object}>
-                        {targetRef.name}
-                      </LinkToObject>
+                      <LinkToObject objectRef={targetRef} object={object} />
                     </TableCell>
                   </TableRow>
                 );
@@ -75,16 +73,14 @@ export const BackendTLSPolicyDetails = observer(
                 <TableCell>Name</TableCell>
               </TableHead>
               {caCertRefs.map((caCertRef) => {
-                const key = createHash(caCertRef);
+                const key = createReactKey(caCertRef);
 
                 return (
                   <TableRow key={key} nowrap>
                     <TableCell>{caCertRef.group || "-"}</TableCell>
                     <TableCell>{caCertRef.kind}</TableCell>
                     <TableCell>
-                      <LinkToObject objectRef={caCertRef} object={object}>
-                        {caCertRef.name}
-                      </LinkToObject>
+                      <LinkToObject objectRef={caCertRef} object={object} />
                     </TableCell>
                   </TableRow>
                 );

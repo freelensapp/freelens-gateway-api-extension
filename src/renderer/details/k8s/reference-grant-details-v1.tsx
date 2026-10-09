@@ -1,10 +1,10 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { ReferenceGrant } from "../../api/k8s";
-import { observer } from "../../observer";
-import { createHash } from "../../utils";
 
 const {
   Component: { DrawerItem, DrawerTitle, Table, TableCell, TableHead, TableRow },
+  Util: { createReactKey },
 } = Renderer;
 
 export const ReferenceGrantDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<ReferenceGrant>) => {
@@ -24,7 +24,7 @@ export const ReferenceGrantDetails = observer((props: Renderer.Component.KubeObj
             <TableCell>Namespace</TableCell>
           </TableHead>
           {object.spec.from.map((entry) => {
-            const key = createHash(entry);
+            const key = createReactKey(entry);
 
             return (
               <TableRow key={key} nowrap>
@@ -47,7 +47,7 @@ export const ReferenceGrantDetails = observer((props: Renderer.Component.KubeObj
             <TableCell>Name</TableCell>
           </TableHead>
           {object.spec.to.map((entry) => {
-            const key = createHash(entry);
+            const key = createReactKey(entry);
 
             return (
               <TableRow key={key} nowrap>

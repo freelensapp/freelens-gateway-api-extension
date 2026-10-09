@@ -1,7 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { ReferenceGrant } from "../../../api/k8s";
 import { withErrorPage } from "../../../components/error-page";
-import { observer } from "../../../observer";
 import { type GatewayPageProps, namespaceCell } from "../shared";
 import styles from "./reference-grants-page.module.scss";
 import stylesInline from "./reference-grants-page.module.scss?inline";

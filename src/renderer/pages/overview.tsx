@@ -1,4 +1,5 @@
 import { Common, Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackendTLSPolicy as BackendTLSPolicy_v1,
@@ -17,7 +18,6 @@ import { XBackendTrafficPolicy as XBackendTrafficPolicy_v1alpha1, XMesh as XMesh
 import { GatewayApiEvents } from "../components/gateway-api-events";
 import { InfoPage } from "../components/info-page";
 import { PieChart } from "../components/pie-chart";
-import { observer } from "../observer";
 import styles from "./overview.module.scss";
 import stylesInline from "./overview.module.scss?inline";
 

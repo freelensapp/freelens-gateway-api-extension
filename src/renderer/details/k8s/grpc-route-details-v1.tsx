@@ -1,12 +1,12 @@
 import { Renderer } from "@freelensapp/extensions";
+import { observer } from "mobx-react";
 import { GRPCRoute } from "../../api/k8s";
-import { observer } from "../../observer";
-import { createHash } from "../../utils";
 import styles from "./common.module.scss";
 import stylesInline from "./common.module.scss?inline";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Icon, Table, TableCell, TableHead, TableRow },
+  Util: { createReactKey },
 } = Renderer;
 
 function isAccepted(object: GRPCRoute): boolean {
@@ -44,7 +44,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
             {parentRefs.map((parentRef) => {
               const namespace = parentRef.namespace || objectNs;
               const kind = parentRef.kind ?? "Gateway";
-              const key = createHash(parentRef);
+              const key = createReactKey(parentRef);
 
               return (
                 <TableRow key={key} nowrap>
@@ -75,7 +75,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
           <>
             <DrawerTitle>Rules</DrawerTitle>
             {rules.map((rule, index) => {
-              const key = createHash(rule);
+              const key = createReactKey(rule);
               return (
                 <div key={key}>
                   <div className={styles.title}>
@@ -87,7 +87,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                   {rule.matches && rule.matches.length > 0 && (
                     <DrawerItem name="Matches">
                       {rule.matches.map((match) => {
-                        const key = createHash(match);
+                        const key = createReactKey(match);
 
                         return (
                           <div key={key} style={{ marginBottom: "10px" }}>
@@ -122,7 +122,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                   {rule.filters && rule.filters.length > 0 && (
                     <DrawerItem name="Filters">
                       {rule.filters.map((filter) => {
-                        const key = createHash(filter);
+                        const key = createReactKey(filter);
                         return <div key={key}>{filter.type}</div>;
                       })}
                     </DrawerItem>
@@ -139,7 +139,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                         {rule.backendRefs.map((backend) => {
                           const kind = backend.kind ?? "Service";
                           const namespace = backend.namespace || objectNs;
-                          const key = createHash(backend);
+                          const key = createReactKey(backend);
 
                           return (
                             <TableRow key={key} nowrap>

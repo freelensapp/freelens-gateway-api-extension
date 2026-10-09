@@ -6,8 +6,6 @@ import {
   type SecretObjectReference,
 } from "./types";
 
-import type { Condition, LabelSelector, ObjectReference } from "@freelensapp/kube-object";
-
 export type ProtocolType = "HTTP" | "HTTPS" | "TCP" | "TLS" | "UDP";
 
 export type FromNamespaces = "All" | "Selector" | "Same" | "None";
@@ -23,7 +21,7 @@ export interface ListenerTLSConfig {
 
 export interface RouteNamespaces {
   from?: FromNamespaces;
-  selector?: LabelSelector;
+  selector?: Renderer.K8sApi.LabelSelector;
 }
 
 export interface RouteGroupKind {
@@ -48,7 +46,7 @@ export interface Listener {
 
 export interface ListenerNamespaces {
   from?: FromNamespaces;
-  selector?: LabelSelector;
+  selector?: Renderer.K8sApi.LabelSelector;
 }
 
 export interface AllowedListeners {
@@ -80,7 +78,7 @@ export interface GatewayBackendTLS {
 export type FrontendValidationModeType = "AllowValidOnly" | "AllowInsecureFallback";
 
 export interface FrontendTLSValidation {
-  caCertificateRefs?: ObjectReference[];
+  caCertificateRefs?: Renderer.K8sApi.ObjectReference[];
   /** default: `"AllowValidOnly"` */
   mode?: FrontendValidationModeType;
 }
@@ -125,7 +123,7 @@ export interface ListenerStatus {
   name: string;
   supportedKinds?: RouteGroupKind[];
   attachedRoutes: number;
-  conditions?: Condition[];
+  conditions?: Renderer.K8sApi.Condition[];
 }
 
 export interface GatewayStatus {

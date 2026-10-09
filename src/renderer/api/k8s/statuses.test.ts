@@ -129,21 +129,18 @@ describe("getStatusCategory", () => {
     ).toBe("NotReady");
   });
 
-  test.each([
-    "GatewayNotProgrammed",
-    "Reconciling",
-    "NotReconciled",
-    "Waiting",
-    "Pending",
-  ])("treats the transient reason %s as InProgress even when the status is False", (reason) => {
-    expect(
-      getStatusCategory({
-        status: {
-          conditions: [{ type: "Programmed", status: "False", reason }],
-        },
-      }),
-    ).toBe("InProgress");
-  });
+  test.each(["GatewayNotProgrammed", "Reconciling", "NotReconciled", "Waiting", "Pending"])(
+    "treats the transient reason %s as InProgress even when the status is False",
+    (reason) => {
+      expect(
+        getStatusCategory({
+          status: {
+            conditions: [{ type: "Programmed", status: "False", reason }],
+          },
+        }),
+      ).toBe("InProgress");
+    },
+  );
 
   test("treats a mix of True and Unknown conditions (no failures) as InProgress", () => {
     expect(
