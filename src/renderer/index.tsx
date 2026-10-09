@@ -225,9 +225,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: XBackendTrafficPolicy_v1alpha1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => (
-          <XBackendTrafficPolicyDetails_v1alpha1 {...props} />
-        ),
+        Details: XBackendTrafficPolicyDetails_v1alpha1,
       },
     },
     {
@@ -235,7 +233,7 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       apiVersions: XMesh_v1alpha1.crd.apiVersions,
       priority: 10,
       components: {
-        Details: (props: Renderer.Component.KubeObjectDetailsProps<any>) => <XMeshDetails_v1alpha1 {...props} />,
+        Details: XMeshDetails_v1alpha1,
       },
     },
   ];
