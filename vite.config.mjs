@@ -12,7 +12,7 @@
 import { builtinModules, isBuiltin } from "node:module";
 import react from "@vitejs/plugin-react";
 import { defaultServerConditions, defaultServerMainFields, defineConfig } from "vite";
-import sassDts from "vite-plugin-sass-dts";
+import { cssModuleDeclarations } from "./build/vite-plugin-css-module-declarations.mjs";
 import { hostModules } from "./build/vite-plugin-host-modules.mjs";
 import { standardDecorators } from "./build/vite-plugin-standard-decorators.mjs";
 
@@ -66,7 +66,8 @@ export default defineConfig(({ mode }) => {
       hostModules(name),
       // JSX with the automatic runtime, so it imports `react/jsx-runtime`.
       react(),
-      ...(name === "renderer" ? [noNodeInRenderer, sassDts({ enabledMode: ["production"] })] : []),
+      // The committed `*.module.d.scss.ts` declarations of the CSS modules.
+      ...(name === "renderer" ? [noNodeInRenderer, cssModuleDeclarations()] : []),
     ],
     css: {
       modules: {

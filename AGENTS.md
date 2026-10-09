@@ -157,11 +157,9 @@ makes TypeScript infer the field circularly (TS7022).
   `JSON.stringify`, so it throws for `undefined`, and the key depends on the order of the object's keys.
 - A component imports its CSS module for the class names. The rules reach the page through `renderer.css` (see
   "CSS"), so there is no `?inline` copy and no `<style>` tag.
-- SCSS modules get TypeScript declarations (`*.module.d.scss.ts`) from `vite-plugin-sass-dts`, written during the
-  renderer build. They are committed; commit the regenerated file with a change to its SCSS module. `pnpm clean:dts`
-  removes them. A failed renderer build can leave some of them empty, because the process exits while the plugin is
-  still writing; `pnpm type:check` then fails with TS2306 (`is not a module`). The next passing build rewrites them;
-  run `git status` after a failed build and do not commit an empty declaration.
+- SCSS modules get TypeScript declarations (`*.module.d.scss.ts`), written during the renderer build (see
+  "CSS module declarations"). They are committed, because `pnpm type:check` runs without a build; commit the
+  regenerated file with a change to its SCSS module. `pnpm clean:dts` removes them.
 - Common detail view styles are in `src/renderer/details/k8s/common.module.scss` and
   `src/renderer/details/x-k8s/common.module.scss`.
 
@@ -244,8 +242,28 @@ that one file (`build.lib.cssFileName`), so a CSS module imported for its class
 names reaches the page through it. A build that emits more than one CSS asset,
 or a differently named one, leaves the extension unstyled; nothing checks it,
 so look at `dist/` after a change to the CSS setup. CSS modules use
-`camelCaseOnly` class names. `vite-plugin-sass-dts` writes the
-`*.module.d.scss.ts` declarations during the renderer run.
+`camelCaseOnly` class names.
+
+### CSS module declarations
+
+`build/vite-plugin-css-module-declarations.mjs` writes `x.module.d.scss.ts`
+next to every `x.module.scss` the renderer build imports, in `vite build` and
+in watch mode. It takes the class names from Vite's own `preprocessCSS`, with
+the build's resolved config, so they are the names the bundle exports, after
+`localsConvention`; a class inside `:global(...)` is not one of them.
+
+The plugin is written so that a build cannot leave a committed declaration
+empty or partial, whether it fails, is interrupted or is killed:
+
+- it awaits its work in `transform`, so the build does not end while a write is
+  pending;
+- it writes a declaration only when the content changed, so a build that
+  changes no stylesheet touches no file;
+- it writes to a temporary `*.tmp` file next to the declaration and renames it
+  over the declaration, which replaces it whole or not at all.
+
+The plugin has no options and no dependency other than Vite, and it refers to
+no path of this repository, so other extensions copy it unchanged.
 
 ## TypeScript
 
