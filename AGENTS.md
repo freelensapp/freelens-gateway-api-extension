@@ -72,7 +72,7 @@ in the tree (`pnpm why <name>`; `pnpm dedupe` after an update).
 ```bash
 # Type checking
 pnpm type:check           # All programs below, in this order
-pnpm type:check:sources   # src/main, src/renderer, src/common
+pnpm type:check:sources   # src/main and src/renderer, each with src/common
 pnpm type:check:tests     # *.test.ts(x) under src/, and test/
 pnpm type:check:tooling   # Vite, Vitest and SVGO configs, build/
 pnpm type:check:environments # environment-tests/
@@ -120,7 +120,6 @@ src/
   renderer/components/           # createAvailableVersionPage, withErrorPage, the pie chart, the events list
   renderer/icons/                # SVG icons, imported with ?raw
   renderer/vars.scss             # SCSS variables
-  common/utils.ts                # maybe()
 test/freelens-extensions.ts      # Runtime stub of @freelensapp/extensions for Vitest
 environment-tests/               # Probes for the per-environment programs
 build/                           # Vite plugins: host modules, standard decorators, CSS module declarations
@@ -416,6 +415,14 @@ uses only what both runtimes have: `globalThis.crypto`, `TextEncoder` and
 `src/common/tsconfig.json` is for the editor, which gives a file to one config
 only. Its `WebWorker` lib is the closest single match and an approximation:
 `self` and `postMessage` compile there and fail in the main program.
+
+`src/common/` has no source file, only that config. `type:check:sources`
+therefore compiles the main and renderer configs only: `tsc` fails on a config
+whose `include` matches no file (TS18003). The common program still runs, in
+`type:check:environments`: `environment-tests/tsconfig.json` extends
+`src/common/tsconfig.json` and keeps its `include`, so common code added later
+is compiled there in the common environment, next to the probes. Keep the
+config when `src/common/` is empty.
 
 The split does not cover the API namespaces: `Main` and `Renderer` compile in
 every program, and the one the process does not have is `undefined` at runtime.
