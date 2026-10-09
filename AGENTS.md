@@ -559,6 +559,12 @@ fails on a target that `biome.jsonc` excludes, and adds the `.cjs` and `.mjs`
 files that Trunk's `javascript` type does not match. Biome's version there is
 the one of the `biome` script in `package.json`.
 
+Both commands also pass `--vcs-use-ignore-file=false`. In Trunk's sandbox,
+Biome 2.5.15 matches every target against the repository's `.gitignore` and
+panics on a path outside the repository root, so every file fails. Trunk
+applies `.gitignore` itself before it picks the targets; `biome.jsonc` keeps
+`vcs.useIgnoreFile` on for `pnpm biome` and editors.
+
 ### Knip
 
 `pnpm knip:check` runs knip twice, for unused files and for dependencies: a
