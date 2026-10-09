@@ -19,18 +19,27 @@ This extension adds support for the
 project that provides expressive, extensible, and role-oriented interfaces
 for service networking, designed as the successor to the Ingress API.
 
-The extension provides cluster pages, list views, and detail panels for all
-standard and experimental Gateway API resources across the
-`gateway.networking.k8s.io` and `gateway.networking.x-k8s.io` API groups.
-Each resource is accessible from the Freelens sidebar, with status
-conditions, spec fields, and related objects displayed in the detail view.
+The extension adds a "Gateway API" entry to the cluster menu, for the
+standard and experimental resources of the `gateway.networking.k8s.io` and
+`gateway.networking.x-k8s.io` API groups:
+
+- **Overview.** One pie chart per installed kind with the number of objects
+  that are Ready, Not Ready, In Progress or Unknown, filtered by namespace,
+  and below them the events of the Gateway API objects. The title of a chart
+  opens the list of its kind.
+- **One list per kind.** Each kind has a page that lists its objects, with
+  sort and search. A kind served in more than one API version is listed in
+  the newest one the cluster serves, and the page says so when the cluster
+  serves none.
+- **Details.** The details panel of every kind and version shows the status
+  conditions, the spec fields and links to the referenced objects.
 
 ![screenshot](docs/images/screenshot.png)
 
 ## Requirements
 
+- Freelens >= 2.0.0
 - Kubernetes >= 1.26
-- Freelens >= 1.8.0
 - Gateway API CRDs installed in the cluster (see the [Gateway API installation guide](https://gateway-api.sigs.k8s.io/guides/))
 
 ## Supported APIs
@@ -72,23 +81,45 @@ Experimental APIs from the Kubernetes SIG Network incubation group.
 
 ## Install
 
-To install, open Freelens and go to Extensions (`ctrl`+`shift`+`E` or `cmd`+`shift`+`E`),
-then search for and install `@freelensapp/gateway-api-extension`.
+Open Freelens and go to Extensions (`ctrl`+`shift`+`E` or
+`cmd`+`shift`+`E`). The field at the top takes a package name, the URL of a
+tarball, or the path to a tarball or a directory.
+
+### From the registry
+
+Enter `@freelensapp/gateway-api-extension` and press Install.
 
 Alternatively, open the following URL in the browser to install directly:
 
 [freelens://app/extensions/install/%40freelensapp%2Fgateway-api-extension](freelens://app/extensions/install/%40freelensapp%2Fgateway-api-extension)
 
-## Build from the source
+### From a release tarball
 
-You can build the extension from this repository.
+Each [release](https://github.com/freelensapp/freelens-gateway-api-extension/releases)
+has the extension as `freelensapp-gateway-api-extension-<version>.tgz`, with
+its checksum in `freelensapp-gateway-api-extension-<version>.tgz.sha256`. The
+0.x releases are for Freelens 1; use a later one with Freelens 2.
+
+- Enter the URL of the `.tgz` asset and press Install. Freelens downloads the
+  `.tgz.sha256` next to it and checks the tarball against it.
+- Or download both files into one directory and enter the path to the `.tgz`,
+  or drop the `.tgz` on the Freelens window. Freelens checks it against the
+  `.tgz.sha256` next to it.
+
+### From a directory
+
+Build the extension (see below), then enter the path to your checkout, the
+directory with `package.json`, and press Install. Freelens runs the extension
+from that directory, from the files in `dist/`, and lists it as unverified.
+
+## Build from the source
 
 ### Prerequisites
 
 Use [NVM](https://github.com/nvm-sh/nvm),
 [mise-en-place](https://mise.jdx.dev/), or
 [windows-nvm](https://github.com/coreybutler/nvm-windows) to install the
-required Node.js version.
+Node.js version in `.nvmrc`.
 
 From the root of this repository:
 
@@ -98,8 +129,8 @@ nvm install
 mise install
 # or
 winget install CoreyButler.NVMforWindows
-nvm install 24.15.0
-nvm use 24.15.0
+nvm install "$(cat .nvmrc)"
+nvm use "$(cat .nvmrc)"
 ```
 
 Install pnpm:
@@ -115,40 +146,40 @@ winget install pnpm.pnpm
 ### Build extension
 
 ```sh
-pnpm i
+pnpm install
 pnpm build
+```
+
+The extension is built into `dist/`. `pnpm build` does not type-check; run
+`pnpm type:check` for that. To pack it into a tarball:
+
+```sh
 pnpm pack
 ```
 
-One script to build and pack the extension for testing:
+One script to bump the prerelease version, build and pack the extension for
+testing:
 
 ```sh
 pnpm pack:dev
 ```
 
-### Install built extension
+The tarball is placed in the current directory. Install it as described in
+[From a release tarball](#from-a-release-tarball).
 
-The tarball will be placed in the current directory. In Freelens, navigate
-to the Extensions page and provide the path to the tarball, or drag and
-drop the `.tgz` file into the Freelens window.
-
-### Check code statically
+### Check the code
 
 ```sh
+pnpm type:check
+pnpm test:unit
 pnpm lint:check
+pnpm knip:check
 ```
 
-or
+and, for the formats that Biome does not cover:
 
 ```sh
 pnpm trunk:check
-```
-
-and
-
-```sh
-pnpm build
-pnpm knip:check
 ```
 
 ### Testing the extension with unpublished Freelens

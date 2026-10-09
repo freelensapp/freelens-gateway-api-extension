@@ -6,7 +6,11 @@ This file provides guidance to coding agents when working with code in this repo
 
 ## Project Overview
 
-Freelens extension for Kubernetes Gateway API CRDs (v1, v1alpha2, v1beta1). Provides cluster pages, detail views, and K8s object wrappers for Gateway API resources.
+Freelens extension for the Kubernetes Gateway API: the standard resources of `gateway.networking.k8s.io` (`v1`,
+`v1alpha2`, `v1beta1`) and the experimental ones of `gateway.networking.x-k8s.io` (`v1alpha1`). It provides an
+Overview page, a list page and details panel per kind, and a model per kind and API version. It is built on the
+patterns of the template, freelensapp/freelens-example-extension; a build, type-check or test pattern that is not
+specific to the Gateway API follows it.
 
 - **Language**: TypeScript 7.0.2
 - **Runtime**: Freelens >= 2.0.0 (extension API v2)
@@ -101,31 +105,54 @@ pnpm clean:all            # Clean everything (dist, dts, node_modules, tgz)
 
 ```text
 src/
-  main/index.ts            # Extension entry point (main process, ESM)
-  renderer/index.tsx       # Extension entry point (renderer process, ESM)
-  renderer/k8s/gateway-api/ # K8s object model classes (one file per CRD)
-  renderer/details/gateway-api/ # Detail view components for CRDs
-  renderer/pages/gateway-api/  # Cluster page components
-  renderer/components/      # Shared components
-  renderer/icons/           # SVG icons
-  common/utils.ts           # Common utilities (e.g., maybe)
+  main/index.ts                  # Main entry (Main.LensExtension), empty
+  renderer/index.tsx             # Renderer entry (Renderer.LensExtension): every registration
+  renderer/api/k8s/              # Models of gateway.networking.k8s.io, one file per kind and version,
+                                 #   shared types (types.ts) and the status categories of the charts (statuses.ts)
+  renderer/api/x-k8s/            # Models of gateway.networking.x-k8s.io
+  renderer/pages/overview.tsx    # Overview page: a pie chart per kind and the events
+  renderer/pages/overview-kinds.ts # The Overview's kinds and the choice of one version per kind
+  renderer/pages/k8s/            # List page per kind and version, with its CSS module
+  renderer/pages/x-k8s/          # List pages of the experimental kinds
+  renderer/details/k8s/          # Details panel per kind and version, and their common CSS module
+  renderer/details/x-k8s/        # Details panels of the experimental kinds
+  renderer/components/           # createAvailableVersionPage, withErrorPage, the pie chart, the events list
+  renderer/icons/                # SVG icons, imported with ?raw
+  renderer/vars.scss             # SCSS variables
+  common/utils.ts                # maybe()
+test/freelens-extensions.ts      # Runtime stub of @freelensapp/extensions for Vitest
+environment-tests/               # Probes for the per-environment programs
+build/                           # Vite plugins: host modules, standard decorators, CSS module declarations
+integration/__tests__/           # Integration test, run inside a Freelens checkout
+docs/images/                     # Screenshot for README.md
 ```
 
 Build output goes to `dist/`: `main.js`, `renderer.js` and `renderer.css`, with
 source maps. `main` and `renderer` in `package.json` point at the two entries.
-The Vite plugins of the build are in `build/`.
+
+`src/renderer/index.tsx` registers one cluster page per kind under the "Gateway API" menu entry, with the kind's
+`crd.singular` as page id, and the Overview page as `overview`. Each kind's page is made by
+`createAvailableVersionPage` from the list pages of its versions, newest first. A details panel is registered for
+every kind and version, by `kind` and `crd.apiVersions`.
 
 ## CRD KubeObject Pattern
 
-K8s object classes MUST use `static readonly` properties for metadata. **Instance methods do NOT work and MUST NOT be used.** The Freelens host reads properties from the class constructor statically — instance methods are not available at runtime because the host creates plain object copies of the K8s resource data, not instances of the extension's class. This means:
+A model is a subclass of `Renderer.K8sApi.LensExtensionKubeObject`, one file per kind and API version, such as
+`src/renderer/api/k8s/gateway-v1.ts` or `tcp-route-v1alpha2.ts`.
 
-- **Allowed**: `object.spec?.someField`, `object.status?.conditions` — direct property access on typed `spec`/`status` interfaces
-- **Allowed**: helper functions like `hasTrueCondition(conditions, "Accepted")` from `types.ts`
-- **Forbidden**: `object.someMethod()` — instance methods will never exist at runtime
-- **Forbidden**: `typeof (object as any).someMethod === "function" ? ...` — anti-pattern that always falls through to the fallback path
-- **Forbidden**: `as any` — use the existing typed `spec`/`status` interfaces directly; all CRD models already define proper `Spec`/`Status` interfaces
+The host reads the model's metadata from the class, through `static readonly` properties. The objects the extension
+gets, in a list, a details panel or the items of a store, come from the host's store for the resource: they are
+instances of the host's `KubeObject`, not of the extension's subclass. The methods of `KubeObject` itself are there (`getName()`,
+`getNs()`, `getCreationTimestamp()`, `getSearchFields()`); a method the subclass defines is not, and calling it
+throws. So:
 
-Always access `spec` and `status` properties directly via their typed interfaces. Do not define instance methods on KubeObject subclasses — they will not be callable at runtime.
+- **Metadata**: `static readonly` `kind`, `namespaced`, `apiBase` and `crd`.
+- **Per-object logic**: a function that takes the object or its fields, such as
+  `hasTrueCondition(conditions, "Accepted")` from `api/k8s/types.ts` or `getStatusCategory(object)` from
+  `api/k8s/statuses.ts`.
+- **Fields**: read `object.spec` and `object.status` through the model's typed `Spec` and `Status` interfaces.
+- **Forbidden**: instance methods on the subclass; a fallback such as
+  `typeof (object as any).someMethod === "function" ? ...`, which always takes the fallback; `as any`.
 
 ```typescript
 export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
@@ -145,12 +172,13 @@ export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
   };
 }
 
-// Also export Api and Store classes (always needed):
 export class GatewayApi extends Renderer.K8sApi.KubeApi<Gateway> {}
 export class GatewayStore extends Renderer.K8sApi.KubeObjectStore<Gateway, GatewayApi> {}
 ```
 
-Each CRD file exports three classes: the KubeObject, the KubeApi, and the KubeObjectStore. They are registered in `src/renderer/index.tsx` via `kubeObjectDetailItems`, `clusterPages`, and `clusterPageMenus`.
+Each model file also exports a `KubeApi` and a `KubeObjectStore` subclass. Neither is instantiated: the store comes
+from the host, through the model's static `getStore()`. `api/k8s/index.ts` and `api/x-k8s/index.ts` re-export the
+three classes of every model with its version as a suffix (`TCPRoute_v1`).
 
 A details component takes `Renderer.Component.KubeObjectDetailsProps<Model>` of its own model class and version, and
 its registration passes it as it is (`Details: GatewayDetails_v1`), not through a wrapper typed
@@ -171,14 +199,19 @@ covers them without rendering it. A model added to the extension fails that test
 kind without status like ReferenceGrant, named in the test as omitted.
 
 The host renders a cluster page with `params` as its only prop. A page that needs the extension instance, as every
-page here does for its error page, is created once at module level and registered as
-`Page: () => <Page extension={this} />`. Creating it inside the `clusterPages` initializer with `this` as an argument
-makes TypeScript infer the field circularly (TS7022).
+page here does (the list pages for their error page, the Overview for its links), is created once at module level and
+registered as `Page: () => <Page extension={this} />`. Creating it inside the `clusterPages` initializer with `this`
+as an argument makes TypeScript infer the field circularly (TS7022). `PageComponents.Page` is typed with the props
+the host passes, `Common.Types.PageComponentProps`, so the type check rejects a page that requires another prop. It
+does not reject one that declares another prop as optional next to `params`; that prop is `undefined`.
 
 ## Renderer Components
 
 - Components that read observables are wrapped in `observer` from `mobx-react`. The build resolves `mobx-react` to the
   host's instance (see "Modules provided by the host"), so the components react to the host's stores.
+- The list pages render through `withErrorPage(props, () => ...)` from `src/renderer/components/error-page.tsx`. It
+  catches what the render throws, logs it with `extension.name` and renders the error instead, so its props need
+  `extension`.
 - React keys derived from an object's content come from `Renderer.Util.createReactKey`. It serializes with
   `JSON.stringify`, so it throws for `undefined`, and the key depends on the order of the object's keys.
 - A link to one of the extension's own pages calls `extension.navigate(pageId)`. `Renderer.Navigation.navigate` is
@@ -190,7 +223,53 @@ makes TypeScript infer the field circularly (TS7022).
   "CSS module declarations"). They are committed, because `pnpm type:check` runs without a build; commit the
   regenerated file with a change to its SCSS module. `pnpm clean:dts` removes them.
 - Common detail view styles are in `src/renderer/details/k8s/common.module.scss` and
-  `src/renderer/details/x-k8s/common.module.scss`.
+  `src/renderer/details/x-k8s/common.module.scss`. SCSS variables are in `src/renderer/vars.scss`, used with
+  `@use` and a relative path, such as `@use "../../vars"`.
+- Icons are SVG files imported with `?raw` and rendered by `Renderer.Component.Icon` through its `svg` prop.
+
+## Rules That Fail Silently
+
+Each of these compiles when it is broken, and breaks the extension at runtime
+or not visibly at all. The sections named in parentheses explain the
+mechanism; this is the list to check a change against.
+
+- **The host's React and mobx, one copy each.** Import `react`, `react-dom`,
+  `mobx` and `mobx-react` by their bare module ids. A second React throws
+  `invalid hook call`; a second mobx throws nothing, and the host never reacts
+  to its observables. The build fails on the ways a second copy gets in
+  ("Modules provided by the host").
+- **Standard decorators.** An observable field is `@observable accessor`, and
+  the class does not call `makeObservable(this)`. Without `accessor` the
+  production build of mobx leaves the field unobservable ("Decorators").
+- **No Node or Electron in renderer and common code.** They are `undefined` in
+  the renderer. The build fails on an import, `pnpm type:check` on a global
+  ("Process-specific settings").
+- **One CSS asset, `dist/renderer.css`.** Any other name, or a second asset,
+  leaves the extension unstyled. Nothing checks it; look at `dist/` after a
+  change to the CSS setup ("CSS").
+- **One tsconfig per environment.** Each program has only its runtime's `lib`
+  and `types`, and no declaration may load Node into the renderer or the DOM
+  into main; otherwise a wrong API type-checks and is `undefined` at runtime.
+  The environment tests fail on a leak ("TypeScript").
+- **No instance method on a KubeObject subclass.** The objects from the host
+  do not have it, and the call throws. Nothing checks it
+  ("CRD KubeObject Pattern").
+- **A details registration pairs `kind`, `apiVersions` and `Details` of one
+  model.** The registration type accepts any details component for any kind
+  ("CRD KubeObject Pattern").
+- **A kind served in two versions is shown once.** Code that goes over all
+  model classes meets it once per served version; take the first served
+  version in order of preference ("CRD KubeObject Pattern").
+- **A cluster page gets the extension from its registration.** The host passes
+  `params` only. The type check rejects a page that requires another prop, but
+  not one that declares it optional ("CRD KubeObject Pattern").
+- **A link to an own page goes through `extension.navigate(pageId)`.**
+  `Renderer.Navigation.navigate` with a relative pathname is pushed as it is
+  and lands only where the browser happens to resolve it ("Renderer
+  Components").
+
+Neither `pnpm build` nor the unit tests run the type check, so a Node global
+in renderer code passes them; `pnpm type:check` and `type-check.yaml` catch it.
 
 ## Build
 
@@ -549,7 +628,8 @@ Code in `src/common/` is shared between both processes.
 
 1. Check that files are not in ignored output directories (`dist/`, `node_modules/`)
 2. Full clean and rebuild: `pnpm clean:all && pnpm install && pnpm build`
-3. Reinstall the extension in Freelens (or restart the app in dev mode)
+3. Rebuild with `pnpm build` for an extension installed from a directory; reinstall one installed from a tarball.
+   Restart Freelens after a change to `main` or `renderer` in `package.json`
 
 ### Build Failures
 
@@ -653,6 +733,28 @@ When asked to implement a change on a PR:
    separately. Do not batch multiple independent fixes into a single
    commit. This keeps the history bisectable and makes each change easy
    to revert individually.
+
+### Modifying GitHub Actions Workflows
+
+Claude cannot push changes to files under `.github/workflows/` directly,
+because the GitHub token used by the action lacks the `workflows` permission.
+Any patch to a workflow file MUST therefore be delivered as a new, complete
+file under the `github-workflow-fix/` directory in the repository root instead
+of editing the file in place:
+
+1. Write the full, final contents of the workflow to
+   `github-workflow-fix/<workflow-file-name>`, with the same file name as in
+   `.github/workflows/` (e.g. `github-workflow-fix/check.yaml`). Do **not**
+   edit the original file under `.github/workflows/`.
+2. Make it a **complete** file — the entire workflow as it should look after
+   the change, not just a diff or fragment — so it can be copied verbatim.
+3. Commit it with the change that needs it, and list it in the report. In the
+   PR description, note it as a proposed workflow change that a maintainer
+   must move from `github-workflow-fix/` to `.github/workflows/`.
+
+A maintainer moves the file into `.github/workflows/` in a separate commit and
+removes `github-workflow-fix/`. Pull before continuing on the branch, as it may
+have gained such a commit.
 
 ### Branch Naming Conventions
 
