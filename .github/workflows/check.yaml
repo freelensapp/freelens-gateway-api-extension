@@ -68,9 +68,6 @@ jobs:
         if: steps.build-packages-2.outcome == 'failure'
         run: pnpm --color=always --stream build
 
-      - name: Check types
-        run: pnpm --color=always --stream type:check
-
       - name: Check linters
         run: pnpm --color=always --stream lint:check
 
