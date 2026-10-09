@@ -111,6 +111,8 @@ its checksum in `freelensapp-gateway-api-extension-<version>.tgz.sha256`. The
 Build the extension (see below), then enter the path to your checkout, the
 directory with `package.json`, and press Install. Freelens runs the extension
 from that directory, from the files in `dist/`, and lists it as unverified.
+This is how you work on the extension: see
+[Development loop](#development-loop).
 
 ## Build from the source
 
@@ -150,8 +152,7 @@ pnpm install
 pnpm build
 ```
 
-The extension is built into `dist/`. `pnpm build` does not type-check; run
-`pnpm type:check` for that. To pack it into a tarball:
+The extension is built into `dist/`. To pack it into a tarball:
 
 ```sh
 pnpm pack
@@ -166,6 +167,23 @@ pnpm pack:dev
 
 The tarball is placed in the current directory. Install it as described in
 [From a release tarball](#from-a-release-tarball).
+
+### Development loop
+
+Install the extension from your checkout once, as described in
+[From a directory](#from-a-directory), then run:
+
+```sh
+pnpm dev
+```
+
+It rebuilds the extension whenever a source file changes, and Freelens
+reloads the extension after each rebuild, without a restart and without
+packing. Stop it with `ctrl`+`C`.
+
+Neither `pnpm build` nor `pnpm dev` type-checks; run `pnpm type:check` for
+that. A change to `main` or `renderer` in `package.json` needs Freelens
+restarted once.
 
 ### Check the code
 

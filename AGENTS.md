@@ -91,6 +91,7 @@ pnpm test:unit            # vitest
 
 # Build
 pnpm build                # Both Vite runs, without the type check
+pnpm dev                  # Both Vite runs in watch mode, for a directory install
 
 # Pack for testing
 pnpm pack:dev             # Bump prerelease version, build, and create .tgz for install in Freelens app
@@ -267,9 +268,14 @@ mechanism; this is the list to check a change against.
   `Renderer.Navigation.navigate` with a relative pathname is pushed as it is
   and lands only where the browser happens to resolve it ("Renderer
   Components").
+- **An ESM `main`, and the entries in `package.json` unchanged while
+  `pnpm dev` runs.** The host refuses to reload a CommonJS main and logs why,
+  and it watches only the entries it started with, so a manifest change needs
+  Freelens restarted.
 
-Neither `pnpm build` nor the unit tests run the type check, so a Node global
-in renderer code passes them; `pnpm type:check` and `type-check.yaml` catch it.
+Neither `pnpm build`, `pnpm dev` nor the unit tests run the type check, so a
+Node global in renderer code passes them; `pnpm type:check` and
+`type-check.yaml` catch it.
 
 ## Build
 
@@ -279,9 +285,11 @@ main` builds main next to it. The two runs share no chunk; each bundle carries
 its own copy of the `src/common/` code it imports. Nothing is minified.
 `pnpm build` runs both and no type check.
 
-A watch build of the renderer (`vite build --watch`) needs `--no-emptyOutDir`.
-In watch mode Vite empties the output directory again before every rebuild, so
-a renderer rebuild would delete `dist/main.js`.
+`pnpm dev` runs the same two builds in watch mode, side by side, for a
+directory install: the host reloads the extension when either entry is
+rewritten. Its renderer run passes `--no-emptyOutDir`. In watch mode Vite
+empties the output directory again before every rebuild, so a renderer rebuild
+would delete `dist/main.js`, and the host would have no main entry to reload.
 
 ### Modules provided by the host
 
@@ -628,8 +636,8 @@ Code in `src/common/` is shared between both processes.
 
 1. Check that files are not in ignored output directories (`dist/`, `node_modules/`)
 2. Full clean and rebuild: `pnpm clean:all && pnpm install && pnpm build`
-3. Rebuild with `pnpm build` for an extension installed from a directory; reinstall one installed from a tarball.
-   Restart Freelens after a change to `main` or `renderer` in `package.json`
+3. With a directory install and `pnpm dev` running, look for a refused reload in the Freelens log, and restart
+   Freelens after a change to `main` or `renderer` in `package.json`; reinstall an extension installed from a tarball
 
 ### Build Failures
 
