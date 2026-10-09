@@ -8,10 +8,50 @@ This file provides guidance to coding agents when working with code in this repo
 
 Freelens extension for Kubernetes Gateway API CRDs (v1, v1alpha2, v1beta1). Provides cluster pages, detail views, and K8s object wrappers for Gateway API resources.
 
-- **Language**: TypeScript 5.9.3
-- **Runtime**: Node.js >= 22.0.0, Freelens >= 1.8.0
-- **Package manager**: pnpm 10.x (locked)
+- **Language**: TypeScript 7.0.2
+- **Runtime**: Freelens >= 2.0.0 (extension API v2)
+- **Toolchain**: Node.js 24.21.0, yq 4.54.1 and cosign 3.1.3 (`mise.toml` with
+  `mise.lock`; Node also in `.nvmrc`)
+- **Package manager**: pnpm 12.9.1 (`packageManager`, run through corepack)
 - **License**: MIT
+
+Library and tool versions follow the Freelens stack exactly: the catalog in
+Freelens's `pnpm-workspace.yaml` for libraries, the root `package.json` scripts
+of Freelens for tools run with `pnpm dlx` (Biome, knip, Trunk launcher), and
+Freelens's `mise.toml`, `mise.lock` and `.nvmrc` for Node and the other mise
+tools. A library added to `package.json` that Freelens also has takes the
+catalog version.
+
+`mise.lock` pins a checksum and a URL per tool for all eight platforms; after
+changing `mise.toml`, run `mise lock` (not only `mise install`, which re-locks
+just the current platform). `mise.lock` is lockfile revision 3
+(`lockfile_version = 3`), which needs mise 2026.9.16 or newer.
+
+`@freelensapp/extensions` is pinned to one exact version, a nightly until
+Freelens 2.0.0 is released. The libraries the host provides at runtime
+(`react`, `react-dom`, `mobx`, `mobx-react`) and their types are
+devDependencies only, for compiling and testing; `electron` is a devDependency
+for its types only. `@types/react-dom` is needed because the
+`@freelensapp/extensions` declaration imports its React types from `react` and
+`react-dom`. No other `@freelensapp/*` package is a dependency: they are not
+published for v2, and their types are reached through `Renderer.K8sApi` and the
+other namespaces of `@freelensapp/extensions`.
+
+pnpm settings live in `pnpm-workspace.yaml`. A dependency runs its install
+scripts only when `allowBuilds` sets it to `true`; a new dependency with
+install scripts that is not listed there fails `pnpm install`, so add it with
+`true` or `false` deliberately. pnpm refuses versions younger than its
+`minimumReleaseAge` (1 day), with `@freelensapp/extensions` excluded because
+its pinned nightly is often adopted on the day it is published.
+
+`strictPeerDependencies: true` makes `pnpm install` fail when the extension's
+own copy of a shared library is outside the peer range that
+`@freelensapp/extensions` declares for it (`react`, `react-dom`, `@types/react`,
+`@types/react-dom`, `mobx`, `mobx-react`, `monaco-editor`, `electron`). These
+peers are optional, so they are checked only for the libraries the extension
+declares, and without the setting pnpm reports a mismatch as one warning line
+and installs anyway. Keep one copy of each shared library and of `@types/node`
+in the tree (`pnpm why <name>`; `pnpm dedupe` after an update).
 
 ## Common Commands
 
@@ -121,7 +161,7 @@ Other dependencies ARE bundled into the extension output.
 - **Biome** formats **TypeScript/TSX, JS, JSON, CSS/SCSS, HTML**: double quotes, semicolons, trailing commas, 2-space indent, 120 char line width — use `pnpm biome:fix`
 - **Trunk** formats **Markdown, YAML**, and other formats not covered by biome — use `pnpm trunk:fix`
 - Import order (enforced by biome organizeImports): built-in modules → `@freelensapp/**` → packages → relative paths
-- React 17 (no `react/jsx-runtime` in tsconfig needed, but handled by build)
+- React 19 (`@types/react` 19: no global `JSX` namespace, use `React.JSX.Element`; components get `children` only when their props declare it)
 - **No emoji** in Markdown files (`.md`), comments, or any source code
 
 ## Security
