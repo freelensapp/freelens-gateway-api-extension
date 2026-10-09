@@ -547,6 +547,11 @@ and there a path anchored at the repository root matches no file, so the
 override silently does nothing. A plain `biome check` matches both forms, so
 only `trunk check` shows the difference.
 
+Renovate updates Biome, in the `biome` script and in `.trunk/trunk.yaml`, but
+cannot run `biome migrate`. `biome-migrate.yaml` runs it on the Renovate
+branch and commits the migrated `biome.jsonc` there, so that the update and its
+migration are one pull request.
+
 `build/` is excluded except for its `*.{js,cjs,mjs}` files, the build plugins.
 Biome also formats the SVG icons. It does not read SCSS; Trunk formats it with
 Prettier.
@@ -558,6 +563,12 @@ Prettier.
 fails on a target that `biome.jsonc` excludes, and adds the `.cjs` and `.mjs`
 files that Trunk's `javascript` type does not match. Biome's version there is
 the one of the `biome` script in `package.json`.
+
+Both commands also pass `--vcs-use-ignore-file=false`. In Trunk's sandbox,
+Biome 2.5.15 matches every target against the repository's `.gitignore` and
+panics on a path outside the repository root, so every file fails. Trunk
+applies `.gitignore` itself before it picks the targets; `biome.jsonc` keeps
+`vcs.useIgnoreFile` on for `pnpm biome` and editors.
 
 ### Knip
 
