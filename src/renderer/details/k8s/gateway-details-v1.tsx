@@ -7,6 +7,7 @@ import type { GatewaySpecAddress, ListenerStatus } from "../../api/k8s/gateway-v
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerItemLabels, DrawerTitle, Icon, LinkToObject, LinkToSecret },
+  Util: { createReactKey },
 } = Renderer;
 
 function isAccepted(object: Gateway): boolean {
@@ -139,23 +140,23 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
           <DrawerItem name="Frontend Validation Mode">{frontendValidation?.mode ?? "-"}</DrawerItem>
           <DrawerItem name="Frontend CA Certs">
             {frontendValidation?.caCertificateRefs?.length
-              ? frontendValidation.caCertificateRefs
-                  .map((reference) => (
-                    <DrawerItem name="" key={`${reference.kind}:${reference.name}:${reference.namespace}`}>
-                      <LinkToObject objectRef={reference} object={object} />
-                    </DrawerItem>
-                  ))
-                  .join(", ")
+              ? frontendValidation.caCertificateRefs.map((reference, index) => (
+                  <span key={createReactKey(reference)}>
+                    {index > 0 && ", "}
+                    <LinkToObject objectRef={reference} object={object} />
+                  </span>
+                ))
               : "-"}
           </DrawerItem>
           <DrawerItem name="Frontend Per Port TLS" hidden={frontendPerPort.length === 0}>
             {frontendPerPort.map((entry) => (
               <DrawerItem name={entry.port} key={`frontend-port-${entry.port}`}>
                 {entry.tls?.validation?.mode ?? "-"}:{" "}
-                {entry.tls?.validation?.caCertificateRefs?.map((reference) => (
-                  <>
-                    <LinkToObject objectRef={reference} object={object} />{" "}
-                  </>
+                {entry.tls?.validation?.caCertificateRefs?.map((reference, index) => (
+                  <span key={createReactKey(reference)}>
+                    {index > 0 && ", "}
+                    <LinkToObject objectRef={reference} object={object} />
+                  </span>
                 ))}
               </DrawerItem>
             ))}
@@ -177,7 +178,11 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
               </DrawerItem>
               <DrawerItem name="TLS Certs" hidden={!listener.tls?.certificateRefs?.length}>
                 {listener.tls?.certificateRefs?.map((certificateRef) => (
-                  <LinkToSecret name={certificateRef.name} namespace={certificateRef.namespace ?? object.getNs()} />
+                  <LinkToSecret
+                    key={createReactKey(certificateRef)}
+                    name={certificateRef.name}
+                    namespace={certificateRef.namespace ?? object.getNs()}
+                  />
                 ))}
               </DrawerItem>
               <DrawerItemLabels

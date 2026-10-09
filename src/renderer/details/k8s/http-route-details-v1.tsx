@@ -87,27 +87,23 @@ export const HTTPRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                       const key = createReactKey(match);
 
                       return (
-                        <>
-                          <DrawerItem name="Type" key={key}>
-                            {match.path?.type ?? "PathPrefix"}
-                          </DrawerItem>
-                          <DrawerItem name="Path" key={key}>
-                            {match.path?.value ?? "/"}
-                          </DrawerItem>
-                          <DrawerItem name="Method" key={key} hidden={!match.method}>
+                        <div key={key} style={{ marginBottom: "10px" }}>
+                          <DrawerItem name="Type">{match.path?.type ?? "PathPrefix"}</DrawerItem>
+                          <DrawerItem name="Path">{match.path?.value ?? "/"}</DrawerItem>
+                          <DrawerItem name="Method" hidden={!match.method}>
                             {match.method}
                           </DrawerItem>
-                          <DrawerItem name="Headers" key={key} hidden={!match.headers}>
+                          <DrawerItem name="Headers" hidden={!match.headers}>
                             {match.headers &&
                               match.headers?.length > 0 &&
                               match.headers.map((h) => `${h.name}=${h.value} (${h.type ?? "Exact"})`).join(", ")}
                           </DrawerItem>
-                          <DrawerItem name="Query Params" key={key} hidden={!match.queryParams}>
+                          <DrawerItem name="Query Params" hidden={!match.queryParams}>
                             {match.queryParams &&
                               match.queryParams?.length > 0 &&
                               match.queryParams.map((q) => `${q.name}=${q.value} (${q.type ?? "Exact"})`).join(", ")}
                           </DrawerItem>
-                        </>
+                        </div>
                       );
                     })}
                   </DrawerItem>
