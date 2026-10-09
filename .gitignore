@@ -25,6 +25,9 @@
 /node_modules/
 /out/
 
+# Scratch space of the CI agent, which checks out Freelens at tmp/freelens.
+/tmp/
+
 /.nyc_output/
 
 *.DS_Store
