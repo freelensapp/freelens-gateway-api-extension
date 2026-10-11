@@ -21,7 +21,7 @@ function isAccepted(object: BackendTLSPolicy): boolean {
 export const BackendTLSPolicyDetails = observer(
   (props: Renderer.Component.KubeObjectDetailsProps<BackendTLSPolicy>) => {
     const { object } = props;
-    const targetRefs = object.spec?.targetRefs ?? [];
+    const targetRefs = object.spec.targetRefs;
 
     return (
       <div className={styles.details}>
