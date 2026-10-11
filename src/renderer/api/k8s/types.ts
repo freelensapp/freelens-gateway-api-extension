@@ -105,7 +105,7 @@ export interface Fraction {
 export interface RouteParentStatus {
   parentRef: ParentReference;
   controllerName: string;
-  conditions?: GatewayCondition[];
+  conditions: GatewayCondition[];
 }
 
 export interface RouteStatus {
@@ -115,7 +115,7 @@ export interface RouteStatus {
 export interface PolicyAncestorStatus {
   ancestorRef: ParentReference;
   controllerName: string;
-  conditions?: Renderer.K8sApi.Condition[];
+  conditions: Renderer.K8sApi.Condition[];
 }
 
 export interface PolicyStatus {

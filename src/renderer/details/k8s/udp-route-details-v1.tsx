@@ -12,7 +12,7 @@ const {
 
 function isAccepted(object: UDPRoute): boolean {
   return (object.status?.parents ?? []).some((parent) =>
-    (parent?.conditions ?? []).some((condition) => condition?.type === "Accepted" && condition?.status === "True"),
+    parent.conditions.some((condition) => condition?.type === "Accepted" && condition?.status === "True"),
   );
 }
 

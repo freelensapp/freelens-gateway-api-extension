@@ -16,7 +16,7 @@ function getHostnames(item: TLSRoute): string[] {
 function isAccepted(item: TLSRoute): boolean {
   return (
     item.status?.parents?.some((parent) =>
-      parent.conditions?.some((condition) => condition.type === "Accepted" && condition.status === "True"),
+      parent.conditions.some((condition) => condition.type === "Accepted" && condition.status === "True"),
     ) ?? false
   );
 }

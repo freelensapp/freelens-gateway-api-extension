@@ -16,7 +16,7 @@ function getHostnames(item: GRPCRoute): string[] {
 function isAccepted(item: GRPCRoute): boolean {
   return (
     item.status?.parents?.some((parent) =>
-      parent.conditions?.some((condition) => condition.type === "Accepted" && condition.status === "True"),
+      parent.conditions.some((condition) => condition.type === "Accepted" && condition.status === "True"),
     ) ?? false
   );
 }
