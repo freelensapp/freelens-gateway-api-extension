@@ -34,6 +34,9 @@ export class XBackendTrafficPolicy extends Renderer.K8sApi.LensExtensionKubeObje
   XBackendTrafficPolicyStatus,
   BackendTrafficPolicySpec
 > {
+  declare kind: "XBackendTrafficPolicy";
+  declare apiVersion: "gateway.networking.x-k8s.io/v1alpha1";
+
   static readonly kind = "XBackendTrafficPolicy";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.x-k8s.io/v1alpha1/xbackendtrafficpolicies";

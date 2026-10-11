@@ -17,6 +17,9 @@ export class TCPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   TCPRouteStatus,
   TCPRouteSpec
 > {
+  declare kind: "TCPRoute";
+  declare apiVersion: "gateway.networking.k8s.io/v1alpha2";
+
   static readonly kind = "TCPRoute";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1alpha2/tcproutes";

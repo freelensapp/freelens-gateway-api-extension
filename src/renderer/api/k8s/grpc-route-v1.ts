@@ -59,6 +59,9 @@ export class GRPCRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   GRPCRouteStatus,
   GRPCRouteSpec
 > {
+  declare kind: "GRPCRoute";
+  declare apiVersion: "gateway.networking.k8s.io/v1";
+
   static readonly kind = "GRPCRoute";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1/grpcroutes";

@@ -42,6 +42,9 @@ export class ListenerSet extends Renderer.K8sApi.LensExtensionKubeObject<
   ListenerSetStatus,
   ListenerSetSpec
 > {
+  declare kind: "ListenerSet";
+  declare apiVersion: "gateway.networking.k8s.io/v1";
+
   static readonly kind = "ListenerSet";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1/listenersets";

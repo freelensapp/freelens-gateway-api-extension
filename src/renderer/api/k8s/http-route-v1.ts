@@ -197,6 +197,9 @@ export class HTTPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   HTTPRouteStatus,
   HTTPRouteSpec
 > {
+  declare kind: "HTTPRoute";
+  declare apiVersion: "gateway.networking.k8s.io/v1";
+
   static readonly kind = "HTTPRoute";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1/httproutes";
