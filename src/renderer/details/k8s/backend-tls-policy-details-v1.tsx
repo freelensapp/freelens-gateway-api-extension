@@ -1,22 +1,16 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { BackendTLSPolicy } from "../../api/k8s";
+import { isPolicyAccepted } from "../../api/k8s/types";
 import { BackendTLSValidation } from "./backend-tls-validation";
 import styles from "./common.module.scss";
+import { PolicyAncestors } from "./policy-ancestors";
 import { ReferenceLink } from "./reference-link";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, Table, TableCell, TableHead, TableRow },
   Util: { createReactKey },
 } = Renderer;
-
-function isAccepted(object: BackendTLSPolicy): boolean {
-  const ancestors = object.status?.ancestors ?? [];
-
-  return ancestors.some((ancestor) =>
-    ancestor.conditions.some((condition) => condition.type === "Accepted" && condition.status === "True"),
-  );
-}
 
 export const BackendTLSPolicyDetails = observer(
   (props: Renderer.Component.KubeObjectDetailsProps<BackendTLSPolicy>) => {
@@ -26,7 +20,7 @@ export const BackendTLSPolicyDetails = observer(
     return (
       <div className={styles.details}>
         <DrawerItem name="Accepted">
-          <BadgeBoolean value={isAccepted(object)} />
+          <BadgeBoolean value={isPolicyAccepted(object.status)} />
         </DrawerItem>
 
         <DrawerTitle>Target Refs</DrawerTitle>
@@ -64,6 +58,8 @@ export const BackendTLSPolicyDetails = observer(
         )}
 
         <BackendTLSValidation object={object} validation={object.spec?.validation} />
+
+        <PolicyAncestors object={object} ancestors={object.status?.ancestors ?? []} />
       </div>
     );
   },

@@ -161,7 +161,7 @@ export interface HTTPRouteTimeouts {
 
 export interface HTTPRouteRetry {
   codes?: number[];
-  attempt?: number;
+  attempts?: number;
   backoff?: string;
 }
 

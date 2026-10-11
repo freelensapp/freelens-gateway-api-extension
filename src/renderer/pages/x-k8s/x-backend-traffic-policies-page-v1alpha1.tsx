@@ -1,12 +1,13 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
+import { isPolicyAccepted } from "../../api/k8s/types";
 import { XBackendTrafficPolicy } from "../../api/x-k8s";
 import { withErrorPage } from "../../components/error-page";
 import { type GatewayPageProps, namespaceCell } from "../k8s/shared";
 import styles from "./x-backend-traffic-policies-page-v1alpha1.module.scss";
 
 const {
-  Component: { KubeObjectAge, KubeObjectListLayout, WithTooltip },
+  Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
 
 export const XBackendTrafficPoliciesPage = observer((props: GatewayPageProps) =>
@@ -21,6 +22,7 @@ export const XBackendTrafficPoliciesPage = observer((props: GatewayPageProps) =>
         sortingCallbacks={{
           name: (item: XBackendTrafficPolicy) => item.getName(),
           namespace: (item: XBackendTrafficPolicy) => item.getNs() ?? "",
+          accepted: (item: XBackendTrafficPolicy) => String(isPolicyAccepted(item.status)),
           age: (item: XBackendTrafficPolicy) => item.getCreationTimestamp(),
         }}
         searchFilters={[(item: XBackendTrafficPolicy) => item.getSearchFields()]}
@@ -28,11 +30,13 @@ export const XBackendTrafficPoliciesPage = observer((props: GatewayPageProps) =>
         renderTableHeader={[
           { title: "Name", sortBy: "name", className: styles.name },
           { title: "Namespace", sortBy: "namespace", className: styles.namespace },
+          { title: "Accepted", sortBy: "accepted", className: styles.accepted },
           { title: "Age", sortBy: "age", className: styles.age },
         ]}
         renderTableContents={(item: XBackendTrafficPolicy) => [
           <WithTooltip>{item.getName()}</WithTooltip>,
           namespaceCell(item.getNs()),
+          <BadgeBoolean value={isPolicyAccepted(item.status)} />,
           <KubeObjectAge object={item} key="age" />,
         ]}
       />

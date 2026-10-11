@@ -1,6 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { BackendTLSPolicy } from "../../api/k8s";
+import { isPolicyAccepted } from "../../api/k8s/types";
 import { withErrorPage } from "../../components/error-page";
 import styles from "./backend-tls-policies-page-v1.module.scss";
 import { type GatewayPageProps, namespaceCell } from "./shared";
@@ -8,14 +9,6 @@ import { type GatewayPageProps, namespaceCell } from "./shared";
 const {
   Component: { BadgeBoolean, KubeObjectAge, KubeObjectListLayout, WithTooltip },
 } = Renderer;
-
-function isAccepted(item: BackendTLSPolicy): boolean {
-  const ancestors = item.status?.ancestors ?? [];
-
-  return ancestors.some((ancestor) =>
-    ancestor.conditions.some((condition) => condition.type === "Accepted" && condition.status === "True"),
-  );
-}
 
 export const BackendTLSPoliciesPage = observer((props: GatewayPageProps) =>
   withErrorPage(props, () => {
@@ -29,7 +22,7 @@ export const BackendTLSPoliciesPage = observer((props: GatewayPageProps) =>
         sortingCallbacks={{
           name: (item: BackendTLSPolicy) => item.getName(),
           namespace: (item: BackendTLSPolicy) => item.getNs() ?? "",
-          accepted: (item: BackendTLSPolicy) => String(isAccepted(item)),
+          accepted: (item: BackendTLSPolicy) => String(isPolicyAccepted(item.status)),
           age: (item: BackendTLSPolicy) => item.getCreationTimestamp(),
         }}
         searchFilters={[(item: BackendTLSPolicy) => item.getSearchFields()]}
@@ -43,7 +36,7 @@ export const BackendTLSPoliciesPage = observer((props: GatewayPageProps) =>
         renderTableContents={(item: BackendTLSPolicy) => [
           <WithTooltip>{item.getName()}</WithTooltip>,
           namespaceCell(item.getNs()),
-          <BadgeBoolean value={isAccepted(item)} />,
+          <BadgeBoolean value={isPolicyAccepted(item.status)} />,
           <KubeObjectAge object={item} key="age" />,
         ]}
       />

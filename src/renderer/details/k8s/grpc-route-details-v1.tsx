@@ -1,6 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { GRPCRoute } from "../../api/k8s";
+import { formatValueMatch } from "../../api/k8s/types";
 import styles from "./common.module.scss";
 import { ReferenceLink } from "./reference-link";
 import { gatewayApiGroup } from "./references";
@@ -108,7 +109,7 @@ export const GRPCRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                           )}
                           {match.headers && match.headers.length > 0 && (
                             <DrawerItem name="Headers" key={`${key}-headers`}>
-                              {JSON.stringify(match.headers)}
+                              {match.headers.map(formatValueMatch).join(", ")}
                             </DrawerItem>
                           )}
                         </div>

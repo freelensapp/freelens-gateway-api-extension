@@ -3,6 +3,7 @@ import {
   type GatewayCondition,
   type GatewayDefaultScope,
   type GatewayKubeObjectCRD,
+  type ObjectReference,
   type SecretObjectReference,
 } from "./types";
 
@@ -78,7 +79,7 @@ export interface GatewayBackendTLS {
 export type FrontendValidationModeType = "AllowValidOnly" | "AllowInsecureFallback";
 
 export interface FrontendTLSValidation {
-  caCertificateRefs: Renderer.K8sApi.ObjectReference[];
+  caCertificateRefs: ObjectReference[];
   /** default: `"AllowValidOnly"` */
   mode?: FrontendValidationModeType;
 }

@@ -19,10 +19,22 @@ export function formatCondition(condition: Renderer.K8sApi.Condition): string {
   return condition.reason ? `${text} (${condition.reason})` : text;
 }
 
+// `name=value (type)` of a header or query parameter match, with `Exact` as the default type.
+export function formatValueMatch(match: { type?: string; name: string; value: string }): string {
+  return `${match.name}=${match.value} (${match.type ?? "Exact"})`;
+}
+
 export interface LocalObjectReference {
   group: string;
   kind: string;
   name: string;
+}
+
+export interface ObjectReference {
+  group: string;
+  kind: string;
+  name: string;
+  namespace?: string;
 }
 
 export interface SecretObjectReference {
@@ -120,4 +132,9 @@ export interface PolicyAncestorStatus {
 
 export interface PolicyStatus {
   ancestors: PolicyAncestorStatus[];
+}
+
+// Whether any ancestor has accepted the policy.
+export function isPolicyAccepted(status: PolicyStatus | undefined): boolean {
+  return status?.ancestors.some((ancestor) => hasTrueCondition(ancestor.conditions, "Accepted")) ?? false;
 }

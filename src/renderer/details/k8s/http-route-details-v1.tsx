@@ -1,6 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { HTTPRoute } from "../../api/k8s";
+import { formatValueMatch } from "../../api/k8s/types";
 import styles from "./common.module.scss";
 import { ReferenceLink } from "./reference-link";
 import { gatewayApiGroup } from "./references";
@@ -97,12 +98,12 @@ export const HTTPRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                           <DrawerItem name="Headers" hidden={!match.headers}>
                             {match.headers &&
                               match.headers?.length > 0 &&
-                              match.headers.map((h) => `${h.name}=${h.value} (${h.type ?? "Exact"})`).join(", ")}
+                              match.headers.map(formatValueMatch).join(", ")}
                           </DrawerItem>
                           <DrawerItem name="Query Params" hidden={!match.queryParams}>
                             {match.queryParams &&
                               match.queryParams?.length > 0 &&
-                              match.queryParams.map((q) => `${q.name}=${q.value} (${q.type ?? "Exact"})`).join(", ")}
+                              match.queryParams.map(formatValueMatch).join(", ")}
                           </DrawerItem>
                         </div>
                       );
@@ -149,6 +150,14 @@ export const HTTPRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                         );
                       })}
                     </Table>
+                  </DrawerItem>
+                )}
+
+                {rule.retry && (
+                  <DrawerItem name="Retry">
+                    <DrawerItem name="Attempts">{rule.retry.attempts ?? "-"}</DrawerItem>
+                    <DrawerItem name="Backoff">{rule.retry.backoff ?? "-"}</DrawerItem>
+                    <DrawerItem name="Codes">{rule.retry.codes?.length ? rule.retry.codes.join(", ") : "-"}</DrawerItem>
                   </DrawerItem>
                 )}
               </div>

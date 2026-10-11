@@ -1,10 +1,11 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { XMesh } from "../../api/x-k8s";
+import { ReferenceLink } from "../k8s/reference-link";
 import styles from "./common.module.scss";
 
 const {
-  Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject },
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle },
 } = Renderer;
 
 function getControllerName(object: XMesh): string {
@@ -35,7 +36,13 @@ export const XMeshDetails = observer((props: Renderer.Component.KubeObjectDetail
           <DrawerItem name="Group">{object.spec.parametersRef.group}</DrawerItem>
           <DrawerItem name="Kind">{object.spec.parametersRef.kind}</DrawerItem>
           <DrawerItem name="Name">
-            <LinkToObject objectRef={object.spec.parametersRef} object={object} />
+            <ReferenceLink
+              object={object}
+              group={object.spec.parametersRef.group}
+              kind={object.spec.parametersRef.kind}
+              name={object.spec.parametersRef.name}
+              namespace={object.spec.parametersRef.namespace}
+            />
           </DrawerItem>
           <DrawerItem name="Namespace" hidden={!object.spec.parametersRef.namespace}>
             {object.spec.parametersRef.namespace}

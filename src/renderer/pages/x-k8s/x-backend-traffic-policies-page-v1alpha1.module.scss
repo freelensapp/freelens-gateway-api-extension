@@ -8,6 +8,10 @@
       flex-grow: 1;
     }
 
+    &.accepted {
+      flex-grow: 0.5;
+    }
+
     &.age {
       flex-grow: 0.3;
     }
