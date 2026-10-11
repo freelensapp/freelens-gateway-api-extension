@@ -1,9 +1,10 @@
 import { Renderer } from "@freelensapp/extensions";
+import { ReferenceLink } from "./reference-link";
 
 import type { BackendTLSPolicyValidation, SubjectAltName } from "../../api/k8s/types";
 
 const {
-  Component: { DrawerItem, DrawerTitle, LinkToObject, Table, TableCell, TableHead, TableRow },
+  Component: { DrawerItem, DrawerTitle, Table, TableCell, TableHead, TableRow },
   Util: { createReactKey },
 } = Renderer;
 
@@ -51,7 +52,13 @@ export function BackendTLSValidation({ object, validation }: BackendTLSValidatio
                 <TableCell>{caCertRef.group || "-"}</TableCell>
                 <TableCell>{caCertRef.kind}</TableCell>
                 <TableCell>
-                  <LinkToObject objectRef={caCertRef} object={object} />
+                  <ReferenceLink
+                    object={object}
+                    group={caCertRef.group}
+                    kind={caCertRef.kind}
+                    name={caCertRef.name}
+                    namespace={object.getNs()}
+                  />
                 </TableCell>
               </TableRow>
             );

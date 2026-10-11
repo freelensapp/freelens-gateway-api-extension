@@ -31,7 +31,7 @@ export const GatewayClassDetails = observer((props: Renderer.Component.KubeObjec
           <DrawerTitle>Parameters Reference</DrawerTitle>
           {object.spec.parametersRef && (
             <div>
-              <DrawerItem name="Group">{object.spec.parametersRef.group}</DrawerItem>
+              <DrawerItem name="Group">{object.spec.parametersRef.group || "-"}</DrawerItem>
               <DrawerItem name="Kind">{object.spec.parametersRef.kind}</DrawerItem>
               <DrawerItem name="Name">
                 <ReferenceLink

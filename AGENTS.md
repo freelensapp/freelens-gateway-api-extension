@@ -265,13 +265,18 @@ does not reject one that declares another prop as optional next to `params`; tha
   `extension`.
 - React keys derived from an object's content come from `Renderer.Util.createReactKey`. It serializes with
   `JSON.stringify`, so it throws for `undefined`, and the key depends on the order of the object's keys.
-- A reference that names its target by `group` and `kind`, as backend, parent and policy target references do, is
-  linked through `ReferenceLink` from `src/renderer/details/k8s/reference-link.tsx`. Passed to `LinkToObject`
-  without an `apiVersion`, or with a fixed one, a reference to another group leads to a URL that does not exist.
+- A reference to another object is linked through `ReferenceLink` from
+  `src/renderer/details/k8s/reference-link.tsx`, with its `group` and `kind`: backend, parent and policy target
+  references, CA certificate references, parameters references, and secret object references too, which go through
+  it rather than `LinkToSecret`. Passed to `LinkToObject` without an `apiVersion`, or with a fixed one, a reference
+  to another group leads to a URL that does not exist, and `LinkToSecret` links to a Secret whatever the kind.
   `getReferenceApiVersion` (`references.ts`) takes `v1` for the core group, the first served version of a kind the
   extension models, as `createAvailableVersionPage` chooses it, and otherwise the API the host has registered for the
-  group and kind; without one, `ReferenceLink` shows the name only. The default group differs: `""` for a backend
-  reference, `gatewayApiGroup` for a parent reference.
+  group and kind; without one, `ReferenceLink` shows the name only. The defaults of an optional `group` and `kind`
+  differ: `""` for a backend reference, `gatewayApiGroup` and `Gateway` for a parent reference, `""` and `Secret`
+  for a secret object reference. A local reference (`LocalObjectReference`) takes the namespace of the object.
+- A group shown on its own, as in a "Group" row or column, shows the core group `""` as `-`; a group and kind shown
+  together show the kind alone for it.
 - A link to one of the extension's own pages calls `extension.navigate(pageId)`. `Renderer.Navigation.navigate` is
   for absolute locations, such as the URL `getDetailsUrl` returns: the host's history does not support a relative
   pathname.
@@ -335,9 +340,11 @@ mechanism; this is the list to check a change against.
   leaves the tree with nothing in its place. A test fails on a model missing
   from `src/renderer/custom-resources.ts`, but nothing checks that
   `src/renderer/index.tsx` assigns it to the field ("CRD KubeObject Pattern").
-- **A reference by group and kind goes through `ReferenceLink`.** A
-  `LinkToObject` with a fixed or missing `apiVersion` leads to a URL that does
-  not exist for a kind of another group ("Renderer Components").
+- **A reference to another object goes through `ReferenceLink`, a secret
+  reference included.** A `LinkToObject` with a fixed or missing
+  `apiVersion` leads to a URL that does not exist for a kind of another group,
+  and `LinkToSecret` links to a Secret whatever the reference's kind
+  ("Renderer Components").
 - **A link to an own page goes through `extension.navigate(pageId)`.**
   `Renderer.Navigation.navigate` with a relative pathname is pushed as it is
   and lands only where the browser happens to resolve it ("Renderer

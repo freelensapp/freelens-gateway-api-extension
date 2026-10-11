@@ -9,7 +9,7 @@ import { gatewayApiGroup } from "../k8s/references";
 import styles from "./common.module.scss";
 
 const {
-  Component: { BadgeBoolean, DrawerItem, DrawerTitle, Icon, LinkToSecret },
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle, Icon },
   Util: { createReactKey },
 } = Renderer;
 
@@ -36,10 +36,15 @@ export const XBackendDetails = observer((props: Renderer.Component.KubeObjectDet
           <DrawerTitle>TLS</DrawerTitle>
           <DrawerItem name="Mode">{tls.mode}</DrawerItem>
           <DrawerItem name="Client Certificate" hidden={!tls.clientCertificateRef}>
-            <LinkToSecret
-              name={tls.clientCertificateRef?.name}
-              namespace={tls.clientCertificateRef?.namespace ?? objectNs}
-            />
+            {tls.clientCertificateRef && (
+              <ReferenceLink
+                object={object}
+                group={tls.clientCertificateRef.group ?? ""}
+                kind={tls.clientCertificateRef.kind ?? "Secret"}
+                name={tls.clientCertificateRef.name}
+                namespace={tls.clientCertificateRef.namespace ?? objectNs}
+              />
+            )}
           </DrawerItem>
           {tls.validation && <BackendTLSValidation object={object} validation={tls.validation} />}
         </>
