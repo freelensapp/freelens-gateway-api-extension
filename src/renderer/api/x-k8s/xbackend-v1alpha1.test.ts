@@ -41,8 +41,7 @@ describe("formatBackendPort", () => {
     expect(formatBackendPort({ name: "https", port: 443 })).toBe("443 (https)");
   });
 
-  it("shows a dash without a port number", () => {
-    expect(formatBackendPort({ name: "https" })).toBe("-");
+  it("shows a dash without a port", () => {
     expect(formatBackendPort(undefined)).toBe("-");
   });
 });

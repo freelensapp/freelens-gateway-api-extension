@@ -16,11 +16,11 @@ export type BackendTLSMode = "None" | "ServerOnly" | "ClientAndServer";
 
 export interface BackendPort {
   name?: string;
-  port?: number;
+  port: number;
 }
 
 export interface ExternalHostnameBackend {
-  hostname?: string;
+  hostname: string;
 }
 
 export interface BackendTLS {
