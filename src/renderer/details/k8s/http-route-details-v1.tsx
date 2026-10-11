@@ -151,6 +151,14 @@ export const HTTPRouteDetails = observer((props: Renderer.Component.KubeObjectDe
                     </Table>
                   </DrawerItem>
                 )}
+
+                {rule.retry && (
+                  <DrawerItem name="Retry">
+                    <DrawerItem name="Attempts">{rule.retry.attempts ?? "-"}</DrawerItem>
+                    <DrawerItem name="Backoff">{rule.retry.backoff ?? "-"}</DrawerItem>
+                    <DrawerItem name="Codes">{rule.retry.codes?.length ? rule.retry.codes.join(", ") : "-"}</DrawerItem>
+                  </DrawerItem>
+                )}
               </div>
             );
           })}
