@@ -25,6 +25,21 @@ export interface SecretObjectReference {
   namespace?: string;
 }
 
+export type SubjectAltNameType = "Hostname" | "URI";
+
+export interface SubjectAltName {
+  type: SubjectAltNameType;
+  hostname?: string;
+  uri?: string;
+}
+
+export interface BackendTLSPolicyValidation {
+  caCertificateRefs?: LocalObjectReference[];
+  wellKnownCACertificates?: string;
+  hostname: string;
+  subjectAltNames?: SubjectAltName[];
+}
+
 export type GatewayDefaultScope = "All" | "None";
 
 export type SessionPersistenceType = "Cookie" | "Header";
