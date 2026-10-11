@@ -4,7 +4,7 @@ import { type GatewayKubeObjectCRD } from "./types";
 export interface ReferenceGrantFrom {
   group: string;
   kind: string;
-  namespace?: string;
+  namespace: string;
 }
 
 export interface ReferenceGrantTo {
