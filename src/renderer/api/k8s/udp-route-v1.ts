@@ -3,11 +3,11 @@ import { type BackendRef, type CommonRouteSpec, type GatewayKubeObjectCRD, type 
 
 export interface UDPRouteRule {
   name?: string;
-  backendRefs?: BackendRef[];
+  backendRefs: BackendRef[];
 }
 
 export interface UDPRouteSpec extends CommonRouteSpec {
-  rules?: UDPRouteRule[];
+  rules: UDPRouteRule[];
 }
 
 export interface UDPRouteStatus extends RouteStatus {}
