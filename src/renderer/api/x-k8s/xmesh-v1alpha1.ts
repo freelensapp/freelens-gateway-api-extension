@@ -3,7 +3,7 @@ import { type ParametersReference, type SupportedFeature } from "../k8s/gateway-
 import { type GatewayKubeObjectCRD } from "../k8s/types";
 
 export interface MeshSpec {
-  controllerName?: string;
+  controllerName: string;
   parametersRef?: ParametersReference;
   description?: string;
 }
