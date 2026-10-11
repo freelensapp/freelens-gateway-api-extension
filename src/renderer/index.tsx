@@ -20,6 +20,7 @@ import { UDPRoute as UDPRoute_v1alpha2 } from "./api/k8s/udp-route-v1alpha2";
 import { XBackendTrafficPolicy as XBackendTrafficPolicy_v1alpha1 } from "./api/x-k8s/x-backend-traffic-policy-v1alpha1";
 import { XMesh as XMesh_v1alpha1 } from "./api/x-k8s/xmesh-v1alpha1";
 import { createAvailableVersionPage } from "./components/available-version";
+import { customResources } from "./custom-resources";
 import { BackendTLSPolicyDetails as BackendTLSPolicyDetails_v1 } from "./details/k8s/backend-tls-policy-details-v1";
 import { GatewayClassDetails as GatewayClassDetails_v1 } from "./details/k8s/gateway-class-details-v1";
 import { GatewayDetails as GatewayDetails_v1 } from "./details/k8s/gateway-details-v1";
@@ -114,6 +115,8 @@ const XMeshesPage = createAvailableVersionPage("Meshes", [
 
 export default class GatewayApiRenderer extends Renderer.LensExtension {
   async onActivate() {}
+
+  customResources = customResources;
 
   kubeObjectDetailItems = [
     {
