@@ -121,8 +121,8 @@ src/
   renderer/pages/overview-kinds.ts # The Overview's kinds and the choice of one version per kind
   renderer/pages/k8s/            # List page per kind and version, with its CSS module
   renderer/pages/x-k8s/          # List pages of the experimental kinds
-  renderer/details/k8s/          # Details panel per kind and version, their common CSS module, and the TLS
-                                 #   validation that BackendTLSPolicy and XBackend share
+  renderer/details/k8s/          # Details panel per kind and version, their common CSS module, the TLS
+                                 #   validation that BackendTLSPolicy and XBackend share, and ReferenceLink
   renderer/details/x-k8s/        # Details panels of the experimental kinds
   renderer/components/           # createAvailableVersionPage, withErrorPage, the pie chart, the events list
   renderer/icons/                # SVG icons, imported with ?raw
@@ -239,6 +239,13 @@ does not reject one that declares another prop as optional next to `params`; tha
   `extension`.
 - React keys derived from an object's content come from `Renderer.Util.createReactKey`. It serializes with
   `JSON.stringify`, so it throws for `undefined`, and the key depends on the order of the object's keys.
+- A reference that names its target by `group` and `kind`, as backend, parent and policy target references do, is
+  linked through `ReferenceLink` from `src/renderer/details/k8s/reference-link.tsx`. Passed to `LinkToObject`
+  without an `apiVersion`, or with a fixed one, a reference to another group leads to a URL that does not exist.
+  `getReferenceApiVersion` (`references.ts`) takes `v1` for the core group, the first served version of a kind the
+  extension models, as `createAvailableVersionPage` chooses it, and otherwise the API the host has registered for the
+  group and kind; without one, `ReferenceLink` shows the name only. The default group differs: `""` for a backend
+  reference, `gatewayApiGroup` for a parent reference.
 - A link to one of the extension's own pages calls `extension.navigate(pageId)`. `Renderer.Navigation.navigate` is
   for absolute locations, such as the URL `getDetailsUrl` returns: the host's history does not support a relative
   pathname.
@@ -297,6 +304,9 @@ mechanism; this is the list to check a change against.
   leaves the tree with nothing in its place. A test fails on a model missing
   from `src/renderer/custom-resources.ts`, but nothing checks that
   `src/renderer/index.tsx` assigns it to the field ("CRD KubeObject Pattern").
+- **A reference by group and kind goes through `ReferenceLink`.** A
+  `LinkToObject` with a fixed or missing `apiVersion` leads to a URL that does
+  not exist for a kind of another group ("Renderer Components").
 - **A link to an own page goes through `extension.navigate(pageId)`.**
   `Renderer.Navigation.navigate` with a relative pathname is pushed as it is
   and lands only where the browser happens to resolve it ("Renderer

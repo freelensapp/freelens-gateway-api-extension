@@ -1,6 +1,9 @@
 import { Renderer } from "@freelensapp/extensions";
 import { getAvailableResource, kinds } from "../../pages/overview-kinds";
 
+// The default group of a parent reference.
+export const gatewayApiGroup = "gateway.networking.k8s.io";
+
 function getGroup(apiVersion: string): string {
   const separator = apiVersion.lastIndexOf("/");
 

@@ -3,9 +3,10 @@ import { observer } from "mobx-react";
 import { TCPRoute } from "../../api/k8s/tcp-route-v1alpha2";
 import styles from "./common.module.scss";
 import { ReferenceLink } from "./reference-link";
+import { gatewayApiGroup } from "./references";
 
 const {
-  Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Icon, Table, TableCell, TableHead, TableRow },
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle, Icon, Table, TableCell, TableHead, TableRow },
   Util: { createReactKey },
 } = Renderer;
 
@@ -41,24 +42,23 @@ export const TCPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
           </TableHead>
           {parentRefs.map((parentRef) => {
             const namespace = parentRef.namespace || objectNs;
+            const group = parentRef.group ?? gatewayApiGroup;
             const kind = parentRef.kind ?? "Gateway";
             const key = createReactKey(parentRef);
 
             return (
               <TableRow key={key} nowrap>
-                <TableCell>{parentRef.group || "gateway.networking.k8s.io"}</TableCell>
+                <TableCell>{group || "-"}</TableCell>
                 <TableCell>{kind}</TableCell>
                 <TableCell>{namespace ?? "-"}</TableCell>
                 <TableCell>{parentRef.sectionName ?? "-"}</TableCell>
                 <TableCell>
-                  <LinkToObject
+                  <ReferenceLink
                     object={object}
-                    objectRef={{
-                      apiVersion: "gateway.networking.k8s.io/v1",
-                      kind,
-                      name: parentRef.name,
-                      namespace,
-                    }}
+                    group={group}
+                    kind={kind}
+                    name={parentRef.name}
+                    namespace={namespace}
                   />
                 </TableCell>
               </TableRow>

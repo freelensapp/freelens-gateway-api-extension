@@ -3,9 +3,10 @@ import { observer } from "mobx-react";
 import { BackendTLSPolicy } from "../../api/k8s";
 import { BackendTLSValidation } from "./backend-tls-validation";
 import styles from "./common.module.scss";
+import { ReferenceLink } from "./reference-link";
 
 const {
-  Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Table, TableCell, TableHead, TableRow },
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle, Table, TableCell, TableHead, TableRow },
   Util: { createReactKey },
 } = Renderer;
 
@@ -46,7 +47,13 @@ export const BackendTLSPolicyDetails = observer(
                   <TableCell>{targetRef.kind}</TableCell>
                   <TableCell>{targetRef.sectionName ?? "-"}</TableCell>
                   <TableCell>
-                    <LinkToObject objectRef={targetRef} object={object} />
+                    <ReferenceLink
+                      object={object}
+                      group={targetRef.group}
+                      kind={targetRef.kind}
+                      name={targetRef.name}
+                      namespace={object.getNs()}
+                    />
                   </TableCell>
                 </TableRow>
               );

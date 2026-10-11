@@ -1,10 +1,11 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { XBackendTrafficPolicy } from "../../api/x-k8s";
+import { ReferenceLink } from "../k8s/reference-link";
 import styles from "./common.module.scss";
 
 const {
-  Component: { DrawerItem, DrawerTitle, LinkToObject, Table, TableCell, TableHead, TableRow },
+  Component: { DrawerItem, DrawerTitle, Table, TableCell, TableHead, TableRow },
   Util: { createReactKey },
 } = Renderer;
 
@@ -33,7 +34,13 @@ export const XBackendTrafficPolicyDetails = observer(
                   <TableCell>{targetRef.group || "-"}</TableCell>
                   <TableCell>{targetRef.kind}</TableCell>
                   <TableCell>
-                    <LinkToObject objectRef={targetRef} object={object} />
+                    <ReferenceLink
+                      object={object}
+                      group={targetRef.group}
+                      kind={targetRef.kind}
+                      name={targetRef.name}
+                      namespace={object.getNs()}
+                    />
                   </TableCell>
                 </TableRow>
               );

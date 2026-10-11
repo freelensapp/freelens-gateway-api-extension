@@ -32,9 +32,10 @@ standard and experimental resources of the `gateway.networking.k8s.io` and
   the newest one the cluster serves, and the page says so when the cluster
   serves none.
 - **Details.** The details panel of every kind and version shows the status
-  conditions, the spec fields and links to the referenced objects. A backend
-  reference links to the object of its group and kind, such as an XBackend,
-  and shows only its name when the cluster serves no such kind.
+  conditions, the spec fields and links to the referenced objects. A backend,
+  parent or target reference links to the object of its group and kind, such
+  as an XBackend, and shows only its name when the cluster serves no such
+  kind.
 - **One sidebar entry per kind.** While the extension is enabled, the Gateway
   API kinds are left out of the Custom Resources tree of the cluster sidebar,
   so each is listed once, under "Gateway API".

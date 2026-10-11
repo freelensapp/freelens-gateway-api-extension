@@ -2,6 +2,8 @@ import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { ListenerSet } from "../../api/k8s";
 import styles from "./common.module.scss";
+import { ReferenceLink } from "./reference-link";
+import { gatewayApiGroup } from "./references";
 
 import type { ListenerEntryStatus } from "../../api/k8s/listenerset-v1";
 
@@ -12,7 +14,6 @@ const {
     DrawerItemLabels,
     DrawerTitle,
     Icon,
-    LinkToObject,
     LinkToSecret,
     Table,
     TableCell,
@@ -57,14 +58,8 @@ export const ListenerSetDetails = observer((props: Renderer.Component.KubeObject
   const listeners = object.spec?.listeners ?? [];
   const statusListeners = (object.status?.listeners ?? []) as ListenerEntryStatus[];
 
-  const parentRefObj = parentRef
-    ? {
-        apiVersion: "gateway.networking.k8s.io/v1",
-        kind: parentRef.kind ?? "Gateway",
-        name: parentRef.name,
-        namespace: parentRef.namespace ?? objectNs,
-      }
-    : undefined;
+  const parentGroup = parentRef?.group ?? gatewayApiGroup;
+  const parentKind = parentRef?.kind ?? "Gateway";
 
   return (
     <div className={styles.details}>
@@ -84,10 +79,16 @@ export const ListenerSetDetails = observer((props: Renderer.Component.KubeObject
             <TableCell>Name</TableCell>
           </TableHead>
           <TableRow nowrap>
-            <TableCell>{parentRef.group ?? "gateway.networking.k8s.io"}</TableCell>
-            <TableCell>{parentRef.kind ?? "Gateway"}</TableCell>
+            <TableCell>{parentGroup || "-"}</TableCell>
+            <TableCell>{parentKind}</TableCell>
             <TableCell>
-              <LinkToObject object={object} objectRef={parentRefObj} />
+              <ReferenceLink
+                object={object}
+                group={parentGroup}
+                kind={parentKind}
+                name={parentRef.name}
+                namespace={parentRef.namespace ?? objectNs}
+              />
             </TableCell>
           </TableRow>
         </Table>

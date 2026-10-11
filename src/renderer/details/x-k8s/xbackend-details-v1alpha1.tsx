@@ -5,14 +5,13 @@ import { XBackend } from "../../api/x-k8s";
 import { formatBackendPort, isBackendAccepted } from "../../api/x-k8s/xbackend-v1alpha1";
 import { BackendTLSValidation } from "../k8s/backend-tls-validation";
 import { ReferenceLink } from "../k8s/reference-link";
+import { gatewayApiGroup } from "../k8s/references";
 import styles from "./common.module.scss";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, Icon, LinkToSecret },
   Util: { createReactKey },
 } = Renderer;
-
-const gatewayApiGroup = "gateway.networking.k8s.io";
 
 export const XBackendDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<XBackend>) => {
   const { object } = props;
