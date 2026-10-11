@@ -113,6 +113,7 @@ pnpm clean:all            # Clean everything (dist, dts, node_modules, tgz)
 src/
   main/index.ts                  # Main entry (Main.LensExtension), empty
   renderer/index.tsx             # Renderer entry (Renderer.LensExtension): every registration
+  renderer/custom-resources.ts   # The model classes of customResources
   renderer/api/k8s/              # Models of gateway.networking.k8s.io, one file per kind and version,
                                  #   shared types (types.ts) and the status categories of the charts (statuses.ts)
   renderer/api/x-k8s/            # Models of gateway.networking.x-k8s.io
@@ -206,6 +207,21 @@ list of kinds and that function are in `src/renderer/pages/overview-kinds.ts`, a
 covers them without rendering it. A model added to the extension fails that test until it is listed there, or, for a
 kind without status like ReferenceGrant, named in the test as omitted.
 
+`customResources` lists the model classes of the custom resources the extension presents with pages of its own. The
+host reads the group and plural from each class's `crd`, and while the extension is enabled it leaves those resources
+out of the Custom Resources tree of the cluster sidebar, where every Gateway API kind would otherwise be listed a
+second time next to the "Gateway API" menu entry; a group of the tree left with no kinds goes with them. That is the
+whole effect: the definitions stay in the Definitions list, and the host's own list and details stay reachable by URL
+and from the command palette. Every model has a page here, so every model class is listed, every version of a kind
+included, so that removing one version keeps the others registered. A model the extension only decorates, with a
+details panel and no page of its own, stays out of the field: registered, it would leave the tree with nothing in its
+place. The list is in `src/renderer/custom-resources.ts`, which `src/renderer/index.tsx` assigns to the field, so that
+a test covers it without instantiating the extension: a model added to the extension fails that test until it is
+listed there. The host rejects an entry it cannot read (no `kind`, no `crd` with `apiVersions` and `plural` nor an
+`apiBase`, a core-group resource) with an error in the log naming the extension, the entry's index and the class, and
+the resource stays in the tree (contract C6 of Freelens's `docs/extensions/api.md`). The field is read once, when the
+extension is registered.
+
 The host renders a cluster page with `params` as its only prop. A page that needs the extension instance, as every
 page here does (the list pages for their error page, the Overview for its links), is created once at module level and
 registered as `Page: () => <Page extension={this} />`. Creating it inside the `clusterPages` initializer with `this`
@@ -275,6 +291,11 @@ mechanism; this is the list to check a change against.
 - **A cluster page gets the extension from its registration.** The host passes
   `params` only. The type check rejects a page that requires another prop, but
   not one that declares it optional ("CRD KubeObject Pattern").
+- **`customResources` lists exactly the models with a page.** A model left
+  out is listed a second time in the Custom Resources tree; one without a page
+  leaves the tree with nothing in its place. A test fails on a model missing
+  from `src/renderer/custom-resources.ts`, but nothing checks that
+  `src/renderer/index.tsx` assigns it to the field ("CRD KubeObject Pattern").
 - **A link to an own page goes through `extension.navigate(pageId)`.**
   `Renderer.Navigation.navigate` with a relative pathname is pushed as it is
   and lands only where the browser happens to resolve it ("Renderer

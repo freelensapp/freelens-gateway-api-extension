@@ -33,6 +33,9 @@ standard and experimental resources of the `gateway.networking.k8s.io` and
   serves none.
 - **Details.** The details panel of every kind and version shows the status
   conditions, the spec fields and links to the referenced objects.
+- **One sidebar entry per kind.** While the extension is enabled, the Gateway
+  API kinds are left out of the Custom Resources tree of the cluster sidebar,
+  so each is listed once, under "Gateway API".
 
 ![screenshot](docs/images/screenshot.png)
 
