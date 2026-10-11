@@ -3,12 +3,13 @@ import { type BackendRef, type CommonRouteSpec, type GatewayKubeObjectCRD, type 
 
 export interface TLSRouteRule {
   name?: string;
-  backendRefs?: BackendRef[];
+  backendRefs: BackendRef[];
 }
 
 export interface TLSRouteSpec extends CommonRouteSpec {
+  /** required by v1, but v1alpha2 serves the same objects and does not require it; unset: any hostname */
   hostnames?: string[];
-  rules?: TLSRouteRule[];
+  rules: TLSRouteRule[];
 }
 
 export interface TLSRouteStatus extends RouteStatus {}
