@@ -30,7 +30,7 @@ export const ReferenceGrantDetails = observer((props: Renderer.Component.KubeObj
               <TableRow key={key} nowrap>
                 <TableCell>{entry.group || "-"}</TableCell>
                 <TableCell>{entry.kind}</TableCell>
-                <TableCell>{entry.namespace ?? "-"}</TableCell>
+                <TableCell>{entry.namespace}</TableCell>
               </TableRow>
             );
           })}
