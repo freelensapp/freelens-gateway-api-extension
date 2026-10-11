@@ -23,6 +23,9 @@ export class ReferenceGrant extends Renderer.K8sApi.LensExtensionKubeObject<
   void,
   ReferenceGrantSpec
 > {
+  declare kind: "ReferenceGrant";
+  declare apiVersion: "gateway.networking.k8s.io/v1beta1";
+
   static readonly kind = "ReferenceGrant";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1beta1/referencegrants";

@@ -140,7 +140,8 @@ source maps. `main` and `renderer` in `package.json` point at the two entries.
 `src/renderer/index.tsx` registers one cluster page per kind under the "Gateway API" menu entry, with the kind's
 `crd.singular` as page id, and the Overview page as `overview`. Each kind's page is made by
 `createAvailableVersionPage` from the list pages of its versions, newest first. A details panel is registered for
-every kind and version, by `kind` and `crd.apiVersions`.
+every kind and version through `Renderer.K8sApi.detailsFor`, which takes `kind` and `apiVersions` from the model
+class.
 
 ## CRD KubeObject Pattern
 
@@ -154,6 +155,8 @@ instances of the host's `KubeObject`, not of the extension's subclass. The metho
 throws. So:
 
 - **Metadata**: `static readonly` `kind`, `namespaced`, `apiBase` and `crd`.
+- **Instance type**: `declare kind` and `declare apiVersion`, the literals of the static `kind` and `crd.apiVersions`,
+  for the type check of the details registrations (below).
 - **Per-object logic**: a function that takes the object or its fields, such as
   `hasTrueCondition(conditions, "Accepted")` from `api/k8s/types.ts` or `getStatusCategory(object)` from
   `api/k8s/statuses.ts`.
@@ -167,6 +170,9 @@ export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
   GatewayStatus,
   GatewaySpec
 > {
+  declare kind: "Gateway";
+  declare apiVersion: "gateway.networking.k8s.io/v1";
+
   static readonly kind = "Gateway";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1/gateways";
@@ -188,10 +194,21 @@ from the host, through the model's static `getStore()`. `api/k8s/index.ts` and `
 three classes of every model with its version as a suffix (`TCPRoute_v1`).
 
 A details component takes `Renderer.Component.KubeObjectDetailsProps<Model>` of its own model class and version, and
-its registration passes it as it is (`Details: GatewayDetails_v1`), not through a wrapper typed
-`KubeObjectDetailsProps<any>`. The registration type has `any` for `spec` and `status`, so the type check accepts any
-details component for any kind: that `kind`, `apiVersions` and `Details` of one entry belong to the same model is up to
-the code.
+is registered with `Renderer.K8sApi.detailsFor(Model, { priority: 10, Details: ModelDetails })`, one call per model
+class. The helper takes `kind` from the class's static `kind` and `apiVersions` from its `crd.apiVersions`, and types
+`Details` against the class, so a component written for another model fails the type check. It throws when the class
+has no `kind` or no `apiVersions`; called in the `kubeObjectDetailItems` initializer, that fails the extension's load
+rather than registering a panel that never appears. A registration written as a plain object types the object as
+`any` and accepts any details component for any kind, and so does a wrapper typed `KubeObjectDetailsProps<any>`:
+pass the component as it is (`Details: GatewayDetails_v1`).
+
+The helper's check is structural. The classes of two versions of one kind (`TCPRoute`, `UDPRoute`, `ReferenceGrant`)
+have compatible shapes, as can two kinds, so the shape alone does not tell them apart. The `declare kind` and
+`declare apiVersion` of every model narrow its instance type to its own literals, and a component of one model then
+fails against the class of any other. They must stay `declare`: as plain fields, `useDefineForClassFields` would
+define them as `undefined` on every instance, while `declare` emits nothing. A class that names several versions in
+`crd.apiVersions` declares `apiVersion` as the union of their literals. Nothing checks that the literals match the
+static `kind` and `crd.apiVersions`; a wrong literal makes the type check accept the component of the model it names.
 
 Kubernetes types that the models share with the host, such as `Condition`, `LabelSelector` and `ObjectReference`,
 come from `Renderer.K8sApi` (`Renderer.K8sApi.Condition`).
@@ -286,9 +303,11 @@ mechanism; this is the list to check a change against.
 - **No instance method on a KubeObject subclass.** The objects from the host
   do not have it, and the call throws. Nothing checks it
   ("CRD KubeObject Pattern").
-- **A details registration pairs `kind`, `apiVersions` and `Details` of one
-  model.** The registration type accepts any details component for any kind
-  ("CRD KubeObject Pattern").
+- **A details panel is registered through `detailsFor`, and every model
+  declares its own `kind` and `apiVersion`.** A registration written as a
+  plain object accepts any details component for any kind, and without the
+  literals, or with wrong ones, the helper accepts the component of another
+  version of the kind ("CRD KubeObject Pattern").
 - **A kind served in two versions is shown once.** Code that goes over all
   model classes meets it once per served version; take the first served
   version in order of preference ("CRD KubeObject Pattern").
