@@ -11,17 +11,17 @@ const {
 } = Renderer;
 
 function isAccepted(object: BackendTLSPolicy): boolean {
-  const ancestors = object.status?.conditions ?? [];
+  const ancestors = object.status?.ancestors ?? [];
 
   return ancestors.some((ancestor) =>
-    (ancestor.conditions ?? []).some((condition) => condition.type === "Accepted" && condition.status === "True"),
+    ancestor.conditions.some((condition) => condition.type === "Accepted" && condition.status === "True"),
   );
 }
 
 export const BackendTLSPolicyDetails = observer(
   (props: Renderer.Component.KubeObjectDetailsProps<BackendTLSPolicy>) => {
     const { object } = props;
-    const targetRefs = object.spec?.targetRefs ?? [];
+    const targetRefs = object.spec.targetRefs;
 
     return (
       <div className={styles.details}>

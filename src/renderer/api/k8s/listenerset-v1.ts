@@ -12,16 +12,16 @@ export interface ParentGatewayReference {
 }
 
 export interface ListenerEntry {
-  name?: string;
+  name: string;
   hostname?: string;
-  port?: number;
+  port: number;
   protocol: ProtocolType;
   tls?: ListenerTLSConfig;
   allowedRoutes?: AllowedRoutes;
 }
 
 export interface ListenerSetSpec {
-  parentRef?: ParentGatewayReference;
+  parentRef: ParentGatewayReference;
   listeners: ListenerEntry[];
 }
 
@@ -29,7 +29,7 @@ export interface ListenerEntryStatus {
   name: string;
   supportedKinds?: RouteGroupKind[];
   attachedRoutes: number;
-  conditions?: Renderer.K8sApi.Condition[];
+  conditions: Renderer.K8sApi.Condition[];
 }
 
 export interface ListenerSetStatus {

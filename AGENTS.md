@@ -213,6 +213,15 @@ static `kind` and `crd.apiVersions`; a wrong literal makes the type check accept
 Kubernetes types that the models share with the host, such as `Condition`, `LabelSelector` and `ObjectReference`,
 come from `Renderer.K8sApi` (`Renderer.K8sApi.Condition`).
 
+Whether a field of `Spec` or `Status` is optional follows the kubebuilder markers of the Go type in
+kubernetes-sigs/gateway-api, at the version the models follow, from which `controller-gen` writes the `required` lists
+of the CRD; it does not follow `omitempty`. A field is required when its marker is `+required` (or
+`+kubebuilder:validation:Required`), or when it has no marker, no `omitempty` and is not a pointer; it is optional
+otherwise. Gateway API pairs `+required` with `omitempty` throughout. A field stays optional when another API version
+that the type covers, or that the CRD serves, leaves it optional: without a conversion webhook, the API server serves an
+object created through one version through every other as it is (`TLSRouteSpec.hostnames`, required in v1 but not in
+v1alpha2). Code reads a required field without a fallback, and shows `-` for an optional one that is not set.
+
 A kind served in more than one API version has one model class per version (`TCPRoute_v1`, `TCPRoute_v1alpha2`).
 The host has a store for every served version of a CRD, so the static `getStore()` of every class whose version is
 served returns one, and code that goes over all classes meets such a kind once per served version. Code that shows a
@@ -303,6 +312,9 @@ mechanism; this is the list to check a change against.
 - **No instance method on a KubeObject subclass.** The objects from the host
   do not have it, and the call throws. Nothing checks it
   ("CRD KubeObject Pattern").
+- **A field is optional as the kubebuilder markers make it, not as
+  `omitempty` does.** A field typed required that the API leaves optional
+  throws or shows `undefined` where it is missing ("CRD KubeObject Pattern").
 - **A details panel is registered through `detailsFor`, and every model
   declares its own `kind` and `apiVersion`.** A registration written as a
   plain object accepts any details component for any kind, and without the

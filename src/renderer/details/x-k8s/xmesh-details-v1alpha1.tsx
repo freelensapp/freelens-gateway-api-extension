@@ -8,7 +8,7 @@ const {
 } = Renderer;
 
 function getControllerName(object: XMesh): string {
-  return object.spec?.controllerName ?? "-";
+  return object.spec.controllerName;
 }
 
 function isAccepted(object: XMesh): boolean {

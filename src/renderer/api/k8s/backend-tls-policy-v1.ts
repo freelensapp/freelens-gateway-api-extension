@@ -12,7 +12,7 @@ export interface LocalPolicyTargetReferenceWithSectionName extends LocalPolicyTa
 }
 
 export interface BackendTLSPolicySpec {
-  targetRefs?: LocalPolicyTargetReferenceWithSectionName[];
+  targetRefs: LocalPolicyTargetReferenceWithSectionName[];
   validation: BackendTLSPolicyValidation;
   options?: Record<string, string>;
 }

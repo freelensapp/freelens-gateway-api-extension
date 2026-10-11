@@ -12,7 +12,7 @@ const {
 
 function isAccepted(object: UDPRoute): boolean {
   return (object.status?.parents ?? []).some((parent) =>
-    (parent?.conditions ?? []).some((condition) => condition?.type === "Accepted" && condition?.status === "True"),
+    parent.conditions.some((condition) => condition?.type === "Accepted" && condition?.status === "True"),
   );
 }
 
@@ -21,7 +21,7 @@ export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
   const objectNs = object.getNs();
 
   const parentRefs = object.spec?.parentRefs ?? [];
-  const rules = object.spec?.rules ?? [];
+  const rules = object.spec.rules;
   const accepted = isAccepted(object);
 
   return (
@@ -82,7 +82,7 @@ export const UDPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
                   {rule.name && <span style={{ color: "var(--textColorSecondary)" }}>({rule.name})</span>}
                 </div>
 
-                {rule.backendRefs && rule.backendRefs.length > 0 && (
+                {rule.backendRefs.length > 0 && (
                   <DrawerItem name="Backend References">
                     <Table selectable tableId="backendRefs" scrollable={false} sortSyncWithUrl={false}>
                       <TableHead flat sticky={false}>

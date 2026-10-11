@@ -12,7 +12,7 @@ const {
 function isAccepted(item: TCPRoute): boolean {
   return (
     item.status?.parents?.some((parent) =>
-      parent.conditions?.some((condition) => condition.type === "Accepted" && condition.status === "True"),
+      parent.conditions.some((condition) => condition.type === "Accepted" && condition.status === "True"),
     ) ?? false
   );
 }
