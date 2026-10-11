@@ -19,6 +19,11 @@ export function formatCondition(condition: Renderer.K8sApi.Condition): string {
   return condition.reason ? `${text} (${condition.reason})` : text;
 }
 
+// `name=value (type)` of a header or query parameter match, with `Exact` as the default type.
+export function formatValueMatch(match: { type?: string; name: string; value: string }): string {
+  return `${match.name}=${match.value} (${match.type ?? "Exact"})`;
+}
+
 export interface LocalObjectReference {
   group: string;
   kind: string;

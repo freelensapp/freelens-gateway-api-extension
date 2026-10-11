@@ -20,7 +20,14 @@ export interface GRPCMethodMatch {
   method?: string;
 }
 
-export interface GRPCHeaderMatch {}
+export type GRPCHeaderMatchType = "Exact" | "RegularExpression";
+
+export interface GRPCHeaderMatch {
+  /** default: `"Exact"` */
+  type?: GRPCHeaderMatchType;
+  name: string;
+  value: string;
+}
 
 export interface GRPCRouteMatch {
   method?: GRPCMethodMatch;

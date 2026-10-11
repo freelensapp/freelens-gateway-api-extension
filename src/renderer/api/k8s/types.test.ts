@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { formatCondition, hasTrueCondition } from "./types";
+import { formatCondition, formatValueMatch, hasTrueCondition } from "./types";
 
 describe("formatCondition", () => {
   test("shows the type and the status", () => {
@@ -8,6 +8,18 @@ describe("formatCondition", () => {
 
   test("adds the reason when there is one", () => {
     expect(formatCondition({ type: "Accepted", status: "False", reason: "Invalid" })).toBe("Accepted: False (Invalid)");
+  });
+});
+
+describe("formatValueMatch", () => {
+  test("shows the name, the value and the type", () => {
+    expect(formatValueMatch({ type: "RegularExpression", name: "x-version", value: "v[0-9]+" })).toBe(
+      "x-version=v[0-9]+ (RegularExpression)",
+    );
+  });
+
+  test("takes Exact when the type is not set", () => {
+    expect(formatValueMatch({ name: "x-env", value: "canary" })).toBe("x-env=canary (Exact)");
   });
 });
 
