@@ -1,6 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { BackendTLSPolicy } from "../../api/k8s";
+import { BackendTLSValidation } from "./backend-tls-validation";
 import styles from "./common.module.scss";
 
 const {
@@ -16,19 +17,13 @@ function isAccepted(object: BackendTLSPolicy): boolean {
   );
 }
 
-function getHostname(object: BackendTLSPolicy): string {
-  return object.spec?.validation?.hostname ?? "-";
-}
-
 export const BackendTLSPolicyDetails = observer(
   (props: Renderer.Component.KubeObjectDetailsProps<BackendTLSPolicy>) => {
     const { object } = props;
     const targetRefs = object.spec?.targetRefs ?? [];
-    const caCertRefs = object.spec?.validation?.caCertificateRefs ?? [];
 
     return (
       <div className={styles.details}>
-        <DrawerItem name="Hostname">{getHostname(object)}</DrawerItem>
         <DrawerItem name="Accepted">
           <BadgeBoolean value={isAccepted(object)} />
         </DrawerItem>
@@ -61,31 +56,7 @@ export const BackendTLSPolicyDetails = observer(
           <DrawerItem name="Target Refs">-</DrawerItem>
         )}
 
-        <DrawerTitle>CA Cert Refs</DrawerTitle>
-        {caCertRefs.length > 0 ? (
-          <Table selectable tableId="backendTLSPolicyCaCertRefs" scrollable={false} sortSyncWithUrl={false}>
-            <TableHead flat sticky={false}>
-              <TableCell>Group</TableCell>
-              <TableCell>Kind</TableCell>
-              <TableCell>Name</TableCell>
-            </TableHead>
-            {caCertRefs.map((caCertRef) => {
-              const key = createReactKey(caCertRef);
-
-              return (
-                <TableRow key={key} nowrap>
-                  <TableCell>{caCertRef.group || "-"}</TableCell>
-                  <TableCell>{caCertRef.kind}</TableCell>
-                  <TableCell>
-                    <LinkToObject objectRef={caCertRef} object={object} />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </Table>
-        ) : (
-          <DrawerItem name="CA Cert Refs">-</DrawerItem>
-        )}
+        <BackendTLSValidation object={object} validation={object.spec?.validation} />
       </div>
     );
   },

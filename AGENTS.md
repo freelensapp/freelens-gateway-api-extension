@@ -121,7 +121,8 @@ src/
   renderer/pages/overview-kinds.ts # The Overview's kinds and the choice of one version per kind
   renderer/pages/k8s/            # List page per kind and version, with its CSS module
   renderer/pages/x-k8s/          # List pages of the experimental kinds
-  renderer/details/k8s/          # Details panel per kind and version, and their common CSS module
+  renderer/details/k8s/          # Details panel per kind and version, their common CSS module, and the TLS
+                                 #   validation that BackendTLSPolicy and XBackend share
   renderer/details/x-k8s/        # Details panels of the experimental kinds
   renderer/components/           # createAvailableVersionPage, withErrorPage, the pie chart, the events list
   renderer/icons/                # SVG icons, imported with ?raw

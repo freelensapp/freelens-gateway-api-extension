@@ -1,6 +1,7 @@
 import { Renderer } from "@freelensapp/extensions";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as k8s from "../../api/k8s";
+import * as xK8s from "../../api/x-k8s";
 import { getReferenceApiVersion } from "./references";
 
 type KubeObjectClass = typeof Renderer.K8sApi.LensExtensionKubeObject<any, any, any>;
@@ -50,6 +51,14 @@ describe("getReferenceApiVersion", () => {
     serve(k8s.UDPRoute_v1alpha2);
 
     expect(getReferenceApiVersion("gateway.networking.k8s.io", "UDPRoute")).toBe("gateway.networking.k8s.io/v1alpha2");
+  });
+
+  it("links a reference to XBackend to the version the cluster serves", () => {
+    serve(xK8s.XBackend_v1alpha1);
+
+    expect(getReferenceApiVersion("gateway.networking.x-k8s.io", "XBackend")).toBe(
+      "gateway.networking.x-k8s.io/v1alpha1",
+    );
   });
 
   it("asks the host for a kind of another group", () => {

@@ -1,5 +1,15 @@
 import { describe, expect, test } from "vitest";
-import { hasTrueCondition } from "./types";
+import { formatCondition, hasTrueCondition } from "./types";
+
+describe("formatCondition", () => {
+  test("shows the type and the status", () => {
+    expect(formatCondition({ type: "Accepted", status: "True" })).toBe("Accepted: True");
+  });
+
+  test("adds the reason when there is one", () => {
+    expect(formatCondition({ type: "Accepted", status: "False", reason: "Invalid" })).toBe("Accepted: False (Invalid)");
+  });
+});
 
 describe("hasTrueCondition", () => {
   test("returns true when a matching condition is True", () => {
