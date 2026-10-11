@@ -7,7 +7,7 @@ import { ReferenceLink } from "./reference-link";
 import type { GatewaySpecAddress, ListenerStatus } from "../../api/k8s/gateway-v1";
 
 const {
-  Component: { BadgeBoolean, DrawerItem, DrawerItemLabels, DrawerTitle, Icon, LinkToObject, LinkToSecret },
+  Component: { BadgeBoolean, DrawerItem, DrawerItemLabels, DrawerTitle, Icon, LinkToObject },
   Util: { createReactKey },
 } = Renderer;
 
@@ -71,6 +71,7 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
   const { object } = props;
   const allowedListenerNamespaces = object.spec?.allowedListeners?.namespaces;
   const infrastructure = object.spec?.infrastructure;
+  const clientCertificateRef = object.spec?.tls?.backend?.clientCertificateRef;
   const frontendValidation = object.spec?.tls?.frontend?.default?.validation;
   const frontendPerPort = object.spec?.tls?.frontend?.perPort ?? [];
   const listenerStatuses = (object.status?.listeners ?? []) as ListenerStatus[];
@@ -142,11 +143,16 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
       {object.spec?.tls && (
         <>
           <DrawerTitle>TLS</DrawerTitle>
-          <DrawerItem name="Backend Client Cert" hidden={!object.spec.tls.backend?.clientCertificateRef}>
-            <LinkToSecret
-              name={object.spec.tls.backend?.clientCertificateRef?.name}
-              namespace={object.spec.tls.backend?.clientCertificateRef?.namespace ?? object.getNs()}
-            />
+          <DrawerItem name="Backend Client Cert" hidden={!clientCertificateRef}>
+            {clientCertificateRef && (
+              <ReferenceLink
+                object={object}
+                group={clientCertificateRef.group ?? ""}
+                kind={clientCertificateRef.kind ?? "Secret"}
+                name={clientCertificateRef.name}
+                namespace={clientCertificateRef.namespace ?? object.getNs()}
+              />
+            )}
           </DrawerItem>
           <DrawerItem name="Frontend Validation Mode">{frontendValidation?.mode ?? "-"}</DrawerItem>
           <DrawerItem name="Frontend CA Certs" labelsOnly>
@@ -202,7 +208,13 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
               <DrawerItem name="TLS Certs" hidden={!listener.tls?.certificateRefs?.length} labelsOnly>
                 {listener.tls?.certificateRefs?.map((certificateRef) => (
                   <div key={createReactKey(certificateRef)}>
-                    <LinkToSecret name={certificateRef.name} namespace={certificateRef.namespace ?? object.getNs()} />
+                    <ReferenceLink
+                      object={object}
+                      group={certificateRef.group ?? ""}
+                      kind={certificateRef.kind ?? "Secret"}
+                      name={certificateRef.name}
+                      namespace={certificateRef.namespace ?? object.getNs()}
+                    />
                   </div>
                 ))}
               </DrawerItem>

@@ -8,18 +8,8 @@ import { gatewayApiGroup } from "./references";
 import type { ListenerEntryStatus } from "../../api/k8s/listenerset-v1";
 
 const {
-  Component: {
-    BadgeBoolean,
-    DrawerItem,
-    DrawerItemLabels,
-    DrawerTitle,
-    Icon,
-    LinkToSecret,
-    Table,
-    TableCell,
-    TableHead,
-    TableRow,
-  },
+  Component: { BadgeBoolean, DrawerItem, DrawerItemLabels, DrawerTitle, Icon, Table, TableCell, TableHead, TableRow },
+  Util: { createReactKey },
 } = Renderer;
 
 function isAccepted(object: ListenerSet): boolean {
@@ -107,8 +97,14 @@ export const ListenerSetDetails = observer((props: Renderer.Component.KubeObject
               </DrawerItem>
               <DrawerItem name="TLS Certs" hidden={!listener.tls?.certificateRefs?.length} labelsOnly>
                 {listener.tls?.certificateRefs?.map((certificateRef) => (
-                  <div key={`${certificateRef.name}-${certificateRef.namespace ?? objectNs}`}>
-                    <LinkToSecret name={certificateRef.name} namespace={certificateRef.namespace ?? objectNs} />
+                  <div key={createReactKey(certificateRef)}>
+                    <ReferenceLink
+                      object={object}
+                      group={certificateRef.group ?? ""}
+                      kind={certificateRef.kind ?? "Secret"}
+                      name={certificateRef.name}
+                      namespace={certificateRef.namespace ?? objectNs}
+                    />
                   </div>
                 ))}
               </DrawerItem>
