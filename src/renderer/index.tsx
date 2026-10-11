@@ -130,134 +130,25 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
   customResources = customResources;
 
   kubeObjectDetailItems = [
-    {
-      kind: GatewayClass_v1.kind,
-      apiVersions: GatewayClass_v1.crd.apiVersions,
+    Renderer.K8sApi.detailsFor(GatewayClass_v1, { priority: 10, Details: GatewayClassDetails_v1 }),
+    Renderer.K8sApi.detailsFor(Gateway_v1, { priority: 10, Details: GatewayDetails_v1 }),
+    Renderer.K8sApi.detailsFor(HTTPRoute_v1, { priority: 10, Details: HTTPRouteDetails_v1 }),
+    Renderer.K8sApi.detailsFor(GRPCRoute_v1, { priority: 10, Details: GRPCRouteDetails_v1 }),
+    Renderer.K8sApi.detailsFor(TCPRoute_v1, { priority: 10, Details: TCPRouteDetails_v1 }),
+    Renderer.K8sApi.detailsFor(TCPRoute_v1alpha2, { priority: 10, Details: TCPRouteDetails_v1alpha2 }),
+    Renderer.K8sApi.detailsFor(TLSRoute_v1, { priority: 10, Details: TLSRouteDetails_v1 }),
+    Renderer.K8sApi.detailsFor(UDPRoute_v1, { priority: 10, Details: UDPRouteDetails_v1 }),
+    Renderer.K8sApi.detailsFor(UDPRoute_v1alpha2, { priority: 10, Details: UDPRouteDetails_v1alpha2 }),
+    Renderer.K8sApi.detailsFor(ReferenceGrant_v1, { priority: 10, Details: ReferenceGrantDetails_v1 }),
+    Renderer.K8sApi.detailsFor(ReferenceGrant_v1beta1, { priority: 10, Details: ReferenceGrantDetails_v1beta1 }),
+    Renderer.K8sApi.detailsFor(ListenerSet_v1, { priority: 10, Details: ListenerSetDetails_v1 }),
+    Renderer.K8sApi.detailsFor(BackendTLSPolicy_v1, { priority: 10, Details: BackendTLSPolicyDetails_v1 }),
+    Renderer.K8sApi.detailsFor(XBackendTrafficPolicy_v1alpha1, {
       priority: 10,
-      components: {
-        Details: GatewayClassDetails_v1,
-      },
-    },
-    {
-      kind: Gateway_v1.kind,
-      apiVersions: Gateway_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: GatewayDetails_v1,
-      },
-    },
-    {
-      kind: HTTPRoute_v1.kind,
-      apiVersions: HTTPRoute_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: HTTPRouteDetails_v1,
-      },
-    },
-    {
-      kind: GRPCRoute_v1.kind,
-      apiVersions: GRPCRoute_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: GRPCRouteDetails_v1,
-      },
-    },
-    {
-      kind: TCPRoute_v1.kind,
-      apiVersions: TCPRoute_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: TCPRouteDetails_v1,
-      },
-    },
-    {
-      kind: TCPRoute_v1alpha2.kind,
-      apiVersions: TCPRoute_v1alpha2.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: TCPRouteDetails_v1alpha2,
-      },
-    },
-    {
-      kind: TLSRoute_v1.kind,
-      apiVersions: TLSRoute_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: TLSRouteDetails_v1,
-      },
-    },
-    {
-      kind: UDPRoute_v1.kind,
-      apiVersions: UDPRoute_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: UDPRouteDetails_v1,
-      },
-    },
-    {
-      kind: UDPRoute_v1alpha2.kind,
-      apiVersions: UDPRoute_v1alpha2.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: UDPRouteDetails_v1alpha2,
-      },
-    },
-    {
-      kind: ReferenceGrant_v1.kind,
-      apiVersions: ReferenceGrant_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: ReferenceGrantDetails_v1,
-      },
-    },
-    {
-      kind: ReferenceGrant_v1beta1.kind,
-      apiVersions: ReferenceGrant_v1beta1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: ReferenceGrantDetails_v1beta1,
-      },
-    },
-    {
-      kind: ListenerSet_v1.kind,
-      apiVersions: ListenerSet_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: ListenerSetDetails_v1,
-      },
-    },
-    {
-      kind: BackendTLSPolicy_v1.kind,
-      apiVersions: BackendTLSPolicy_v1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: BackendTLSPolicyDetails_v1,
-      },
-    },
-    {
-      kind: XBackendTrafficPolicy_v1alpha1.kind,
-      apiVersions: XBackendTrafficPolicy_v1alpha1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: XBackendTrafficPolicyDetails_v1alpha1,
-      },
-    },
-    {
-      kind: XBackend_v1alpha1.kind,
-      apiVersions: XBackend_v1alpha1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: XBackendDetails_v1alpha1,
-      },
-    },
-    {
-      kind: XMesh_v1alpha1.kind,
-      apiVersions: XMesh_v1alpha1.crd.apiVersions,
-      priority: 10,
-      components: {
-        Details: XMeshDetails_v1alpha1,
-      },
-    },
+      Details: XBackendTrafficPolicyDetails_v1alpha1,
+    }),
+    Renderer.K8sApi.detailsFor(XBackend_v1alpha1, { priority: 10, Details: XBackendDetails_v1alpha1 }),
+    Renderer.K8sApi.detailsFor(XMesh_v1alpha1, { priority: 10, Details: XMeshDetails_v1alpha1 }),
   ];
 
   clusterPages = [
