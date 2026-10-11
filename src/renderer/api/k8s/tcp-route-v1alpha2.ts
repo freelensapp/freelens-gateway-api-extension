@@ -3,7 +3,7 @@ import { type BackendRef, type CommonRouteSpec, type GatewayKubeObjectCRD, type 
 
 export interface TCPRouteRule {
   name?: string;
-  backendRefs?: BackendRef[];
+  backendRefs: BackendRef[];
 }
 
 export interface TCPRouteSpec extends CommonRouteSpec {
