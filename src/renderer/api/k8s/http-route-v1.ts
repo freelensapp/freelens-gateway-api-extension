@@ -101,7 +101,7 @@ export interface HTTPRouteRule {
 }
 
 export interface HTTPRequestMirrorFilter {
-  backendRef?: BackendObjectReference;
+  backendRef: BackendObjectReference;
   percent?: number;
   fraction?: Fraction;
 }
@@ -135,8 +135,8 @@ export interface HTTPBackendRef extends BackendRef {
 }
 
 export interface HTTPExternalAuthFilter {
-  protocol?: HTTPRouteExternalAuthProtocol;
-  backendRef?: BackendObjectReference;
+  protocol: HTTPRouteExternalAuthProtocol;
+  backendRef: BackendObjectReference;
   grpc?: GRPCAuthConfig;
   http?: HTTPAuthConfig;
   forwardBody?: ForwardBodyConfig;
