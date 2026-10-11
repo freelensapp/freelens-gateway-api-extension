@@ -24,6 +24,9 @@ export class BackendTLSPolicy extends Renderer.K8sApi.LensExtensionKubeObject<
   BackendTLSPolicyStatus,
   BackendTLSPolicySpec
 > {
+  declare kind: "BackendTLSPolicy";
+  declare apiVersion: "gateway.networking.k8s.io/v1";
+
   static readonly kind = "BackendTLSPolicy";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1/backendtlspolicies";

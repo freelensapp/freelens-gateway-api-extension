@@ -138,6 +138,9 @@ export class Gateway extends Renderer.K8sApi.LensExtensionKubeObject<
   GatewayStatus,
   GatewaySpec
 > {
+  declare kind: "Gateway";
+  declare apiVersion: "gateway.networking.k8s.io/v1";
+
   static readonly kind = "Gateway";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1/gateways";

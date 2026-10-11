@@ -18,6 +18,9 @@ export class TLSRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   TLSRouteStatus,
   TLSRouteSpec
 > {
+  declare kind: "TLSRoute";
+  declare apiVersion: "gateway.networking.k8s.io/v1";
+
   static readonly kind = "TLSRoute";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1/tlsroutes";

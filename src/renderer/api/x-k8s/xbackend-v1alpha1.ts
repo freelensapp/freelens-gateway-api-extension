@@ -70,6 +70,9 @@ export class XBackend extends Renderer.K8sApi.LensExtensionKubeObject<
   BackendStatus,
   BackendSpec
 > {
+  declare kind: "XBackend";
+  declare apiVersion: "gateway.networking.x-k8s.io/v1alpha1";
+
   static readonly kind = "XBackend";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.x-k8s.io/v1alpha1/xbackends";

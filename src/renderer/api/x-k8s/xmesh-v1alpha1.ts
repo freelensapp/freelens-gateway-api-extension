@@ -18,6 +18,9 @@ export class XMesh extends Renderer.K8sApi.LensExtensionKubeObject<
   MeshStatus,
   MeshSpec
 > {
+  declare kind: "XMesh";
+  declare apiVersion: "gateway.networking.x-k8s.io/v1alpha1";
+
   static readonly kind = "XMesh";
   static readonly namespaced = false;
   static readonly apiBase = "/apis/gateway.networking.x-k8s.io/v1alpha1/xmeshes";

@@ -17,6 +17,9 @@ export class UDPRoute extends Renderer.K8sApi.LensExtensionKubeObject<
   UDPRouteStatus,
   UDPRouteSpec
 > {
+  declare kind: "UDPRoute";
+  declare apiVersion: "gateway.networking.k8s.io/v1";
+
   static readonly kind = "UDPRoute";
   static readonly namespaced = true;
   static readonly apiBase = "/apis/gateway.networking.k8s.io/v1/udproutes";
