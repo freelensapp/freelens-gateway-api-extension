@@ -78,7 +78,7 @@ export interface GatewayBackendTLS {
 export type FrontendValidationModeType = "AllowValidOnly" | "AllowInsecureFallback";
 
 export interface FrontendTLSValidation {
-  caCertificateRefs?: Renderer.K8sApi.ObjectReference[];
+  caCertificateRefs: Renderer.K8sApi.ObjectReference[];
   /** default: `"AllowValidOnly"` */
   mode?: FrontendValidationModeType;
 }
@@ -104,7 +104,7 @@ export interface GatewayTLSConfig {
 
 export interface GatewaySpec {
   gatewayClassName: string;
-  listeners?: Listener[];
+  listeners: Listener[];
   addresses?: GatewaySpecAddress[];
   infrastructure?: GatewayInfrastructure;
   allowedListeners?: AllowedListeners;
@@ -123,7 +123,7 @@ export interface ListenerStatus {
   name: string;
   supportedKinds?: RouteGroupKind[];
   attachedRoutes: number;
-  conditions?: Renderer.K8sApi.Condition[];
+  conditions: Renderer.K8sApi.Condition[];
 }
 
 export interface GatewayStatus {

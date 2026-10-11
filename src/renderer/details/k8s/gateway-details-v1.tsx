@@ -139,7 +139,7 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
           </DrawerItem>
           <DrawerItem name="Frontend Validation Mode">{frontendValidation?.mode ?? "-"}</DrawerItem>
           <DrawerItem name="Frontend CA Certs" labelsOnly>
-            {frontendValidation?.caCertificateRefs?.length ? (
+            {frontendValidation?.caCertificateRefs.length ? (
               frontendValidation.caCertificateRefs.map((reference) => (
                 <div key={createReactKey(reference)}>
                   <LinkToObject objectRef={reference} object={object} />
@@ -153,7 +153,7 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
             {frontendPerPort.map((entry) => (
               <DrawerItem name={entry.port} key={`frontend-port-${entry.port}`} labelsOnly>
                 <div>{entry.tls?.validation?.mode ?? "-"}:</div>
-                {entry.tls?.validation?.caCertificateRefs?.map((reference) => (
+                {entry.tls?.validation?.caCertificateRefs.map((reference) => (
                   <div key={createReactKey(reference)}>
                     <LinkToObject objectRef={reference} object={object} />
                   </div>
@@ -164,7 +164,7 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
         </>
       )}
 
-      {object.spec.listeners && object.spec.listeners.length > 0 && (
+      {object.spec.listeners.length > 0 && (
         <>
           <DrawerTitle>Listeners</DrawerTitle>
           {object.spec.listeners.map((listener) => (
@@ -216,7 +216,7 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
               {formatGroupKinds(listenerStatus.supportedKinds)}
             </DrawerItem>
             <DrawerItem name={`Listener ${listenerStatus.name} Conditions`}>
-              {listenerStatus.conditions?.length
+              {listenerStatus.conditions.length
                 ? listenerStatus.conditions.map((condition) => formatCondition(condition)).join(", ")
                 : "-"}
             </DrawerItem>
