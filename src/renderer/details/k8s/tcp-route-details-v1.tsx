@@ -82,7 +82,7 @@ export const TCPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
                   {rule.name && <span style={{ color: "var(--textColorSecondary)" }}>({rule.name})</span>}
                 </div>
 
-                {rule.backendRefs && rule.backendRefs.length > 0 && (
+                {rule.backendRefs.length > 0 && (
                   <DrawerItem name="Backend References">
                     <Table selectable tableId="backendRefs" scrollable={false} sortSyncWithUrl={false}>
                       <TableHead flat sticky={false}>
