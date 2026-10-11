@@ -133,3 +133,8 @@ export interface PolicyAncestorStatus {
 export interface PolicyStatus {
   ancestors: PolicyAncestorStatus[];
 }
+
+// Whether any ancestor has accepted the policy.
+export function isPolicyAccepted(status: PolicyStatus | undefined): boolean {
+  return status?.ancestors.some((ancestor) => hasTrueCondition(ancestor.conditions, "Accepted")) ?? false;
+}

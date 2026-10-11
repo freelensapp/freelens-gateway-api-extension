@@ -1,11 +1,13 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
+import { isPolicyAccepted } from "../../api/k8s/types";
 import { XBackendTrafficPolicy } from "../../api/x-k8s";
+import { PolicyAncestors } from "../k8s/policy-ancestors";
 import { ReferenceLink } from "../k8s/reference-link";
 import styles from "./common.module.scss";
 
 const {
-  Component: { DrawerItem, DrawerTitle, Table, TableCell, TableHead, TableRow },
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle, Table, TableCell, TableHead, TableRow },
   Util: { createReactKey },
 } = Renderer;
 
@@ -18,6 +20,10 @@ export const XBackendTrafficPolicyDetails = observer(
 
     return (
       <div className={styles.details}>
+        <DrawerItem name="Accepted">
+          <BadgeBoolean value={isPolicyAccepted(object.status)} />
+        </DrawerItem>
+
         <DrawerTitle>Target Refs</DrawerTitle>
         {targetRefs.length > 0 ? (
           <Table selectable tableId="xBackendTrafficPolicyTargetRefs" scrollable={false} sortSyncWithUrl={false}>
@@ -85,6 +91,8 @@ export const XBackendTrafficPolicyDetails = observer(
             )}
           </>
         )}
+
+        <PolicyAncestors object={object} ancestors={object.status?.ancestors ?? []} />
       </div>
     );
   },

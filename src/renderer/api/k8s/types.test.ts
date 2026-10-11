@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { formatCondition, formatValueMatch, hasTrueCondition } from "./types";
+import { formatCondition, formatValueMatch, hasTrueCondition, isPolicyAccepted } from "./types";
 
 describe("formatCondition", () => {
   test("shows the type and the status", () => {
@@ -52,5 +52,35 @@ describe("hasTrueCondition", () => {
   test("returns false for an empty or undefined condition list", () => {
     expect(hasTrueCondition([], "Accepted")).toBe(false);
     expect(hasTrueCondition(undefined, "Accepted")).toBe(false);
+  });
+});
+
+describe("isPolicyAccepted", () => {
+  const ancestorRef = { name: "gateway" };
+
+  test("returns true when an ancestor has accepted the policy", () => {
+    expect(
+      isPolicyAccepted({
+        ancestors: [
+          { ancestorRef, controllerName: "example.net/a", conditions: [{ type: "Accepted", status: "False" }] },
+          { ancestorRef, controllerName: "example.net/b", conditions: [{ type: "Accepted", status: "True" }] },
+        ],
+      }),
+    ).toBe(true);
+  });
+
+  test("returns false when no ancestor has accepted the policy", () => {
+    expect(
+      isPolicyAccepted({
+        ancestors: [
+          { ancestorRef, controllerName: "example.net/a", conditions: [{ type: "Accepted", status: "False" }] },
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  test("returns false without ancestors or status", () => {
+    expect(isPolicyAccepted({ ancestors: [] })).toBe(false);
+    expect(isPolicyAccepted(undefined)).toBe(false);
   });
 });
