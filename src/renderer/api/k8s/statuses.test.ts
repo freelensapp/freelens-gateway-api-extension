@@ -88,7 +88,7 @@ describe("getStatusCategory", () => {
     expect(
       getStatusCategory({
         status: {
-          conditions: [
+          ancestors: [
             {
               ancestorRef: { name: "gateway" },
               controllerName: "example.com/controller",
@@ -104,7 +104,7 @@ describe("getStatusCategory", () => {
     expect(
       getStatusCategory({
         status: {
-          conditions: [
+          ancestors: [
             {
               ancestorRef: { name: "gateway" },
               controllerName: "example.com/controller",
@@ -114,6 +114,22 @@ describe("getStatusCategory", () => {
         },
       }),
     ).toBe("NotReady");
+  });
+
+  test("reports a policy as InProgress while an ancestor condition is Pending", () => {
+    expect(
+      getStatusCategory({
+        status: {
+          ancestors: [
+            {
+              ancestorRef: { name: "gateway" },
+              controllerName: "example.com/controller",
+              conditions: [{ type: "Accepted", status: "Unknown", reason: "Pending" }],
+            },
+          ],
+        },
+      }),
+    ).toBe("InProgress");
   });
 
   test("prefers NotReady over InProgress when both a terminal failure and an Unknown condition are present", () => {
@@ -171,10 +187,11 @@ describe("getStatusCategory", () => {
     ).toBe("Unknown");
   });
 
-  test("returns Unknown for empty parents and empty nested condition arrays", () => {
+  test("returns Unknown for empty parents, empty ancestors and empty nested condition arrays", () => {
     expect(getStatusCategory({ status: { parents: [] } })).toBe("Unknown");
     expect(getStatusCategory({ status: { parents: [{ conditions: [] }] } })).toBe("Unknown");
-    expect(getStatusCategory({ status: { conditions: [{ ancestorRef: { name: "gw" }, conditions: [] }] } })).toBe(
+    expect(getStatusCategory({ status: { ancestors: [] } })).toBe("Unknown");
+    expect(getStatusCategory({ status: { ancestors: [{ ancestorRef: { name: "gw" }, conditions: [] }] } })).toBe(
       "Unknown",
     );
   });

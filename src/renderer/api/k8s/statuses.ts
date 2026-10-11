@@ -6,8 +6,8 @@
  *
  * - Top-level `status.conditions[]`: Gateway, GatewayClass, ListenerSet, Mesh
  * - `status.parents[].conditions[]`: HTTPRoute, GRPCRoute, TCPRoute, TLSRoute, UDPRoute, XBackend
- * - `status.ancestors[].conditions[]` (modelled here as `status.conditions[].conditions[]`):
- *   BackendTLSPolicy, BackendTrafficPolicy and other policy resources
+ * - `status.ancestors[].conditions[]`: BackendTLSPolicy, BackendTrafficPolicy and other
+ *   policy resources
  *
  * ReferenceGrant has no status and is therefore not categorizable.
  *
@@ -64,10 +64,24 @@ function pushCondition(target: NormalizedCondition[], value: unknown): void {
   });
 }
 
+function pushNestedConditions(target: NormalizedCondition[], entries: unknown): void {
+  if (!Array.isArray(entries)) {
+    return;
+  }
+  for (const entry of entries) {
+    const entryRecord = toRecord(entry);
+    if (entryRecord && Array.isArray(entryRecord.conditions)) {
+      for (const nested of entryRecord.conditions) {
+        pushCondition(target, nested);
+      }
+    }
+  }
+}
+
 /**
  * Collects all conditions from a Gateway API resource status, regardless of
- * whether they live at the top level, under `parents[]`, or under nested
- * ancestor entries.
+ * whether they live at the top level, under `parents[]`, or under
+ * `ancestors[]`.
  */
 function collectConditions(status: unknown): NormalizedCondition[] {
   const record = toRecord(status);
@@ -77,33 +91,17 @@ function collectConditions(status: unknown): NormalizedCondition[] {
 
   const conditions: NormalizedCondition[] = [];
 
-  // Top-level conditions (Gateway, GatewayClass, ListenerSet, Mesh) and
-  // nested ancestor conditions (policies expose `status.ancestors[].conditions[]`
-  // which is modelled here as `status.conditions[].conditions[]`).
+  // Top-level conditions (Gateway, GatewayClass, ListenerSet, Mesh).
   if (Array.isArray(record.conditions)) {
     for (const entry of record.conditions) {
-      const entryRecord = toRecord(entry);
-      if (entryRecord && Array.isArray(entryRecord.conditions)) {
-        for (const nested of entryRecord.conditions) {
-          pushCondition(conditions, nested);
-        }
-      } else {
-        pushCondition(conditions, entry);
-      }
+      pushCondition(conditions, entry);
     }
   }
 
-  // Route conditions live under each parent reference.
-  if (Array.isArray(record.parents)) {
-    for (const parent of record.parents) {
-      const parentRecord = toRecord(parent);
-      if (parentRecord && Array.isArray(parentRecord.conditions)) {
-        for (const nested of parentRecord.conditions) {
-          pushCondition(conditions, nested);
-        }
-      }
-    }
-  }
+  // Route conditions live under each parent reference, policy conditions
+  // under each ancestor reference.
+  pushNestedConditions(conditions, record.parents);
+  pushNestedConditions(conditions, record.ancestors);
 
   return conditions;
 }

@@ -11,7 +11,7 @@ const {
 } = Renderer;
 
 function isAccepted(object: BackendTLSPolicy): boolean {
-  const ancestors = object.status?.conditions ?? [];
+  const ancestors = object.status?.ancestors ?? [];
 
   return ancestors.some((ancestor) =>
     (ancestor.conditions ?? []).some((condition) => condition.type === "Accepted" && condition.status === "True"),

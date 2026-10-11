@@ -119,5 +119,5 @@ export interface PolicyAncestorStatus {
 }
 
 export interface PolicyStatus {
-  conditions?: PolicyAncestorStatus[];
+  ancestors: PolicyAncestorStatus[];
 }
