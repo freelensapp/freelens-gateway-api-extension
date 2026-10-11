@@ -30,6 +30,13 @@ export interface LocalObjectReference {
   name: string;
 }
 
+export interface ObjectReference {
+  group: string;
+  kind: string;
+  name: string;
+  namespace?: string;
+}
+
 export interface SecretObjectReference {
   group?: string;
   kind?: string;

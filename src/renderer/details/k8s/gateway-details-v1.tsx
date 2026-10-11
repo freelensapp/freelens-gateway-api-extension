@@ -2,6 +2,7 @@ import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { Gateway } from "../../api/k8s";
 import styles from "./common.module.scss";
+import { ReferenceLink } from "./reference-link";
 
 import type { GatewaySpecAddress, ListenerStatus } from "../../api/k8s/gateway-v1";
 
@@ -142,7 +143,13 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
             {frontendValidation?.caCertificateRefs.length ? (
               frontendValidation.caCertificateRefs.map((reference) => (
                 <div key={createReactKey(reference)}>
-                  <LinkToObject objectRef={reference} object={object} />
+                  <ReferenceLink
+                    object={object}
+                    group={reference.group}
+                    kind={reference.kind}
+                    name={reference.name}
+                    namespace={reference.namespace ?? object.getNs()}
+                  />
                 </div>
               ))
             ) : (
@@ -155,7 +162,13 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
                 <div>{entry.tls?.validation?.mode ?? "-"}:</div>
                 {entry.tls?.validation?.caCertificateRefs.map((reference) => (
                   <div key={createReactKey(reference)}>
-                    <LinkToObject objectRef={reference} object={object} />
+                    <ReferenceLink
+                      object={object}
+                      group={reference.group}
+                      kind={reference.kind}
+                      name={reference.name}
+                      namespace={reference.namespace ?? object.getNs()}
+                    />
                   </div>
                 ))}
               </DrawerItem>
