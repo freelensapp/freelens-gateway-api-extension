@@ -54,12 +54,12 @@ function formatGroupKinds(kinds: Array<{ group?: string; kind: string }> | undef
 export const ListenerSetDetails = observer((props: Renderer.Component.KubeObjectDetailsProps<ListenerSet>) => {
   const { object } = props;
   const objectNs = object.getNs();
-  const parentRef = object.spec?.parentRef;
+  const parentRef = object.spec.parentRef;
   const listeners = object.spec?.listeners ?? [];
   const statusListeners = (object.status?.listeners ?? []) as ListenerEntryStatus[];
 
-  const parentGroup = parentRef?.group ?? gatewayApiGroup;
-  const parentKind = parentRef?.kind ?? "Gateway";
+  const parentGroup = parentRef.group ?? gatewayApiGroup;
+  const parentKind = parentRef.kind ?? "Gateway";
 
   return (
     <div className={styles.details}>
@@ -71,30 +71,26 @@ export const ListenerSetDetails = observer((props: Renderer.Component.KubeObject
       </DrawerItem>
 
       <DrawerTitle>Parent Reference</DrawerTitle>
-      {parentRef ? (
-        <Table selectable tableId="listenerSetParentRef" scrollable={false} sortSyncWithUrl={false}>
-          <TableHead flat sticky={false}>
-            <TableCell>Group</TableCell>
-            <TableCell>Kind</TableCell>
-            <TableCell>Name</TableCell>
-          </TableHead>
-          <TableRow nowrap>
-            <TableCell>{parentGroup || "-"}</TableCell>
-            <TableCell>{parentKind}</TableCell>
-            <TableCell>
-              <ReferenceLink
-                object={object}
-                group={parentGroup}
-                kind={parentKind}
-                name={parentRef.name}
-                namespace={parentRef.namespace ?? objectNs}
-              />
-            </TableCell>
-          </TableRow>
-        </Table>
-      ) : (
-        <DrawerItem name="Parent Reference">-</DrawerItem>
-      )}
+      <Table selectable tableId="listenerSetParentRef" scrollable={false} sortSyncWithUrl={false}>
+        <TableHead flat sticky={false}>
+          <TableCell>Group</TableCell>
+          <TableCell>Kind</TableCell>
+          <TableCell>Name</TableCell>
+        </TableHead>
+        <TableRow nowrap>
+          <TableCell>{parentGroup || "-"}</TableCell>
+          <TableCell>{parentKind}</TableCell>
+          <TableCell>
+            <ReferenceLink
+              object={object}
+              group={parentGroup}
+              kind={parentKind}
+              name={parentRef.name}
+              namespace={parentRef.namespace ?? objectNs}
+            />
+          </TableCell>
+        </TableRow>
+      </Table>
 
       {listeners.length > 0 && (
         <>
@@ -144,7 +140,7 @@ export const ListenerSetDetails = observer((props: Renderer.Component.KubeObject
               <DrawerItem name="Attached Routes">{listenerStatus.attachedRoutes}</DrawerItem>
               <DrawerItem name="Supported Kinds">{formatGroupKinds(listenerStatus.supportedKinds)}</DrawerItem>
               <DrawerItem name="Conditions">
-                {listenerStatus.conditions?.length
+                {listenerStatus.conditions.length
                   ? listenerStatus.conditions.map((condition) => formatCondition(condition)).join(", ")
                   : "-"}
               </DrawerItem>
