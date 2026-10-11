@@ -18,6 +18,7 @@ import { TLSRoute as TLSRoute_v1 } from "./api/k8s/tls-route-v1";
 import { UDPRoute as UDPRoute_v1 } from "./api/k8s/udp-route-v1";
 import { UDPRoute as UDPRoute_v1alpha2 } from "./api/k8s/udp-route-v1alpha2";
 import { XBackendTrafficPolicy as XBackendTrafficPolicy_v1alpha1 } from "./api/x-k8s/x-backend-traffic-policy-v1alpha1";
+import { XBackend as XBackend_v1alpha1 } from "./api/x-k8s/xbackend-v1alpha1";
 import { XMesh as XMesh_v1alpha1 } from "./api/x-k8s/xmesh-v1alpha1";
 import { createAvailableVersionPage } from "./components/available-version";
 import { customResources } from "./custom-resources";
@@ -35,6 +36,7 @@ import { TLSRouteDetails as TLSRouteDetails_v1 } from "./details/k8s/tls-route-d
 import { UDPRouteDetails as UDPRouteDetails_v1 } from "./details/k8s/udp-route-details-v1";
 import { UDPRouteDetails as UDPRouteDetails_v1alpha2 } from "./details/k8s/udp-route-details-v1alpha2";
 import { XBackendTrafficPolicyDetails as XBackendTrafficPolicyDetails_v1alpha1 } from "./details/x-k8s/x-backend-traffic-policy-details-v1alpha1";
+import { XBackendDetails as XBackendDetails_v1alpha1 } from "./details/x-k8s/xbackend-details-v1alpha1";
 import { XMeshDetails as XMeshDetails_v1alpha1 } from "./details/x-k8s/xmesh-details-v1alpha1";
 import { GatewayApiIcon } from "./icons";
 import { BackendTLSPoliciesPage as BackendTLSPoliciesPage_v1 } from "./pages/k8s/backend-tls-policies-page-v1";
@@ -52,6 +54,7 @@ import { UDPRoutesPage as UDPRoutesPage_v1 } from "./pages/k8s/udp-routes-page-v
 import { UDPRoutesPage as UDPRoutesPage_v1alpha2 } from "./pages/k8s/udp-routes-page-v1alpha2";
 import { OverviewPage } from "./pages/overview";
 import { XBackendTrafficPoliciesPage as XBackendTrafficPoliciesPage_v1alpha1 } from "./pages/x-k8s/x-backend-traffic-policies-page-v1alpha1";
+import { XBackendsPage as XBackendsPage_v1alpha1 } from "./pages/x-k8s/xbackends-page-v1alpha1";
 import { XMeshesPage as XMeshesPage_v1alpha1 } from "./pages/x-k8s/xmeshes-page-v1alpha1";
 
 const GatewayClassesPage = createAvailableVersionPage("Gateway Classes", [
@@ -101,6 +104,14 @@ const XBackendTrafficPoliciesPage = createAvailableVersionPage("Backend Traffic 
   {
     kubeObjectClass: XBackendTrafficPolicy_v1alpha1,
     PageComponent: XBackendTrafficPoliciesPage_v1alpha1,
+    version: "v1alpha1",
+  },
+]);
+
+const XBackendsPage = createAvailableVersionPage("Backends", [
+  {
+    kubeObjectClass: XBackend_v1alpha1,
+    PageComponent: XBackendsPage_v1alpha1,
     version: "v1alpha1",
   },
 ]);
@@ -232,6 +243,14 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       },
     },
     {
+      kind: XBackend_v1alpha1.kind,
+      apiVersions: XBackend_v1alpha1.crd.apiVersions,
+      priority: 10,
+      components: {
+        Details: XBackendDetails_v1alpha1,
+      },
+    },
+    {
       kind: XMesh_v1alpha1.kind,
       apiVersions: XMesh_v1alpha1.crd.apiVersions,
       priority: 10,
@@ -312,6 +331,12 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       id: "xbackendtrafficpolicy",
       components: {
         Page: () => <XBackendTrafficPoliciesPage extension={this} />,
+      },
+    },
+    {
+      id: "xbackend",
+      components: {
+        Page: () => <XBackendsPage extension={this} />,
       },
     },
     {
@@ -412,6 +437,13 @@ export default class GatewayApiRenderer extends Renderer.LensExtension {
       parentId: "gateway-api",
       title: "Backend Traffic Policies",
       target: { pageId: "xbackendtrafficpolicy" },
+      components: {},
+    },
+    {
+      id: "xbackend",
+      parentId: "gateway-api",
+      title: "Backends",
+      target: { pageId: "xbackend" },
       components: {},
     },
     {

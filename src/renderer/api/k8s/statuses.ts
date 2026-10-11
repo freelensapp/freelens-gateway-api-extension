@@ -5,7 +5,7 @@
  * location of those conditions depends on the resource:
  *
  * - Top-level `status.conditions[]`: Gateway, GatewayClass, ListenerSet, Mesh
- * - `status.parents[].conditions[]`: HTTPRoute, GRPCRoute, TCPRoute, TLSRoute, UDPRoute
+ * - `status.parents[].conditions[]`: HTTPRoute, GRPCRoute, TCPRoute, TLSRoute, UDPRoute, XBackend
  * - `status.ancestors[].conditions[]` (modelled here as `status.conditions[].conditions[]`):
  *   BackendTLSPolicy, BackendTrafficPolicy and other policy resources
  *

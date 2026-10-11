@@ -1,7 +1,5 @@
 import { Renderer } from "@freelensapp/extensions";
-import { type GatewayKubeObjectCRD, type LocalObjectReference, type PolicyStatus } from "./types";
-
-export type SubjectAltNameType = "Hostname" | "URI";
+import { type BackendTLSPolicyValidation, type GatewayKubeObjectCRD, type PolicyStatus } from "./types";
 
 export interface LocalPolicyTargetReference {
   group: string;
@@ -11,19 +9,6 @@ export interface LocalPolicyTargetReference {
 
 export interface LocalPolicyTargetReferenceWithSectionName extends LocalPolicyTargetReference {
   sectionName?: string;
-}
-
-export interface SubjectAltName {
-  type: SubjectAltNameType;
-  hostname?: string;
-  uri?: string;
-}
-
-export interface BackendTLSPolicyValidation {
-  caCertificateRefs?: LocalObjectReference[];
-  wellKnownCACertificates?: string;
-  hostname: string;
-  subjectAltNames?: SubjectAltName[];
 }
 
 export interface BackendTLSPolicySpec {

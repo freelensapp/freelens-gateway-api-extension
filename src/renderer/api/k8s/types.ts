@@ -8,8 +8,15 @@ export interface GatewayCondition extends Renderer.K8sApi.Condition {
   type: "Accepted" | "Programmed" | "Ready";
 }
 
-export function hasTrueCondition(conditions: GatewayCondition[] | undefined, type: string): boolean {
+export function hasTrueCondition(conditions: Renderer.K8sApi.Condition[] | undefined, type: string): boolean {
   return conditions?.some((condition) => condition.type === type && condition.status === "True") ?? false;
+}
+
+// `Type: Status`, followed by the reason when there is one.
+export function formatCondition(condition: Renderer.K8sApi.Condition): string {
+  const text = `${condition.type}: ${condition.status}`;
+
+  return condition.reason ? `${text} (${condition.reason})` : text;
 }
 
 export interface LocalObjectReference {
@@ -23,6 +30,21 @@ export interface SecretObjectReference {
   kind?: string;
   name: string;
   namespace?: string;
+}
+
+export type SubjectAltNameType = "Hostname" | "URI";
+
+export interface SubjectAltName {
+  type: SubjectAltNameType;
+  hostname?: string;
+  uri?: string;
+}
+
+export interface BackendTLSPolicyValidation {
+  caCertificateRefs?: LocalObjectReference[];
+  wellKnownCACertificates?: string;
+  hostname: string;
+  subjectAltNames?: SubjectAltName[];
 }
 
 export type GatewayDefaultScope = "All" | "None";

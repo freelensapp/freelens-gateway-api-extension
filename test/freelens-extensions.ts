@@ -25,8 +25,15 @@ class LensExtensionKubeObject {
 class KubeApi {}
 class KubeObjectStore {}
 
+// The host's registry of the APIs the cluster serves. Without a host it has
+// none; a test that needs one spies on `getApi`.
+const apiManager = {
+  getApi: (): undefined => undefined,
+};
+
 export const Renderer = {
   K8sApi: {
+    apiManager,
     KubeApi,
     KubeObjectStore,
     LensExtensionKubeObject,

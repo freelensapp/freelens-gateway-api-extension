@@ -4,12 +4,23 @@ import {
   XBackendTrafficPolicyStore as XBackendTrafficPolicyStore_v1alpha1,
 } from "./x-backend-traffic-policy-v1alpha1";
 import {
+  XBackend as XBackend_v1alpha1,
+  XBackendApi as XBackendApi_v1alpha1,
+  XBackendStore as XBackendStore_v1alpha1,
+} from "./xbackend-v1alpha1";
+import {
   XMesh as XMesh_v1alpha1,
   XMeshApi as XMeshApi_v1alpha1,
   XMeshStore as XMeshStore_v1alpha1,
 } from "./xmesh-v1alpha1";
 
 export {
+  XBackend_v1alpha1,
+  XBackend_v1alpha1 as XBackend,
+  XBackendApi_v1alpha1,
+  XBackendApi_v1alpha1 as XBackendApi,
+  XBackendStore_v1alpha1,
+  XBackendStore_v1alpha1 as XBackendStore,
   XBackendTrafficPolicy_v1alpha1,
   XBackendTrafficPolicy_v1alpha1 as XBackendTrafficPolicy,
   XBackendTrafficPolicyApi_v1alpha1,

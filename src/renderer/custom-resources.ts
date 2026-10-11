@@ -13,7 +13,7 @@ import {
   UDPRoute_v1,
   UDPRoute_v1alpha2,
 } from "./api/k8s";
-import { XBackendTrafficPolicy_v1alpha1, XMesh_v1alpha1 } from "./api/x-k8s";
+import { XBackend_v1alpha1, XBackendTrafficPolicy_v1alpha1, XMesh_v1alpha1 } from "./api/x-k8s";
 
 import type { Common } from "@freelensapp/extensions";
 
@@ -36,5 +36,6 @@ export const customResources: Common.Types.CustomResourceRegistration[] = [
   ListenerSet_v1,
   BackendTLSPolicy_v1,
   XBackendTrafficPolicy_v1alpha1,
+  XBackend_v1alpha1,
   XMesh_v1alpha1,
 ];
