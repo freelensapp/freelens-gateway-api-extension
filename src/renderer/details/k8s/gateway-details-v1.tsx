@@ -49,7 +49,7 @@ function formatGroupKinds(kinds: Array<{ group?: string; kind: string }> | undef
   return kinds
     .map((entry) => {
       const group = entry.group ?? "gateway.networking.k8s.io";
-      return `${group}/${entry.kind}`;
+      return group ? `${group}/${entry.kind}` : entry.kind;
     })
     .join(", ");
 }
@@ -116,7 +116,7 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
           />
           {infrastructure.parametersRef && (
             <DrawerItem name="Parameters Ref">
-              <DrawerItem name="Group">{infrastructure.parametersRef.group}</DrawerItem>
+              <DrawerItem name="Group">{infrastructure.parametersRef.group || "-"}</DrawerItem>
               <DrawerItem name="Kind">{infrastructure.parametersRef.kind}</DrawerItem>
               <DrawerItem name="Name">
                 <ReferenceLink

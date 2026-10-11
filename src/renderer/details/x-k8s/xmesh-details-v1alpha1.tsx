@@ -33,7 +33,7 @@ export const XMeshDetails = observer((props: Renderer.Component.KubeObjectDetail
       {object.spec?.parametersRef && (
         <div>
           <DrawerTitle>Parameters Reference</DrawerTitle>
-          <DrawerItem name="Group">{object.spec.parametersRef.group}</DrawerItem>
+          <DrawerItem name="Group">{object.spec.parametersRef.group || "-"}</DrawerItem>
           <DrawerItem name="Kind">{object.spec.parametersRef.kind}</DrawerItem>
           <DrawerItem name="Name">
             <ReferenceLink

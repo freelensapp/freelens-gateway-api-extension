@@ -36,7 +36,7 @@ function formatGroupKinds(kinds: Array<{ group?: string; kind: string }> | undef
   return kinds
     .map((entry) => {
       const group = entry.group ?? "gateway.networking.k8s.io";
-      return `${group}/${entry.kind}`;
+      return group ? `${group}/${entry.kind}` : entry.kind;
     })
     .join(", ");
 }
