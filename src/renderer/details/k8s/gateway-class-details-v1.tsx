@@ -1,9 +1,10 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { GatewayClass } from "../../api/k8s";
+import { ReferenceLink } from "./reference-link";
 
 const {
-  Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject },
+  Component: { BadgeBoolean, DrawerItem, DrawerTitle },
 } = Renderer;
 
 function getControllerName(object: GatewayClass): string {
@@ -33,7 +34,13 @@ export const GatewayClassDetails = observer((props: Renderer.Component.KubeObjec
               <DrawerItem name="Group">{object.spec.parametersRef.group}</DrawerItem>
               <DrawerItem name="Kind">{object.spec.parametersRef.kind}</DrawerItem>
               <DrawerItem name="Name">
-                <LinkToObject objectRef={object.spec.parametersRef} object={object} />
+                <ReferenceLink
+                  object={object}
+                  group={object.spec.parametersRef.group}
+                  kind={object.spec.parametersRef.kind}
+                  name={object.spec.parametersRef.name}
+                  namespace={object.spec.parametersRef.namespace}
+                />
               </DrawerItem>
               <DrawerItem name="Namespace" hidden={!object.spec.parametersRef.namespace}>
                 {object.spec.parametersRef.namespace}

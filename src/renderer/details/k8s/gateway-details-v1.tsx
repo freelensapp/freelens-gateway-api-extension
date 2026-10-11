@@ -113,11 +113,21 @@ export const GatewayDetails = observer((props: Renderer.Component.KubeObjectDeta
             labels={infrastructure.annotations ?? {}}
             hidden={!infrastructure.annotations}
           />
-          <DrawerItem name="Parameters Ref" hidden={!infrastructure.parametersRef}>
-            {infrastructure.parametersRef
-              ? `${infrastructure.parametersRef.group}/${infrastructure.parametersRef.kind}/${infrastructure.parametersRef.name}`
-              : "-"}
-          </DrawerItem>
+          {infrastructure.parametersRef && (
+            <DrawerItem name="Parameters Ref">
+              <DrawerItem name="Group">{infrastructure.parametersRef.group}</DrawerItem>
+              <DrawerItem name="Kind">{infrastructure.parametersRef.kind}</DrawerItem>
+              <DrawerItem name="Name">
+                <ReferenceLink
+                  object={object}
+                  group={infrastructure.parametersRef.group}
+                  kind={infrastructure.parametersRef.kind}
+                  name={infrastructure.parametersRef.name}
+                  namespace={object.getNs()}
+                />
+              </DrawerItem>
+            </DrawerItem>
+          )}
         </>
       )}
 
