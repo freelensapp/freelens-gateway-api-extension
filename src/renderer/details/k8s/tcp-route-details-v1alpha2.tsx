@@ -2,6 +2,7 @@ import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
 import { TCPRoute } from "../../api/k8s/tcp-route-v1alpha2";
 import styles from "./common.module.scss";
+import { ReferenceLink } from "./reference-link";
 
 const {
   Component: { BadgeBoolean, DrawerItem, DrawerTitle, LinkToObject, Icon, Table, TableCell, TableHead, TableRow },
@@ -97,14 +98,12 @@ export const TCPRouteDetails = observer((props: Renderer.Component.KubeObjectDet
                         return (
                           <TableRow key={key} nowrap>
                             <TableCell>
-                              <LinkToObject
+                              <ReferenceLink
                                 object={object}
-                                objectRef={{
-                                  apiVersion: "v1",
-                                  kind,
-                                  name: backend.name,
-                                  namespace,
-                                }}
+                                group={backend.group ?? ""}
+                                kind={kind}
+                                name={backend.name}
+                                namespace={namespace}
                               />
                             </TableCell>
                             <TableCell>{backend.port ?? "-"}</TableCell>
