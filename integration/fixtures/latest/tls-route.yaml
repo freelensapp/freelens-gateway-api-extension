@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: TLSRoute
+metadata:
+  name: integration-tests-object
+  namespace: integration-tests
+spec:
+  parentRefs:
+    - name: integration-tests-object
+  hostnames:
+    - integration-tests.example.com
+  rules:
+    - backendRefs:
+        - name: integration-tests-object
+          port: 443

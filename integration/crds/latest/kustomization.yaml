@@ -1,0 +1,7 @@
+# The Gateway API CRDs of the latest integration test session: the
+# experimental channel of the newest release, which serves every kind the
+# extension shows at its newest version. Renovate updates the ref.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://github.com/kubernetes-sigs/gateway-api//config/crd/experimental?ref=v1.6.3

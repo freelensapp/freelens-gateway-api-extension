@@ -1,0 +1,12 @@
+apiVersion: gateway.networking.x-k8s.io/v1alpha1
+kind: XBackend
+metadata:
+  name: integration-tests-object
+  namespace: integration-tests
+spec:
+  type: ExternalHostname
+  externalHostname:
+    hostname: integration-tests.example.com
+  port:
+    port: 443
+  protocol: HTTP
