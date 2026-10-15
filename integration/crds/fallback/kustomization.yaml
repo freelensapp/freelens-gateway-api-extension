@@ -1,0 +1,9 @@
+# The Gateway API CRDs of the fallback integration test session: the
+# experimental channel of v1.4.1, which serves TCPRoute and UDPRoute only in
+# v1alpha2 and ReferenceGrant only in v1beta1, and has no TLSRoute v1, no
+# ListenerSet v1, no XBackend and no XMesh. The ref stays pinned (see
+# .renovaterc.json).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://github.com/kubernetes-sigs/gateway-api//config/crd/experimental?ref=v1.4.1

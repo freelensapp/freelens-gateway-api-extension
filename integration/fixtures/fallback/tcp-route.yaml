@@ -1,0 +1,12 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: integration-tests-object
+  namespace: integration-tests
+spec:
+  parentRefs:
+    - name: integration-tests-object
+  rules:
+    - backendRefs:
+        - name: integration-tests-object
+          port: 8080
