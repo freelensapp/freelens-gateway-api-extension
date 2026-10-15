@@ -29,7 +29,8 @@ jobs:
           - freelens_version: main
 
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 60
+    # The builds, plus the 30 minutes of the integration tests step.
+    timeout-minutes: 80
 
     env:
       DO_NOT_TRACK: "1"
@@ -183,6 +184,25 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
 
+      # Without known checksums, @electron/get downloads SHASUMS256.txt from
+      # GitHub on every build, bypassing its cache, even when the Electron zip
+      # is cached, so an outage of GitHub fails the packaging. electron-builder
+      # takes them from SHASUMS256.txt-<version> at the root of that cache
+      # instead, and the electron package ships the same checksums, which the
+      # lockfile has verified. Electron is a devDependency of the app package,
+      # freelens/freelens in this checkout.
+      - name: Seed Electron checksums
+        if: steps.electron-build-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: freelens/freelens
+        run: |-
+          mkdir -p ~/.cache/electron
+          node -e '
+            const checksums = require("electron/checksums.json");
+            const lines = Object.entries(checksums).map(([file, sha256]) => `${sha256} *${file}\n`);
+            require("node:fs").writeFileSync(process.argv[1], lines.join(""));
+          ' "$HOME/.cache/electron/SHASUMS256.txt-$electron_version"
+
       - name: Disable pre post scripts for pnpm
         working-directory: freelens
         run: pnpm config set enablePrePostScripts false --location project
@@ -261,25 +281,30 @@ jobs:
           path: freelens/freelens/dist
           key: ${{ steps.electron-build-cache.outputs.cache-primary-key }}
 
+      # The tests run three sessions, each with an app of its own: the install
+      # test, and two sessions with the Gateway API CRDs of one release each,
+      # applied through kustomize from kubernetes-sigs/gateway-api. A cluster
+      # session applies the manifests of integration/crds/<session> and
+      # integration/fixtures/<session> from EXTENSION_DIR, the checkout of the
+      # extension, to the kind cluster named by TEST_KIND_CLUSTER_NAME, and
+      # removes them again.
+      #
+      # The tests are deterministic, so a failure is not retried: --retry=0
+      # overrides the `retry: 2` of Freelens's Vitest config, and there is no
+      # second run of the step. A failing view costs one view timeout.
+      #
+      # The sessions take about 10 minutes when they pass, most of it in
+      # starting the app and opening the cluster twice and in fetching the
+      # CRDs from GitHub on every apply and delete. The other 20 minutes of
+      # `timeout 1800` leave room for the 14 views of the latest session to
+      # fail on their 60-second view timeout one after another.
       - name: Run integration tests
-        id: integration-tests-linux
         working-directory: freelens
         run: |
           sudo chown root:root freelens/dist/linux*-unpacked/chrome-sandbox
           sudo chmod 4755 freelens/dist/linux*-unpacked/chrome-sandbox
-          timeout 600 xvfb-run -a pnpm --color=always test:integration --reporter=verbose --reporter=github-actions --includeTaskLocation
+          timeout 1800 xvfb-run -a pnpm --color=always test:integration --retry=0 --reporter=verbose --reporter=github-actions --includeTaskLocation
         env:
           DEBUG: pw:browser
-          TEST_KIND_CLUSTER_NAME: freelens
-        continue-on-error: true
-
-      - name: Run integration tests (retry)
-        if: steps.integration-tests-linux.outcome == 'failure'
-        working-directory: freelens
-        run: |
-          sudo chown root:root freelens/dist/linux*-unpacked/chrome-sandbox
-          sudo chmod 4755 freelens/dist/linux*-unpacked/chrome-sandbox
-          timeout 600 xvfb-run -a pnpm --color=always test:integration --reporter=verbose --reporter=github-actions --includeTaskLocation
-        env:
-          DEBUG: pw:browser
+          EXTENSION_DIR: ${{ github.workspace }}
           TEST_KIND_CLUSTER_NAME: freelens

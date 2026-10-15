@@ -1,0 +1,10 @@
+apiVersion: gateway.networking.x-k8s.io/v1alpha1
+kind: XBackendTrafficPolicy
+metadata:
+  name: integration-tests-object
+  namespace: integration-tests
+spec:
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: integration-tests-object

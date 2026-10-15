@@ -135,6 +135,12 @@
       "matchDepNames": ["npm"],
       "matchUpdateTypes": ["major"],
       "enabled": false
+    },
+    {
+      "description": "The Gateway API CRDs of the fallback integration test session stay at v1.4.1: it is the release that serves TCPRoute and UDPRoute only in v1alpha2 and ReferenceGrant only in v1beta1, and has no TLSRoute v1, ListenerSet v1, XBackend and XMesh, which is what the session checks. The kustomize manager updates the ref of the latest session as usual.",
+      "matchManagers": ["kustomize"],
+      "matchFileNames": ["integration/crds/fallback/kustomization.yaml"],
+      "enabled": false
     }
   ],
   "customDatasources": {
