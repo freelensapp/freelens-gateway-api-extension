@@ -130,7 +130,9 @@ src/
 test/freelens-extensions.ts      # Runtime stub of @freelensapp/extensions for Vitest
 environment-tests/               # Probes for the per-environment programs
 build/                           # Vite plugins: host modules, standard decorators, CSS module declarations
-integration/__tests__/           # Integration test, run inside a Freelens checkout
+integration/__tests__/           # Integration tests, run inside a Freelens checkout, and their shared module
+integration/crds/                # Gateway API CRDs of each integration test session, by kustomize from upstream
+integration/fixtures/            # Test objects of each integration test session
 docs/images/                     # Screenshot for README.md
 ```
 
@@ -710,9 +712,104 @@ with the v2 extension API until Freelens 2.0.0 is released: the workflow builds
 the extension, packs it with a `.tgz.sha256` checksum next to the tarball, as
 the release publishes it, checks out and packages Freelens, copies
 `integration/__tests__/` into `freelens/integration/__tests__/` and runs them
-there under Freelens's Vitest, with its helpers. The test installs the tarball
-from the extensions page, waits for the extension to be listed as enabled, and
-fails on any error logged by either process.
+there under Freelens's Vitest, with its helpers. Each test file is a session
+with an app of its own, which installs the tarball from the extensions page,
+and fails on any error logged by either process:
+
+- `extensions.tests.ts` installs the extension and waits for it to be listed
+  as enabled. It needs no cluster. The extension has no `appPreferences`, so
+  there is no preferences check as in the template.
+- `gateway-api-latest.tests.ts` opens the kind cluster with the experimental
+  channel of the newest Gateway API release and one object of every kind the
+  extension shows. For each kind, the list page shows a row for the object,
+  and its details open at the newest version, with a text that only the
+  extension's panel of the kind renders and no error page of the error
+  boundary; TCPRoute, UDPRoute and ReferenceGrant, which the CRDs also serve
+  in an older version, pick `v1`. The Overview shows a chart for each kind
+  with objects, once.
+- `gateway-api-fallback.tests.ts` opens the kind cluster with the
+  experimental channel of v1.4.1, which serves TCPRoute and UDPRoute only in
+  `v1alpha2` and ReferenceGrant only in `v1beta1`: their pages list their
+  objects from those versions, and the Overview has a chart for each route.
+  That release has no TLSRoute `v1`, no ListenerSet `v1`, no XBackend, and no
+  XMesh in its `config/crd/experimental` kustomization (the release asset has
+  one), so the TLS Routes, Listener Sets, Backends and Meshes pages say that
+  the cluster does not serve the kind.
+
+A session tells which version a page chose from the details URL of its row,
+which names the API version (`kube-details=/apis/<group>/<version>/...`).
+Each view is an `it` that navigates from the sidebar itself, expanding the
+"Gateway API" entry when its items are not shown, so that it does not depend
+on the state another left. The sessions do not check the columns, every field
+of the details, or the Custom Resources tree.
+
+The tests are deterministic, so the workflow does not retry them: it passes
+`--retry=0`, which overrides the `retry: 2` of Freelens's Vitest config, and
+runs the step once, under `timeout 1800`. A retry repeats the same failure,
+and every view of a session waits its full timeout before it fails, so the
+retries of Vitest and a second run of the step together would turn one
+broken view into a run of more than an hour. The sessions take about 10
+minutes when they pass; the rest of the step's 30 minutes leaves room for
+every view of the latest session to fail on its 60-second view timeout.
+
+The CRDs of a session come from kubernetes-sigs/gateway-api, not from this
+repository: `integration/crds/<session>/kustomization.yaml` has the
+`config/crd/experimental` directory at the release tag as a remote resource,
+which kubectl's kustomize fetches with git on every apply and delete. For
+v1.6.3 it renders 13 CRDs and the `safe-upgrades` ValidatingAdmissionPolicy
+with its binding, for v1.4.1 11 CRDs without the policy. The Renovate
+kustomize manager updates the `?ref=` of the latest session with each
+release; a rule in `.renovaterc.json` keeps the fallback session at v1.4.1,
+the release it checks. The CRDs are kept apart from the test objects in
+`integration/fixtures/<session>/` (one object per kind the session checks,
+named `integration-tests-object`, in the namespace `integration-tests`, which
+the kustomization creates), so that they are established before the objects
+are applied. Each namespaced object names its namespace itself: kustomize does
+not know which custom resources are cluster-scoped, and its `namespace` field
+would put GatewayClass and XMesh in a namespace too.
+
+Freelens's Vitest runs the files one at a time, in no set order, and none
+depends on another having run. The policy refuses a CRD of a release before
+v1.5, and a downgrade, so each cluster session first removes what an earlier
+session or run left, whichever release it came from: the namespace
+`integration-tests`, the cluster-scoped test objects (GatewayClass and XMesh,
+whose names start with `integration-tests`), the policy and its binding, and
+every CRD of `gateway.networking.k8s.io` and `gateway.networking.x-k8s.io`,
+each deletion waiting until the object is gone. It then applies its CRDs with
+`kubectl apply --server-side -k`, waits until they are established, applies
+its fixtures, and only then starts the app. Once the app has opened the
+cluster, the session selects `integration-tests` in the namespace filter of
+the extension's Gateways page, which its `KubeObjectListLayout` renders for a
+namespaced resource that both releases serve: a new cluster shows only
+`default`, and the selection holds for every namespaced list of the cluster
+and for the Overview. The page renders the filter only once the host has
+registered the APIs of the cluster's CRDs, so a page that says a kind is not
+served is not just early. The session opens no page of the host, whose
+requests can log errors of their own: the Pods page asks for pod metrics, and
+kind has no metrics server. A session's teardown closes the app first, so
+that the app logs no watch error for a CRD deleted under it, then deletes the
+fixtures and the CRDs with `--wait`, also when a test failed, and then checks
+the errors.
+
+The code the sessions share is in `integration/__tests__/extension-helpers.ts`:
+starting the app with the error collector, installing the extension, opening
+the kind cluster, kubectl, setting up and tearing down a session, selecting
+the namespace, and the selectors, with the title and the details text of each
+kind's views. There is no menu item check: the extension registers none. Its
+name does not match `*.tests.ts`, so Freelens's Vitest does not collect it.
+The directory stays flat, because the workflow copies it with
+`cp integration/__tests__/*`.
+
+Two variables configure the sessions. `EXTENSION_DIR` is the root of this
+checkout, where they read the kustomizations from, since they run inside the
+Freelens checkout. `TEST_KIND_CLUSTER_NAME` names the kind cluster (`kind` by
+default, `freelens` in the workflow), and every kubectl call names its
+context, `kind-<name>`, so a run never acts on the current context. Outside
+CI a session skips with a warning when either is missing or the cluster is not
+reachable; in CI (`CI` set) the run fails instead, so that a mistake in the
+workflow does not turn into a silent skip. A run deletes the Gateway API CRDs,
+and with them every Gateway API object on the cluster: run it locally only
+against a kind cluster with nothing worth keeping.
 
 ## Checking the Extension in Freelens Dev
 
@@ -756,7 +853,9 @@ applied with `kubectl apply --server-side -f <url>`:
   none.
 
 The CRDs come without objects, and a kind with no objects has no chart on the
-Overview. Create at least one object per kind under check. Without a Gateway
+Overview. Create at least one object per kind under check;
+`kubectl apply --server-side -k integration/fixtures/latest` creates one of
+every kind, valid for the CRDs of `integration/crds/latest`. Without a Gateway
 API controller in the cluster nothing sets their status: the charts show no
 object as Ready, and the details show only the pending conditions that some
 CRDs, such as Gateway's, put in by default. After a CRD is deleted,
