@@ -1,6 +1,6 @@
 import { Renderer } from "@freelensapp/extensions";
 import { observer } from "mobx-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GatewayApiEvents } from "../components/gateway-api-events";
 import { InfoPage } from "../components/info-page";
 import { PieChart } from "../components/pie-chart";
@@ -18,8 +18,6 @@ export interface OverviewPageProps {
 export const OverviewPage = observer(({ extension }: OverviewPageProps) => {
   const [crds, setCrds] = useState<Renderer.K8sApi.CustomResourceDefinition[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const watches = useRef<(() => void)[]>([]);
-  const abortController = useRef(new AbortController());
 
   const getCrd = useCallback(
     (store: Renderer.K8sApi.KubeObjectStore) => {
@@ -51,17 +49,22 @@ export const OverviewPage = observer(({ extension }: OverviewPageProps) => {
   );
 
   useEffect(() => {
-    let isMounted = true;
-    const signal = abortController.current.signal;
+    // One controller and one list of watches per run of the effect: React.StrictMode,
+    // which Freelens dev renders in, runs it, cleans it up and runs it again on the
+    // same instance, and a controller kept across runs would stay aborted.
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    const watches: (() => void)[] = [];
 
     (async () => {
       const crdStore = Renderer.K8sApi.crdStore;
       const loadedCrds = (await crdStore.loadAll()) || [];
-      if (isMounted) setCrds(loadedCrds);
+      if (!signal.aborted) setCrds(loadedCrds);
 
       const namespaceStore = Renderer.K8sApi.namespaceStore;
       await namespaceStore.loadAll({ namespaces: [], reqInit: { signal } });
-      watches.current.push(namespaceStore.subscribe());
+      if (signal.aborted) return;
+      watches.push(namespaceStore.subscribe());
 
       const namespaces = namespaceStore.items.map((ns) => ns.getName());
 
@@ -70,7 +73,8 @@ export const OverviewPage = observer(({ extension }: OverviewPageProps) => {
         if (!store) continue;
         try {
           await store.loadAll({ namespaces, reqInit: { signal } });
-          watches.current.push(store.subscribe());
+          if (signal.aborted) return;
+          watches.push(store.subscribe());
         } catch (_) {
           // a kind that fails to load has no chart
         }
@@ -79,19 +83,18 @@ export const OverviewPage = observer(({ extension }: OverviewPageProps) => {
       try {
         const eventStore = Renderer.K8sApi.eventStore;
         await eventStore.loadAll({ namespaces, reqInit: { signal } });
-        watches.current.push(eventStore.subscribe());
+        if (signal.aborted) return;
+        watches.push(eventStore.subscribe());
       } catch (_) {
         // events are best-effort
       }
 
-      if (isMounted) setLoaded(true);
+      if (!signal.aborted) setLoaded(true);
     })();
 
     return () => {
-      isMounted = false;
-      abortController.current.abort();
-      watches.current.forEach((unsubscribe) => unsubscribe());
-      watches.current = [];
+      abortController.abort();
+      watches.forEach((unsubscribe) => unsubscribe());
     };
   }, []);
 

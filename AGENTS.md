@@ -340,6 +340,15 @@ mechanism; this is the list to check a change against.
   with. An `observer` that reads the items while it renders follows them; a
   memo needs a key such as the ids and `resourceVersion`s of the objects. It
   shows only on a cluster whose objects change while the view is open.
+- **An effect creates what its cleanup aborts or releases.** Freelens dev
+  renders in `React.StrictMode`, which runs an effect, cleans it up and runs
+  it again on the same instance. An `AbortController` kept in a `useRef` is
+  aborted by the first cleanup, and every request of the second run with it;
+  the host takes an aborted `loadAll` for no failure, so the view shows
+  nothing and logs nothing. Create the controller, and the list of watches to
+  release, inside the effect. The production build has no `StrictMode`, so
+  only Freelens dev shows it; the integration tests open the Overview first to
+  catch it ("Workflows").
 - **A cluster page gets the extension from its registration.** The host passes
   `params` only. The type check rejects a page that requires another prop, but
   not one that declares it optional ("CRD KubeObject Pattern").
