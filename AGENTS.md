@@ -80,6 +80,7 @@ pnpm type:check           # All programs below, in this order
 pnpm type:check:sources   # src/main and src/renderer, each with src/common
 pnpm type:check:tests     # *.test.ts(x) under src/, and test/
 pnpm type:check:tooling   # Vite, Vitest and SVGO configs, build/
+pnpm type:check:integration # integration/
 pnpm type:check:environments # environment-tests/
 
 # Linting & formatting
@@ -93,6 +94,7 @@ pnpm knip:check           # Unused files, unused and unlisted dependencies (knip
 
 # Tests
 pnpm test:unit            # vitest
+pnpm test:integration     # vitest, against Freelens dev with a kind cluster
 
 # Build
 pnpm build                # Both Vite runs, without the type check
@@ -130,7 +132,8 @@ src/
 test/freelens-extensions.ts      # Runtime stub of @freelensapp/extensions for Vitest
 environment-tests/               # Probes for the per-environment programs
 build/                           # Vite plugins: host modules, standard decorators, CSS module declarations
-integration/__tests__/           # Integration test, run inside a Freelens checkout
+integration/__tests__/           # Integration tests, run against Freelens dev over CDP, and their shared module
+integration/fixtures/            # Gateway API CRDs and test objects of the integration tests, per session
 docs/images/                     # Screenshot for README.md
 ```
 
@@ -741,7 +744,7 @@ plugin on.
 | `check.yaml`             | `pnpm build`, `pnpm lint:check`, `pnpm knip:check`                            |
 | `unit-tests.yaml`        | `pnpm test:unit`                                                              |
 | `trunk-check.yaml`       | `trunk check --all`                                                           |
-| `integration-tests.yaml` | the integration tests in `integration/`, against a Freelens build             |
+| `integration-tests.yaml` | the integration tests in `integration/`, against Freelens dev                 |
 | `mise-lock-check.yaml`   | on a change to `mise.lock`: no checksum changed for an unchanged tool version |
 
 The type check has a workflow of its own, on pull requests and on pushes to
@@ -750,14 +753,146 @@ tests included, which no build reaches, and a type error shows as its own
 failed check rather than as a failed build. `check.yaml` builds without the
 type check for the same reason, so it does not run twice.
 
-The integration tests run inside a Freelens checkout of `main`, the only ref
-with the v2 extension API until Freelens 2.0.0 is released: the workflow builds
-the extension, packs it with a `.tgz.sha256` checksum next to the tarball, as
-the release publishes it, checks out and packages Freelens, copies
-`integration/__tests__/` into `freelens/integration/__tests__/` and runs them
-there under Freelens's Vitest, with its helpers. The test installs the tarball
-from the extensions page, waits for the extension to be listed as enabled, and
-fails on any error logged by either process.
+The integration tests run in this repository, under its own Vitest
+(`vitest.integration.config.ts`, `pnpm test:integration`), against Freelens
+started with `pnpm dev` from a freelensapp/freelens checkout, as in
+freelensapp/freelens-example-extension. They attach to it with Playwright's
+`chromium.connectOverCDP` on the port that script opens (see "Checking the
+Extension in Freelens Dev"), so they need no package of Freelens and no file
+of its checkout; Freelens dev is the only dependency, and it is not in
+`package.json`. `playwright` is a devDependency at the version of Freelens's
+catalog. The workflow builds the extension, checks out Freelens at each
+release tag of its matrix (`v2.0.0`), starts `pnpm dev` there in the
+background under `xvfb-run`, with its output in a file and a fresh profile in
+`FREELENS_INTEGRATION_TESTING_DIR`, waits until the CDP endpoint answers, and
+runs `pnpm test:integration` here. A profile of Freelens dev syncs no
+kubeconfig by default, so the workflow seeds the fresh one with a single sync
+entry, a file with the kind cluster alone, and the catalog lists that cluster
+and nothing else. Every test file is a session of its own on the one app, and
+fails on any error logged by either process:
+
+- `extensions.tests.ts` uninstalls whatever installation of the extension the
+  app has and installs this checkout in place from the Extensions page. It
+  needs no cluster.
+- `gateway-api-latest.tests.ts` applies the experimental channel of the newest
+  Gateway API release, which serves every kind the extension shows at its
+  newest version, TCPRoute and UDPRoute in `v1` next to `v1alpha2`, and
+  ReferenceGrant in `v1` next to `v1beta1`, and one test object of every kind.
+  The Overview shows a chart with one object for every kind but
+  ReferenceGrant, which has no status; every list page shows a row for the
+  object, and its details show a text that only the extension's panel of the
+  kind renders, no error page of the error boundary, and the newest version.
+- `gateway-api-fallback.tests.ts` applies the experimental channel of v1.4.1,
+  which serves TCPRoute and UDPRoute only in `v1alpha2` and ReferenceGrant only
+  in `v1beta1`, and has no TLSRoute `v1`, no ListenerSet `v1`, no XBackend and
+  no XMesh, with one object of each of the first three. Their pages fall back
+  to the older version, the Overview shows the two routes, and the pages of the
+  other four say that the cluster does not serve the kind.
+
+A page tells which version it chose by the details URL of its row, which names
+it (`kube-details=/apis/<group>/<version>/...` in the URL of the cluster
+frame). The Overview is the first view of each session, opened right after the
+namespace is selected on the HTTP Routes page, so that it loads every other
+kind itself: opened after the list pages, it would find their stores loaded
+and pass even if it loaded nothing.
+Each view is an `it` that navigates itself, so that it does not depend on the
+state another left. The tests do not check the columns, every field or the
+Custom Resources tree.
+
+The tests are deterministic, so nothing retries them: the config sets no
+`retry`, and the workflow runs the step once, under `timeout 600`. A retry
+repeats the same failure, and every view waits its full timeout before it
+fails.
+
+The CRDs come from kubernetes-sigs/gateway-api, through kustomize, as a remote
+resource of `config/crd/experimental` at a release tag:
+`integration/fixtures/<session>/crds/kustomization.yaml`. Renovate's kustomize
+manager updates the tag of the latest session; a rule in `.renovaterc.json`
+keeps the fallback session at v1.4.1. There is no controller: nothing
+reconciles the objects of `integration/fixtures/<session>/objects`, which need
+only be valid for the CRDs. Each namespaced object names the namespace
+`integration-tests` itself, because kustomize does not know which custom
+resources are cluster-scoped and would give one to GatewayClass and XMesh too;
+the cluster-scoped objects are named `integration-tests-object`, like every
+other test object.
+
+Vitest runs the files one at a time (`fileParallelism: false`), in no set
+order, and none depends on another having run. A cluster session disconnects
+the kind cluster and removes what an earlier session or run left, whichever
+release it came from: the namespace `integration-tests`, the cluster-scoped
+test objects, the `safe-upgrades.gateway.networking.k8s.io`
+ValidatingAdmissionPolicy and its binding, which the experimental channel
+installs since v1.5 and which refuses any CRD of an earlier release, and every
+CRD of the two Gateway API groups, each with `--wait`. It then applies the
+CRDs, waits until they are established and until every resource of them can
+be listed (an established CRD answers 429 until the API server has
+initialized its storage, and the Overview lists every kind at once), applies
+the test objects, and only then connects the cluster, so that the app reads
+the CRDs anew. The session then selects `integration-tests` in the namespace
+filter of the HTTP Routes page, unless the filter already shows it: a new
+cluster shows only `default`, and the app keeps the selection for every
+namespaced list of the cluster. The session opens no page of the host, whose
+requests can log errors of their own: the Pods page asks for pod metrics, and
+kind has no metrics server. Its teardown disconnects the cluster first, so
+that the app logs no watch error for a CRD deleted under it, then deletes the
+test objects and the CRDs with `--wait`, also when a test failed, and then
+checks the errors.
+
+The sessions reach the app through its renderer only; the main process, and
+with it the application menu, is out of reach of CDP. They navigate the root
+frame, and the cluster frame to a page of the extension, with
+`Renderer.Navigation.navigate` of the extension API: the sidebar entries of
+the kinds are nested under "Gateway API", which the sidebar renders collapsed.
+They find the kind cluster with `Renderer.Catalog.catalogEntities` by its
+name, `kind-<name>`, connect it by navigating to `/cluster/<id>` and
+disconnect it with the entity's `disconnect()`. `browser.close()` of a browser
+connected over CDP closes only the connection, so a session ends with it and
+the app keeps running. The renderer's console carries the errors of the root
+frame and of every cluster frame; the main log is read from the file that
+`FREELENS_MAIN_LOG` names, from its size when the session started, and every
+line that starts with `error:` counts, also after a task prefix that turbo may
+add, such as `freelens:dev:`. One line does not count:
+`proxy_server.go:… Error while proxying request: context canceled`, which the
+Kubernetes proxy of Freelens logs for a request that the renderer aborts.
+Freelens dev renders in `React.StrictMode`, which mounts every view twice and
+aborts the requests of the first mount, so the line comes and goes with the
+timing of a run, also right after the cluster is connected, before any view
+of the extension. Without the variable only the renderer is checked. The
+workflow sets `TURBO_LOG_ORDER=stream` for `pnpm dev`: in GitHub Actions turbo
+otherwise groups the output of a task until it ends, and the persistent `dev`
+task never ends, so the log would stay empty.
+
+The code the sessions share is in `integration/__tests__/extension-helpers.ts`:
+connecting to the app with the error collector, installing the extension,
+connecting and disconnecting the kind cluster, kubectl, the setup and teardown
+of the CRDs, the views of every kind and the selectors. Its name does not
+match `*.tests.ts`, so Vitest does not collect it. `integration/tsconfig.json`
+compiles the directory with Node and the DOM, because the callbacks of
+`page.evaluate` run in the page, and with the types of
+`@freelensapp/extensions`, which declare `globalThis.FreelensExtensionApi`
+for them.
+
+Three variables configure the sessions. `FREELENS_CDP_URL` is the CDP
+endpoint (`http://127.0.0.1:9223` by default), `FREELENS_MAIN_LOG` the main
+log, and `TEST_KIND_CLUSTER_NAME` names the kind cluster (`kind` by default,
+`freelens` in the workflow); every kubectl call names its context,
+`kind-<name>`, so a run never acts on the current context. The checkout to
+install, and the fixtures, are found from the location of the helpers.
+Outside CI a session skips with a warning when Freelens dev does not answer or
+the cluster is not reachable; in CI (`CI` set) the run fails instead, so that
+a mistake in the workflow does not turn into a silent skip.
+
+Run locally, the tests act on the profile of Freelens dev, `FreelensDev`,
+which is apart from that of an installed Freelens: they navigate its window,
+leave this checkout installed in place, uninstalling another installation of
+the extension, and leave the kind cluster disconnected, with the namespace
+filter set to `integration-tests`. They touch no other cluster of the
+catalog. The profile lists the kind cluster only once its kubeconfig is in
+"Kubeconfig Syncs" (see "Checking the Extension in Freelens Dev"); without
+it the cluster sessions fail on the timeout of finding the cluster. A run
+deletes the Gateway API CRDs, and with them every Gateway API object on the
+cluster: run it only against a kind cluster with nothing worth keeping, not
+one with a Gateway API controller.
 
 ## Checking the Extension in Freelens Dev
 
@@ -769,10 +904,11 @@ Chrome DevTools Protocol. How to attach Playwright MCP to it is in Freelens's
 Freelens before the session connects. Playwright MCP writes its snapshots to
 `.playwright-mcp/`, which is git-ignored.
 
-Without the MCP server, a `playwright-core` script with
-`chromium.connectOverCDP("http://127.0.0.1:9223")` does the same. End such a
-script by exiting the process; do not close the browser, which belongs to
-Freelens.
+Without the MCP server, a script with
+`chromium.connectOverCDP("http://127.0.0.1:9223")` of `playwright`, a
+devDependency, does the same, as the integration tests do. `browser.close()`
+of such a browser closes only the connection; the app belongs to Freelens and
+keeps running.
 
 A profile of Freelens dev syncs no kubeconfig until one is added in
 "Kubeconfig Syncs" of the Kubernetes preferences, so its catalog lists none of
@@ -812,9 +948,11 @@ applied with `kubectl apply --server-side -f <url>`:
   none.
 
 The CRDs come without objects, and a kind with no objects has no chart on the
-Overview. Create at least one object per kind under check. Without a Gateway
-API controller in the cluster nothing sets their status: the charts show no
-object as Ready, and the details show only the pending conditions that some
+Overview. Create at least one object per kind under check. The integration
+tests have one object per kind: apply `integration/fixtures/latest/crds`, then
+`integration/fixtures/latest/objects`, with `kubectl apply --server-side -k`;
+a run of the tests deletes both again. Without a Gateway API controller in the
+cluster nothing sets their status: the charts show no object as Ready, and the details show only the pending conditions that some
 CRDs, such as Gateway's, put in by default. After a CRD is deleted,
 the host keeps its stores until the cluster frame is reloaded, and keeps
 watching it, logging the 404s; neither comes from the extension.
