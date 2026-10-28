@@ -1,6 +1,6 @@
 {
   "name": "@freelensapp/gateway-api-extension",
-  "version": "1.0.0-0",
+  "version": "1.0.0",
   "description": "Freelens extension for Gateway API",
   "repository": {
     "type": "git",
