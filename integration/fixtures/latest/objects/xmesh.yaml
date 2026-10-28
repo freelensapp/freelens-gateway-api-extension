@@ -1,0 +1,6 @@
+apiVersion: gateway.networking.x-k8s.io/v1alpha1
+kind: XMesh
+metadata:
+  name: integration-tests-object
+spec:
+  controllerName: freelens.app/integration-tests

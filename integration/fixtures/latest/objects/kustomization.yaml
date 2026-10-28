@@ -1,0 +1,22 @@
+# The test objects of the latest integration test session: one object of every
+# kind the extension shows, at its newest version, in a namespace of its own.
+# Each namespaced object names its namespace itself: kustomize does not know
+# which custom resources are cluster-scoped, and its namespace field would put
+# GatewayClass and XMesh in the namespace too.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - gateway-class.yaml
+  - gateway.yaml
+  - http-route.yaml
+  - grpc-route.yaml
+  - tcp-route.yaml
+  - tls-route.yaml
+  - udp-route.yaml
+  - reference-grant.yaml
+  - listener-set.yaml
+  - backend-tls-policy.yaml
+  - x-backend-traffic-policy.yaml
+  - xbackend.yaml
+  - xmesh.yaml

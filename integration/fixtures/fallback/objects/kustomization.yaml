@@ -1,0 +1,12 @@
+# The test objects of the fallback integration test session: one object of
+# each kind that the CRDs of v1.4.1 serve only in an older version than the
+# extension prefers (TCPRoute and UDPRoute in v1alpha2, ReferenceGrant in
+# v1beta1), in a namespace of its own. Each object names its namespace itself,
+# as in the latest session.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - tcp-route.yaml
+  - udp-route.yaml
+  - reference-grant.yaml
