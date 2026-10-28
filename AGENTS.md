@@ -857,10 +857,15 @@ Kubernetes proxy of Freelens logs for a request that the renderer aborts.
 Freelens dev renders in `React.StrictMode`, which mounts every view twice and
 aborts the requests of the first mount, so the line comes and goes with the
 timing of a run, also right after the cluster is connected, before any view
-of the extension. Without the variable only the renderer is checked. The
-workflow sets `TURBO_LOG_ORDER=stream` for `pnpm dev`: in GitHub Actions turbo
-otherwise groups the output of a task until it ends, and the persistent `dev`
-task never ends, so the log would stay empty.
+of the extension. Without the variable only the renderer is checked. A
+renderer error carries its location, line and column included, and the worker
+that logged it. Its text is the preview of its arguments, which is empty for
+some objects and only the class name for others, such as `ErrorEvent`; such an
+error is described from its arguments, read from the page, and an empty one
+without arguments, which the browser itself logs, gets its time, to find it in
+the main log. The workflow sets `TURBO_LOG_ORDER=stream` for `pnpm dev`: in
+GitHub Actions turbo otherwise groups the output of a task until it ends, and
+the persistent `dev` task never ends, so the log would stay empty.
 
 The code the sessions share is in `integration/__tests__/extension-helpers.ts`:
 connecting to the app with the error collector, installing the extension,
