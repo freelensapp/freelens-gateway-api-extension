@@ -28,7 +28,7 @@ tools.
 Renovate keeps them there: custom datasources in `.renovaterc.json` read the
 versions from the same Freelens files on `main`, so an update arrives only once
 Freelens has adopted it, at that version, in one `Freelens dependencies` group
-PR together with the `@freelensapp/extensions` nightly. A dependency added to
+PR together with a release of `@freelensapp/extensions`. A dependency added to
 `package.json` follows the Freelens catalog unless the catalog rule excludes
 it; one that Freelens does not have must be excluded there, or its lookup fails
 on the Dependency Dashboard. What Freelens does not define (GitHub Actions, the
@@ -46,8 +46,7 @@ changing `mise.toml`, run `mise lock` (not only `mise install`, which re-locks
 just the current platform). `mise.lock` is lockfile revision 3
 (`lockfile_version = 3`), which needs mise 2026.9.16 or newer.
 
-`@freelensapp/extensions` is pinned to one exact version, a nightly until
-Freelens 2.0.0 is released. The libraries the host provides at runtime
+`@freelensapp/extensions` is pinned to one exact version. The libraries the host provides at runtime
 (`react`, `react-dom`, `mobx`, `mobx-react`) and their types are
 devDependencies only, for compiling and testing; `electron` is a devDependency
 for its types only. `@types/react-dom` is needed because the
@@ -61,7 +60,8 @@ scripts only when `allowBuilds` sets it to `true`; a new dependency with
 install scripts that is not listed there fails `pnpm install`, so add it with
 `true` or `false` deliberately. pnpm refuses versions younger than its
 `minimumReleaseAge` (1 day), with `@freelensapp/extensions` excluded because
-its pinned nightly is often adopted on the day it is published.
+a Freelens release is adopted on the day it is published, together with the
+stack it was built with.
 
 `strictPeerDependencies: true` makes `pnpm install` fail when the extension's
 own copy of a shared library is outside the peer range that
@@ -83,10 +83,10 @@ pnpm type:check:tooling   # Vite, Vitest and SVGO configs, build/
 pnpm type:check:environments # environment-tests/
 
 # Linting & formatting
-pnpm biome:check          # TypeScript/TSX, JS, JSON, CSS, HTML, SVG (biome)
+pnpm biome:check          # TypeScript/TSX, JS, JSON, CSS, SCSS, HTML, SVG, YAML, Markdown (biome)
 pnpm biome:fix            # Auto-fix the formats above
-pnpm trunk:check          # Markdown, YAML, TOML, SCSS, workflows, and Biome again (changed files)
-pnpm trunk:fix            # Auto-fix Markdown, YAML, SCSS, etc.
+pnpm trunk:check          # TOML, shell, workflows, yamllint, and Biome again (changed files)
+pnpm trunk:fix            # Auto-fix TOML, shell, and the Biome formats
 pnpm lint:check           # Alias for biome:check
 pnpm lint:fix             # Alias for biome:fix
 pnpm knip:check           # Unused files, unused and unlisted dependencies (knip)
@@ -635,16 +635,21 @@ migration are one pull request. The commit is by `github-actions[bot]`, which
 it for a manual edit and stop updating the branch.
 
 `build/` is excluded except for its `*.{js,cjs,mjs}` files, the build plugins.
-Biome also formats the SVG icons. It does not read SCSS; Trunk formats it with
-Prettier.
+Biome also formats the SVG icons, and SCSS, YAML and Markdown, as in Freelens,
+so Trunk runs no Prettier, markdownlint or yamlfmt; yamllint still checks YAML.
+`biome.jsonc` leaves out `pnpm-lock.yaml` and `pnpm-workspace.yaml`, which pnpm
+writes, and `.trunk/`, whose `trunk.yaml` `trunk upgrade` rewrites. The
+Markdown rules are in `nursery`.
 
 ### Trunk
 
 `.trunk/trunk.yaml` has the linters of Freelens. Its own Biome definition runs
 `biome check` and `biome format` with `--no-errors-on-unmatched`, because Biome
 fails on a target that `biome.jsonc` excludes, and adds the `.cjs` and `.mjs`
-files that Trunk's `javascript` type does not match. Biome's version there is
-the one of the `biome` script in `package.json`.
+files that Trunk's `javascript` type does not match, and the Markdown, SCSS
+and YAML files. Biome's version there is the one of the `biome` script in
+`package.json`. actionlint comes from the maintained fork of kjanat, which
+continues the releases of rhysd/actionlint with the same file names.
 
 Both commands also pass `--vcs-use-ignore-file=false`. In Trunk's sandbox,
 Biome 2.5.15 matches every target against the repository's `.gitignore` and
@@ -792,8 +797,8 @@ as failures of the "no error in DevTools" check.
 
 ## Code Style
 
-- **Biome** formats **TypeScript/TSX, JS, JSON, CSS, HTML, SVG**: double quotes, semicolons, trailing commas, 2-space indent, 120 char line width — use `pnpm biome:fix`
-- **Trunk** formats **Markdown, YAML, SCSS** (with Prettier), and other formats not covered by biome — use `pnpm trunk:fix`
+- **Biome** formats **TypeScript/TSX, JS, JSON, CSS, SCSS, HTML, SVG, YAML, Markdown**: double quotes, semicolons, trailing commas, 2-space indent, 120 char line width — use `pnpm biome:fix`
+- **Trunk** formats **TOML and shell scripts**, and runs the linters for formats not covered by Biome (yamllint, actionlint, shellcheck) — use `pnpm trunk:fix`
 - Import order (enforced by biome organizeImports): built-in modules → `@freelensapp/**` → packages → relative paths
 - React 19 (`@types/react` 19: no global `JSX` namespace, use `React.JSX.Element`; components get `children` only when their props declare it)
 - **No emoji** in Markdown files (`.md`), comments, or any source code
@@ -859,8 +864,8 @@ Code in `src/common/` is shared between both processes.
 2. **Follow existing patterns** — grep for similar implementations before creating new ones
 3. **Test changes** before committing
 4. **Run validation before committing:** `pnpm lint:fix && pnpm type:check && pnpm test:unit`
-5. **For TypeScript/TSX, JS, JSON, CSS, HTML, SVG files:** run `pnpm biome:fix` (or `biome check` directly if `biome` is installed locally)
-6. **For Markdown, YAML, SCSS and other formats:** run `pnpm trunk:fix` (or `trunk check` directly if `trunk` is installed locally)
+5. **For TypeScript/TSX, JS, JSON, CSS, SCSS, HTML, SVG, YAML and Markdown files:** run `pnpm biome:fix` (or `biome check` directly if `biome` is installed locally)
+6. **For other formats:** run `pnpm trunk:fix` (or `trunk check` directly if `trunk` is installed locally)
 7. **Full build** when in doubt about cached state: `pnpm clean:all && pnpm install && pnpm build`
 8. **Do not use Anthropic Fable for coding tasks** — Fable may be used only for planning,
    analysis, and thinking through problems. When writing or editing code,
@@ -890,6 +895,7 @@ When reviewing code and proposing fixes:
    ```
 
    You can generate this from the terminal with:
+
    ```bash
    git diff -u -- path/to/file
    ```
@@ -921,9 +927,9 @@ When reviewing code and proposing fixes:
    - Use GitHub's `suggestion` block for small targeted fixes so the PR
      author can accept the change with a single click:
 
-     ````suggestion
+     ```suggestion
      <same unified-diff format as shown above>
-     ````
+     ```
 
    - For larger multi-file changes, use `diff -u` blocks in a regular
      comment instead, with the proposed commit subject shown first
