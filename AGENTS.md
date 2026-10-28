@@ -332,6 +332,14 @@ mechanism; this is the list to check a change against.
   host registers the APIs after the cluster frame starts; a page rendered
   earlier shows the kind as not installed until it is opened again
   ("CRD KubeObject Pattern").
+- **A memo over a store's items is keyed on something that changes with
+  them.** The host keeps one observable array per store and updates it in
+  place, with `replace` and `splice`, so `store.items` stays the same array
+  while the objects in it change. A `useMemo` keyed on it, or on a prop that
+  holds it, is computed once, and an open view keeps the objects it was opened
+  with. An `observer` that reads the items while it renders follows them; a
+  memo needs a key such as the ids and `resourceVersion`s of the objects. It
+  shows only on a cluster whose objects change while the view is open.
 - **A cluster page gets the extension from its registration.** The host passes
   `params` only. The type check rejects a page that requires another prop, but
   not one that declares it optional ("CRD KubeObject Pattern").
@@ -757,6 +765,17 @@ Without the MCP server, a `playwright-core` script with
 script by exiting the process; do not close the browser, which belongs to
 Freelens.
 
+A profile of Freelens dev syncs no kubeconfig until one is added in
+"Kubeconfig Syncs" of the Kubernetes preferences, so its catalog lists none of
+the developer's clusters; `KUBECONFIG` does not change that. For the checks,
+add a kubeconfig with the test cluster alone, such as the output of
+`kubectl config view --minify --flatten --context kind-kind`. A fresh profile,
+in a `FREELENS_INTEGRATION_TESTING_DIR` under the system's temporary
+directory, can start with it already in place: seed
+`FreelensDev/lens-user-store.json` there with
+`preferences.syncKubeconfigEntries`, whose `filePath` is absolute ("Kubeconfig
+syncs of the dev profile" in Freelens's `DEVELOPMENT.md`).
+
 ### Installing the checkout
 
 1. `pnpm install`, then `pnpm build`. After a branch switch, `node_modules`
@@ -817,6 +836,19 @@ lines, and never paste the full console into a PR, an issue or a report.
 React reports key problems as console errors ("Each child in a list should
 have a unique key", "Encountered two children with the same key"); they count
 as failures of the "no error in DevTools" check.
+
+The renderer's requests to Kubernetes go through Chromium, which logs every
+response that is not a success as a console error,
+`Failed to load resource: the server responded with a status of N`, also one
+that the code that sent it handles. The text names no URL; the location of the
+message does. Leave out such an error by its status and URL only where the
+response is expected, a 404 or a 409, not every "Failed to load resource".
+
+The main process logs to the terminal running Freelens, and to a file. On
+macOS it is `~/Library/Logs/Freelens/lens.log`, with the renderer's
+`lens-renderer-*.log` next to it; when the terminal is not at hand, it shows
+the extension's activation, its reloads and its own lines. Filter it as the
+console.
 
 ## Code Style
 
