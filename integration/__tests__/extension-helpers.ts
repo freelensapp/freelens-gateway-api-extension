@@ -112,7 +112,9 @@ export interface AppSession {
   window: Page;
   /** The errors logged so far. */
   errors(): string[];
-  /** Stops collecting errors and closes the connection; returns every error logged. */
+  /** Stops collecting errors; returns every error logged until then. */
+  stopCollecting(): Promise<string[]>;
+  /** Stops collecting errors, unless stopped already, and closes the connection; returns every error collected. */
   close(): Promise<string[]>;
 }
 
@@ -292,8 +294,8 @@ function collectErrors(window: Page) {
 
 /**
  * Connects to Freelens dev and collects the errors either process logs until
- * the session is closed. Closing a browser connected over CDP closes only the
- * connection; the app keeps running.
+ * the session stops collecting or is closed. Closing a browser connected over
+ * CDP closes only the connection; the app keeps running.
  */
 export async function connectApp(): Promise<AppSession> {
   const browser = await chromium.connectOverCDP(cdpUrl);
@@ -301,17 +303,30 @@ export async function connectApp(): Promise<AppSession> {
   try {
     const window = await rootPage(browser);
     const collector = collectErrors(window);
+    let collected: Promise<string[]> | undefined;
 
-    return {
-      browser,
-      window,
-      errors: collector.errors,
-      close: async () => {
+    const stopCollecting = () => {
+      collected ??= (async () => {
         await collector.settle();
 
         const errors = collector.errors();
 
         collector.stop();
+
+        return errors;
+      })();
+
+      return collected;
+    };
+
+    return {
+      browser,
+      window,
+      errors: collector.errors,
+      stopCollecting,
+      close: async () => {
+        const errors = await stopCollecting();
+
         await browser.close();
 
         return errors;

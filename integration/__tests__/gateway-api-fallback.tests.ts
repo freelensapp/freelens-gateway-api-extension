@@ -65,13 +65,17 @@ describe.skipIf(!(await appReady({ cluster: true })))(`Gateway API views, ${fixt
       let errors: string[] = [];
 
       try {
-        // The cluster first: the app watches the CRDs, and would log errors
+        // The errors first: the app refreshes the cluster while it disconnects,
+        // and logs errors of its own when the refresh loses the race.
+        errors = (await session?.stopCollecting()) ?? [];
+
+        // The cluster then: the app watches the CRDs, and would log errors
         // for CRDs deleted under it.
         if (session) {
           await disconnectKindCluster(session);
         }
 
-        errors = (await session?.close()) ?? [];
+        await session?.close();
       } finally {
         tearDownCluster(fixtures);
       }

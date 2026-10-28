@@ -833,10 +833,16 @@ filter of the HTTP Routes page, unless the filter already shows it: a new
 cluster shows only `default`, and the app keeps the selection for every
 namespaced list of the cluster. The session opens no page of the host, whose
 requests can log errors of their own: the Pods page asks for pod metrics, and
-kind has no metrics server. Its teardown disconnects the cluster first, so
-that the app logs no watch error for a CRD deleted under it, then deletes the
-test objects and the CRDs with `--wait`, also when a test failed, and then
-checks the errors.
+kind has no metrics server. Its teardown stops collecting the errors first,
+then disconnects the cluster, so that the app logs no watch error for a CRD
+deleted under it, then deletes the test objects and the CRDs with `--wait`,
+also when a test failed, and then checks the errors. The app refreshes the
+cluster's permissions while it disconnects it, and when the refresh loses the
+race, its requests fail on its own proxy (`[AUTHORIZATION-REVIEW]`,
+`[AUTHORIZATION-NAMESPACE-REVIEW]`, `[FREELENS-PROXY]` with `Cluster <id> is
+not connected` or `The client is destroyed`); those errors come and go with
+the timing of a run and say nothing about the extension, and the session no
+longer collects them.
 
 The sessions reach the app through its renderer only; the main process, and
 with it the application menu, is out of reach of CDP. They navigate the root
