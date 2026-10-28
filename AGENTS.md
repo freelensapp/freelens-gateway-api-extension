@@ -28,7 +28,7 @@ tools.
 Renovate keeps them there: custom datasources in `.renovaterc.json` read the
 versions from the same Freelens files on `main`, so an update arrives only once
 Freelens has adopted it, at that version, in one `Freelens dependencies` group
-PR together with the `@freelensapp/extensions` nightly. A dependency added to
+PR together with a release of `@freelensapp/extensions`. A dependency added to
 `package.json` follows the Freelens catalog unless the catalog rule excludes
 it; one that Freelens does not have must be excluded there, or its lookup fails
 on the Dependency Dashboard. What Freelens does not define (GitHub Actions, the
@@ -46,8 +46,7 @@ changing `mise.toml`, run `mise lock` (not only `mise install`, which re-locks
 just the current platform). `mise.lock` is lockfile revision 3
 (`lockfile_version = 3`), which needs mise 2026.9.16 or newer.
 
-`@freelensapp/extensions` is pinned to one exact version, a nightly until
-Freelens 2.0.0 is released. The libraries the host provides at runtime
+`@freelensapp/extensions` is pinned to one exact version. The libraries the host provides at runtime
 (`react`, `react-dom`, `mobx`, `mobx-react`) and their types are
 devDependencies only, for compiling and testing; `electron` is a devDependency
 for its types only. `@types/react-dom` is needed because the
@@ -61,7 +60,8 @@ scripts only when `allowBuilds` sets it to `true`; a new dependency with
 install scripts that is not listed there fails `pnpm install`, so add it with
 `true` or `false` deliberately. pnpm refuses versions younger than its
 `minimumReleaseAge` (1 day), with `@freelensapp/extensions` excluded because
-its pinned nightly is often adopted on the day it is published.
+a Freelens release is adopted on the day it is published, together with the
+stack it was built with.
 
 `strictPeerDependencies: true` makes `pnpm install` fail when the extension's
 own copy of a shared library is outside the peer range that
@@ -83,10 +83,10 @@ pnpm type:check:tooling   # Vite, Vitest and SVGO configs, build/
 pnpm type:check:environments # environment-tests/
 
 # Linting & formatting
-pnpm biome:check          # TypeScript/TSX, JS, JSON, CSS, HTML, SVG (biome)
+pnpm biome:check          # TypeScript/TSX, JS, JSON, CSS, SCSS, HTML, SVG, YAML, Markdown (biome)
 pnpm biome:fix            # Auto-fix the formats above
-pnpm trunk:check          # Markdown, YAML, TOML, SCSS, workflows, and Biome again (changed files)
-pnpm trunk:fix            # Auto-fix Markdown, YAML, SCSS, etc.
+pnpm trunk:check          # TOML, shell, workflows, yamllint, and Biome again (changed files)
+pnpm trunk:fix            # Auto-fix TOML, shell, and the Biome formats
 pnpm lint:check           # Alias for biome:check
 pnpm lint:fix             # Alias for biome:fix
 pnpm knip:check           # Unused files, unused and unlisted dependencies (knip)
@@ -332,6 +332,14 @@ mechanism; this is the list to check a change against.
   host registers the APIs after the cluster frame starts; a page rendered
   earlier shows the kind as not installed until it is opened again
   ("CRD KubeObject Pattern").
+- **A memo over a store's items is keyed on something that changes with
+  them.** The host keeps one observable array per store and updates it in
+  place, with `replace` and `splice`, so `store.items` stays the same array
+  while the objects in it change. A `useMemo` keyed on it, or on a prop that
+  holds it, is computed once, and an open view keeps the objects it was opened
+  with. An `observer` that reads the items while it renders follows them; a
+  memo needs a key such as the ids and `resourceVersion`s of the objects. It
+  shows only on a cluster whose objects change while the view is open.
 - **A cluster page gets the extension from its registration.** The host passes
   `params` only. The type check rejects a page that requires another prop, but
   not one that declares it optional ("CRD KubeObject Pattern").
@@ -353,6 +361,11 @@ mechanism; this is the list to check a change against.
   `pnpm dev` runs.** The host refuses to reload a CommonJS main and logs why,
   and it watches only the entries it started with, so a manifest change needs
   Freelens restarted.
+- **A bundled CommonJS package loads in the ESM main.** Main is built for
+  Rolldown's `node` platform, which gives it a `require`, and defines
+  `__dirname` and `__filename`. Without either, the package throws when
+  Freelens evaluates `dist/main.js`, and the extension does not activate;
+  `pnpm build` and `pnpm type:check` pass ("Process-specific settings").
 
 Neither `pnpm build`, `pnpm dev` nor the unit tests run the type check, so a
 Node global in renderer code passes them; `pnpm type:check` and
@@ -414,7 +427,25 @@ and the host does not provide has to be in the bundle.
   leaves it for a consumer's bundler and the page has no `process`.
 - **Main**: Node builtins (`node:*` and bare) and `electron` stay external.
   Bundled packages resolve with Vite's server conditions, so main gets their
-  Node builds rather than their browser builds.
+  Node builds rather than their browser builds. Main is built for Rolldown's
+  `node` platform (`build.rolldownOptions.platform`), the renderer for
+  `browser`, the default of a Vite client build. A bundled CommonJS package
+  `require()`s the builtins, and an ES module has no `require`: for the
+  `browser` platform Rolldown turns the call into a `__require` shim that
+  throws ``Calling `require` for "node:assert" in an environment that doesn't
+  expose the `require` function`` as soon as the bundle is evaluated, and for
+  `node` it defines `__require` with `createRequire(import.meta.url)`.
+  `__dirname` and `__filename` are the other half: Node passes them to a
+  CommonJS module, Rolldown leaves them as they are on either platform, and
+  the ES module throws `ReferenceError: __dirname is not defined in ES module
+  scope`. Main defines them (`define`) as `import.meta.dirname` and
+  `import.meta.filename`, the directory and file of `dist/main.js`, not of the
+  package: a library that loads a file next to itself, such as a `.wasm`,
+  finds it only when the build puts it in `dist/`.
+  `pnpm build` and `pnpm type:check` pass either way, and nothing before
+  Freelens evaluates `dist/main.js`, so on the wrong platform the extension
+  fails only when Freelens loads it. A main bundle without CommonJS is the
+  same on both platforms, byte for byte.
 
 ### Decorators
 
@@ -635,16 +666,21 @@ migration are one pull request. The commit is by `github-actions[bot]`, which
 it for a manual edit and stop updating the branch.
 
 `build/` is excluded except for its `*.{js,cjs,mjs}` files, the build plugins.
-Biome also formats the SVG icons. It does not read SCSS; Trunk formats it with
-Prettier.
+Biome also formats the SVG icons, and SCSS, YAML and Markdown, as in Freelens,
+so Trunk runs no Prettier, markdownlint or yamlfmt; yamllint still checks YAML.
+`biome.jsonc` leaves out `pnpm-lock.yaml` and `pnpm-workspace.yaml`, which pnpm
+writes, and `.trunk/`, whose `trunk.yaml` `trunk upgrade` rewrites. The
+Markdown rules are in `nursery`.
 
 ### Trunk
 
 `.trunk/trunk.yaml` has the linters of Freelens. Its own Biome definition runs
 `biome check` and `biome format` with `--no-errors-on-unmatched`, because Biome
 fails on a target that `biome.jsonc` excludes, and adds the `.cjs` and `.mjs`
-files that Trunk's `javascript` type does not match. Biome's version there is
-the one of the `biome` script in `package.json`.
+files that Trunk's `javascript` type does not match, and the Markdown, SCSS
+and YAML files. Biome's version there is the one of the `biome` script in
+`package.json`. actionlint comes from the maintained fork of kjanat, which
+continues the releases of rhysd/actionlint with the same file names.
 
 Both commands also pass `--vcs-use-ignore-file=false`. In Trunk's sandbox,
 Biome 2.5.15 matches every target against the repository's `.gitignore` and
@@ -729,6 +765,17 @@ Without the MCP server, a `playwright-core` script with
 script by exiting the process; do not close the browser, which belongs to
 Freelens.
 
+A profile of Freelens dev syncs no kubeconfig until one is added in
+"Kubeconfig Syncs" of the Kubernetes preferences, so its catalog lists none of
+the developer's clusters; `KUBECONFIG` does not change that. For the checks,
+add a kubeconfig with the test cluster alone, such as the output of
+`kubectl config view --minify --flatten --context kind-kind`. A fresh profile,
+in a `FREELENS_INTEGRATION_TESTING_DIR` under the system's temporary
+directory, can start with it already in place: seed
+`FreelensDev/lens-user-store.json` there with
+`preferences.syncKubeconfigEntries`, whose `filePath` is absolute ("Kubeconfig
+syncs of the dev profile" in Freelens's `DEVELOPMENT.md`).
+
 ### Installing the checkout
 
 1. `pnpm install`, then `pnpm build`. After a branch switch, `node_modules`
@@ -790,10 +837,23 @@ React reports key problems as console errors ("Each child in a list should
 have a unique key", "Encountered two children with the same key"); they count
 as failures of the "no error in DevTools" check.
 
+The renderer's requests to Kubernetes go through Chromium, which logs every
+response that is not a success as a console error,
+`Failed to load resource: the server responded with a status of N`, also one
+that the code that sent it handles. The text names no URL; the location of the
+message does. Leave out such an error by its status and URL only where the
+response is expected, a 404 or a 409, not every "Failed to load resource".
+
+The main process logs to the terminal running Freelens, and to a file. On
+macOS it is `~/Library/Logs/Freelens/lens.log`, with the renderer's
+`lens-renderer-*.log` next to it; when the terminal is not at hand, it shows
+the extension's activation, its reloads and its own lines. Filter it as the
+console.
+
 ## Code Style
 
-- **Biome** formats **TypeScript/TSX, JS, JSON, CSS, HTML, SVG**: double quotes, semicolons, trailing commas, 2-space indent, 120 char line width — use `pnpm biome:fix`
-- **Trunk** formats **Markdown, YAML, SCSS** (with Prettier), and other formats not covered by biome — use `pnpm trunk:fix`
+- **Biome** formats **TypeScript/TSX, JS, JSON, CSS, SCSS, HTML, SVG, YAML, Markdown**: double quotes, semicolons, trailing commas, 2-space indent, 120 char line width — use `pnpm biome:fix`
+- **Trunk** formats **TOML and shell scripts**, and runs the linters for formats not covered by Biome (yamllint, actionlint, shellcheck) — use `pnpm trunk:fix`
 - Import order (enforced by biome organizeImports): built-in modules → `@freelensapp/**` → packages → relative paths
 - React 19 (`@types/react` 19: no global `JSX` namespace, use `React.JSX.Element`; components get `children` only when their props declare it)
 - **No emoji** in Markdown files (`.md`), comments, or any source code
@@ -859,8 +919,8 @@ Code in `src/common/` is shared between both processes.
 2. **Follow existing patterns** — grep for similar implementations before creating new ones
 3. **Test changes** before committing
 4. **Run validation before committing:** `pnpm lint:fix && pnpm type:check && pnpm test:unit`
-5. **For TypeScript/TSX, JS, JSON, CSS, HTML, SVG files:** run `pnpm biome:fix` (or `biome check` directly if `biome` is installed locally)
-6. **For Markdown, YAML, SCSS and other formats:** run `pnpm trunk:fix` (or `trunk check` directly if `trunk` is installed locally)
+5. **For TypeScript/TSX, JS, JSON, CSS, SCSS, HTML, SVG, YAML and Markdown files:** run `pnpm biome:fix` (or `biome check` directly if `biome` is installed locally)
+6. **For other formats:** run `pnpm trunk:fix` (or `trunk check` directly if `trunk` is installed locally)
 7. **Full build** when in doubt about cached state: `pnpm clean:all && pnpm install && pnpm build`
 8. **Do not use Anthropic Fable for coding tasks** — Fable may be used only for planning,
    analysis, and thinking through problems. When writing or editing code,
@@ -890,6 +950,7 @@ When reviewing code and proposing fixes:
    ```
 
    You can generate this from the terminal with:
+
    ```bash
    git diff -u -- path/to/file
    ```
@@ -921,9 +982,9 @@ When reviewing code and proposing fixes:
    - Use GitHub's `suggestion` block for small targeted fixes so the PR
      author can accept the change with a single click:
 
-     ````suggestion
+     ```suggestion
      <same unified-diff format as shown above>
-     ````
+     ```
 
    - For larger multi-file changes, use `diff -u` blocks in a regular
      comment instead, with the proposed commit subject shown first

@@ -1,15 +1,11 @@
 # @freelensapp/gateway-api-extension
 
-<!-- markdownlint-disable MD013 -->
-
 [![Home](https://img.shields.io/badge/%F0%9F%8F%A0-freelens.app-02a7a0)](https://freelens.app)
 [![GitHub](https://img.shields.io/github/stars/freelensapp/freelens-gateway-api-extension?style=flat&label=GitHub%20%E2%AD%90)](https://github.com/freelensapp/freelens-gateway-api-extension)
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/freelensapp/freelens-gateway-api-extension)
 [![Release](https://img.shields.io/github/v/release/freelensapp/freelens-gateway-api-extension?display_name=tag&sort=semver)](https://github.com/freelensapp/freelens-gateway-api-extension)
 [![Integration tests](https://github.com/freelensapp/freelens-gateway-api-extension/actions/workflows/integration-tests.yaml/badge.svg?branch=main)](https://github.com/freelensapp/freelens-gateway-api-extension/actions/workflows/integration-tests.yaml)
 [![npm](https://img.shields.io/npm/v/@freelensapp/gateway-api-extension.svg)](https://www.npmjs.com/package/@freelensapp/gateway-api-extension)
-
-<!-- markdownlint-enable MD013 -->
 
 ## Overview
 
@@ -52,39 +48,31 @@ standard and experimental resources of the `gateway.networking.k8s.io` and
 
 ### gateway.networking.k8s.io
 
-<!-- markdownlint-disable MD013 -->
-
-| API Version | Kind | Short Name | Scope | Description |
-| --- | --- | --- | --- | --- |
-| v1 | `GatewayClass` | `gc` | Cluster | Defines a class of Gateways sharing a common controller |
-| v1 | `Gateway` | `gtw` | Namespaced | Describes an instance of a service-traffic handling infrastructure |
-| v1 | `HTTPRoute` | | Namespaced | Routes HTTP and HTTPS traffic to backends |
-| v1 | `GRPCRoute` | | Namespaced | Routes gRPC traffic to backends |
-| v1 | `TLSRoute` | | Namespaced | Routes TLS traffic to backends based on SNI |
-| v1 | `TCPRoute` | | Namespaced | Routes TCP traffic to backends |
-| v1 | `UDPRoute` | | Namespaced | Routes UDP traffic to backends |
-| v1 | `BackendTLSPolicy` | `btlspolicy` | Namespaced | Configures TLS for connections from a Gateway to backends |
-| v1 | `ReferenceGrant` | `refgrant` | Namespaced | Allows cross-namespace references to Gateway API resources |
-| v1 | `ListenerSet` | `lset` | Namespaced | Extends a Gateway with additional listeners |
-| v1alpha2 | `TCPRoute` | | Namespaced | Routes TCP traffic to backends (v1alpha2 variant) |
-| v1alpha2 | `UDPRoute` | | Namespaced | Routes UDP traffic to backends (v1alpha2 variant) |
-| v1beta1 | `ReferenceGrant` | `refgrant` | Namespaced | Allows cross-namespace references (v1beta1 variant) |
-
-<!-- markdownlint-enable MD013 -->
+| API Version | Kind               | Short Name   | Scope      | Description                                                        |
+| ----------- | ------------------ | ------------ | ---------- | ------------------------------------------------------------------ |
+| v1          | `GatewayClass`     | `gc`         | Cluster    | Defines a class of Gateways sharing a common controller            |
+| v1          | `Gateway`          | `gtw`        | Namespaced | Describes an instance of a service-traffic handling infrastructure |
+| v1          | `HTTPRoute`        |              | Namespaced | Routes HTTP and HTTPS traffic to backends                          |
+| v1          | `GRPCRoute`        |              | Namespaced | Routes gRPC traffic to backends                                    |
+| v1          | `TLSRoute`         |              | Namespaced | Routes TLS traffic to backends based on SNI                        |
+| v1          | `TCPRoute`         |              | Namespaced | Routes TCP traffic to backends                                     |
+| v1          | `UDPRoute`         |              | Namespaced | Routes UDP traffic to backends                                     |
+| v1          | `BackendTLSPolicy` | `btlspolicy` | Namespaced | Configures TLS for connections from a Gateway to backends          |
+| v1          | `ReferenceGrant`   | `refgrant`   | Namespaced | Allows cross-namespace references to Gateway API resources         |
+| v1          | `ListenerSet`      | `lset`       | Namespaced | Extends a Gateway with additional listeners                        |
+| v1alpha2    | `TCPRoute`         |              | Namespaced | Routes TCP traffic to backends (v1alpha2 variant)                  |
+| v1alpha2    | `UDPRoute`         |              | Namespaced | Routes UDP traffic to backends (v1alpha2 variant)                  |
+| v1beta1     | `ReferenceGrant`   | `refgrant`   | Namespaced | Allows cross-namespace references (v1beta1 variant)                |
 
 ### gateway.networking.x-k8s.io
 
 Experimental APIs from the Kubernetes SIG Network incubation group.
 
-<!-- markdownlint-disable MD013 -->
-
-| API Version | Kind | Short Name | Scope | Description |
-| --- | --- | --- | --- | --- |
-| v1alpha1 | `XBackendTrafficPolicy` | `xbtrafficpolicy` | Namespaced | Configures backend traffic policies such as retry budgets and session persistence |
-| v1alpha1 | `XBackend` | `xbackend` | Namespaced | Describes a backend destination, such as an external hostname, and how a Gateway connects to it |
-| v1alpha1 | `XMesh` | `mesh` | Cluster | Describes a service mesh implementation |
-
-<!-- markdownlint-enable MD013 -->
+| API Version | Kind                    | Short Name        | Scope      | Description                                                                                     |
+| ----------- | ----------------------- | ----------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| v1alpha1    | `XBackendTrafficPolicy` | `xbtrafficpolicy` | Namespaced | Configures backend traffic policies such as retry budgets and session persistence               |
+| v1alpha1    | `XBackend`              | `xbackend`        | Namespaced | Describes a backend destination, such as an external hostname, and how a Gateway connects to it |
+| v1alpha1    | `XMesh`                 | `mesh`            | Cluster    | Describes a service mesh implementation                                                         |
 
 ## Install
 

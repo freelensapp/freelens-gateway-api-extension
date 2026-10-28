@@ -27,12 +27,18 @@ const entryPoints = {
     // Renderer code gets no guarantee of Node or Electron, so nothing is left
     // for the runtime to resolve.
     external: [],
+    platform: /** @type {const} */ ("browser"),
   },
   main: {
     entry: "src/main/index.ts",
     emptyOutDir: false,
     // Node and Electron resolve their own modules at runtime.
     external: ["electron", /^electron\//, /^node:/, ...builtinModules],
+    // Bundled CommonJS packages `require()` the builtins. For the browser
+    // platform Rolldown turns such a call into a shim that throws in an ES
+    // module, where there is no `require`; for Node it creates one with
+    // `createRequire(import.meta.url)`.
+    platform: /** @type {const} */ ("node"),
   },
 };
 
@@ -85,6 +91,10 @@ export default defineConfig(({ mode }) => {
           // Main runs in Node: pick the Node builds of bundled packages, not
           // their browser builds.
           resolve: { conditions: [...defaultServerConditions], mainFields: [...defaultServerMainFields] },
+          // A bundled CommonJS package reads `__dirname` and `__filename`,
+          // which Node passes to a CommonJS module and an ES module does not
+          // have; Rolldown leaves them as they are.
+          define: { __dirname: "import.meta.dirname", __filename: "import.meta.filename" },
         }),
     build: {
       target: "esnext",
@@ -101,6 +111,7 @@ export default defineConfig(({ mode }) => {
       },
       rolldownOptions: {
         external: entryPoint.external,
+        platform: entryPoint.platform,
       },
     },
   };
